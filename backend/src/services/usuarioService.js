@@ -1,10 +1,6 @@
 const prisma = require('../models/prisma');
 const bcrypt = require('bcrypt');
 
-/**
- * Service de Usuário
- * Contém toda a lógica de negócio relacionada a usuários
- */
 class UsuarioService {
     /**
      * Criar novo usuário
@@ -46,6 +42,7 @@ class UsuarioService {
      */
     async listar() {
         const usuarios = await prisma.usuario.findMany({
+            where: { status_usuario: 1 },
             select: {
                 id: true,
                 nome: true,
@@ -120,28 +117,19 @@ class UsuarioService {
     }
 
     /**
-     * "Excluir" usuário (soft delete - desativar)
-     * Nota: Por enquanto, apenas exclui. 
-     * Se quiser soft delete, adicione campo 'ativo' no schema
+     * Desativar usuário (soft delete)
      */
-    async excluir(id) {
+    async desativar(id) {
         // Verifica se usuário existe
         await this.buscarPorId(id);
 
-        // Verifica se tem equipamentos cadastrados
-        const equipamentos = await prisma.equipamento.count({
-            where: { usuario_id: parseInt(id) }
+        // Desativa o usuário
+        await prisma.usuario.update({
+            where: { id: parseInt(id) },
+            data: { status_usuario: 0 }
         });
 
-        if (equipamentos > 0) {
-            throw new Error('Não é possível excluir usuário com equipamentos cadastrados');
-        }
-
-        await prisma.usuario.delete({
-            where: { id: parseInt(id) }
-        });
-
-        return { message: 'Usuário excluído com sucesso' };
+        return { message: 'Usuário desativado com sucesso' };
     }
 }
 

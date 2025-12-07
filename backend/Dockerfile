@@ -1,7 +1,7 @@
-FROM node:22-alpine
+FROM node:22
 
 # Instala OpenSSL necessário para o Prisma
-RUN apk add --no-cache openssl
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

@@ -1,9 +1,5 @@
 const usuarioService = require('../services/usuarioService');
 
-/**
- * Controller de Usuário
- * Responsável por receber requisições, validar entrada e retornar respostas HTTP
- */
 class UsuarioController {
     /**
      * POST /usuarios
@@ -59,11 +55,11 @@ class UsuarioController {
 
     /**
      * DELETE /usuarios/:id
-     * Excluir usuário
+     * Desativar usuário
      */
-    async excluir(req, res) {
+    async desativar(req, res) {
         try {
-            const resultado = await usuarioService.excluir(req.params.id);
+            const resultado = await usuarioService.desativar(req.params.id);
             return res.status(200).json(resultado);
         } catch (error) {
             return res.status(400).json({ error: error.message });

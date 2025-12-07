@@ -19,11 +19,12 @@ enum TipoMovimentacao {
 }
 
 model Usuario {
-  id           Int      @id @default(autoincrement())
-  nome         String
-  usuario_rede String   @unique
-  senha_hash   String
-  created_at   DateTime @default(now())
+  id             Int      @id @default(autoincrement())
+  nome           String
+  usuario_rede   String   @unique
+  senha_hash     String
+  status_usuario Int      @default(1)
+  created_at     DateTime @default(now()) @db.Timestamptz(3)
 
   equipamentos  Equipamento[]  @relation("EquipamentoCadastrado")
   movimentacoes Movimentacao[] @relation("MovimentacaoUsuario")
