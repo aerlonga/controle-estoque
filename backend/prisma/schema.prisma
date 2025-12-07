@@ -7,8 +7,59 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+enum StatusEquipamento {
+  NO_DEPOSITO
+  FORA_DEPOSITO
+  DESCARTADO
+}
+
+enum TipoMovimentacao {
+  ENTRADA
+  SAIDA
+}
+
+model Usuario {
+  id           Int      @id @default(autoincrement())
+  nome         String
+  usuario_rede String   @unique
+  senha_hash   String
+  created_at   DateTime @default(now())
+
+  equipamentos  Equipamento[]  @relation("EquipamentoCadastrado")
+  movimentacoes Movimentacao[] @relation("MovimentacaoUsuario")
+
+  @@map("usuarios")
+}
+
+model Equipamento {
+  id           Int               @id @default(autoincrement())
+  patrimonio   String?
+  nome         String
+  modelo       String
+  numero_serie String            @unique
+  status       StatusEquipamento @default(NO_DEPOSITO)
+  local        String?
+  usuario_id   Int
+  created_at   DateTime          @default(now())
+  updated_at   DateTime          @updatedAt
+
+  usuario       Usuario        @relation("EquipamentoCadastrado", fields: [usuario_id], references: [id])
+  movimentacoes Movimentacao[] @relation("MovimentacaoEquipamento")
+
+  @@map("equipamentos")
+}
+
+model Movimentacao {
+  id                Int              @id @default(autoincrement())
+  equipamento_id    Int
+  tipo              TipoMovimentacao
+  data_movimentacao DateTime         @default(now())
+  usuario_id        Int
+  observacao        String?
+  created_at        DateTime         @default(now())
+
+  equipamento Equipamento @relation("MovimentacaoEquipamento", fields: [equipamento_id], references: [id])
+  usuario     Usuario     @relation("MovimentacaoUsuario", fields: [usuario_id], references: [id])
+
+  @@map("movimentacoes")
 }
