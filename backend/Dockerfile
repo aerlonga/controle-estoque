@@ -1,5 +1,8 @@
 FROM node:22-alpine
 
+# Instala OpenSSL necessário para o Prisma
+RUN apk add --no-cache openssl
+
 WORKDIR /app
 
 # Copia package.json e package-lock.json
