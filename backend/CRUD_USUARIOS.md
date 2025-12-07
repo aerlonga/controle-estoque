@@ -1,150 +1,63 @@
-# Implementação CRUD Usuários - MVC + Services
+# 📖 API de Controle de Estoque - Documentação
 
-## 📁 Estrutura Criada
+## 🏗️ Arquitetura: MVC + Services
+
+### Estrutura de Pastas
 
 ```
 backend/src/
-├── controllers/
-│   └── usuarioController.js       # HTTP: req/res handling
-├── services/
-│   └── usuarioService.js          # Lógica de negócio
-├── routes/
-│   ├── index.js                   # Rotas centralizadas
-│   └── usuarioRoutes.js           # Endpoints de usuário
-├── middlewares/                   # Pasta para futuros middlewares
+├── controllers/     # HTTP handlers (req/res)
+├── services/        # Lógica de negócio
+├── routes/          # Definição de endpoints
+├── middlewares/     # Middlewares futuros
 └── models/
-    └── prisma.js                  # Cliente Prisma
+    └── prisma.js    # Cliente Prisma
 ```
 
----
-
-## 🏗️ Arquitetura MVC + Services
-
-### Fluxo de uma Requisição:
+### Fluxo de Requisição
 
 ```
-Cliente (Postman/cURL)
+Cliente HTTP
     ↓
-Route (usuarioRoutes.js) → Define endpoint POST /usuarios
+Route (/api/usuarios)
     ↓
-Controller (usuarioController.js) → Valida requisição HTTP
+Controller (usuarioController.js)
     ↓
-Service (usuarioService.js) → Executa lógica de negócio
+Service (usuarioService.js)
     ↓
-Prisma (models/prisma.js) → Acessa banco de dados
+Prisma Client
     ↓
-PostgreSQL → Persiste dados
+PostgreSQL
 ```
 
 ---
 
-## 🔨 Arquivos Implementados
+## � CRUD de Usuários
 
-### 1. Service (`services/usuarioService.js`)
+### Modelo de Dados
 
-**Responsabilidade:** Lógica de negócio
-
-**Métodos:**
-- `criar(dados)` - Cria usuário com senha criptografada
-- `listar()` - Retorna todos os usuários
-- `buscarPorId(id)` - Busca por ID
-- `atualizar(id, dados)` - Atualiza usuário
-- `excluir(id)` - Remove usuário (com validação)
-
-**Características:**
-- ✅ Validações de negócio
-- ✅ Criptografia de senha com bcrypt
-- ✅ Verifica duplicidade de `usuario_rede`
-- ✅ Não retorna `senha_hash` nas respostas
-- ✅ Impede excluir usuário com equipamentos
-
----
-
-### 2. Controller (`controllers/usuarioController.js`)
-
-**Responsabilidade:** Orquestrar requisições HTTP
-
-**Métodos:**
-- `criar(req, res)` → POST 201 Created
-- `listar(req, res)` → GET 200 OK
-- `buscarPorId(req, res)` → GET 200 OK / 404 Not Found
-- `atualizar(req, res)` → PUT 200 OK / 400 Bad Request
-- `excluir(req, res)` → DELETE 200 OK / 400 Bad Request
-
-**Características:**
-- ✅ Try/catch para tratamento de erros
-- ✅ Status HTTP adequados
-- ✅ Delega lógica para o Service
-
----
-
-### 3. Routes (`routes/usuarioRoutes.js`)
-
-**Responsabilidade:** Definir endpoints REST
-
-```javascript
-POST   /api/usuarios      → Criar
-GET    /api/usuarios      → Listar todos
-GET    /api/usuarios/:id  → Buscar por ID
-PUT    /api/usuarios/:id  → Atualizar
-DELETE /api/usuarios/:id  → Excluir
+```prisma
+model Usuario {
+  id             Int      @id @default(autoincrement())
+  nome           String
+  usuario_rede   String   @unique
+  senha_hash     String
+  status_usuario Int      @default(1)  // 1 = ativo, 0 = desativado
+  created_at     DateTime @default(now()) @db.Timestamptz(3)
+}
 ```
 
 ---
 
-## 📝 Como Usar como Exemplo
+## 📍 Endpoints
 
-Para implementar CRUD de **Equipamentos**, siga este padrão:
+**Base URL:** `http://localhost:3000/api`
 
-### 1. Criar `services/equipamentoService.js`
+### 1. Criar Usuário
 
-Copie `usuarioService.js` e adapte:
-
-```javascript
-// Diferenças principais:
-- usuario → equipamento
-- Adicionar lógica de status (NO_DEPOSITO, FORA_DEPOSITO, DESCARTADO)
-- "Excluir" = Mudar status para DESCARTADO
-- Validar campos específicos (patrimonio opcional, numero_serie único)
-```
-
-### 2. Criar `controllers/equipamentoController.js`
-
-Copie `usuarioController.js` e adapte:
-
-```javascript
-// Mesma estrutura, só muda:
-- usuarioService → equipamentoService
-- Comentários adequados
-```
-
-### 3. Criar `routes/equipamentoRoutes.js`
-
-Copie `usuarioRoutes.js` e adapte:
-
-```javascript
-const equipamentoController = require('../controllers/equipamentoController');
-
-router.post('/', equipamentoController.criar);
-router.get('/', equipamentoController.listar);
-// ... etc
-```
-
-### 4. Registrar em `routes/index.js`
-
-```javascript
-const equipamentoRoutes = require('./equipamentoRoutes');
-router.use('/equipamentos', equipamentoRoutes);
-```
-
----
-
-## 🧪 Testando
-
-### Com cURL:
+**POST** `/usuarios`
 
 ```bash
-# Criar usuário
 curl -X POST http://localhost:3000/api/usuarios \
   -H "Content-Type: application/json" \
   -d '{
@@ -152,38 +65,215 @@ curl -X POST http://localhost:3000/api/usuarios \
     "usuario_rede": "joao.silva",
     "senha_hash": "senha123"
   }'
+```
 
-# Listar
+**Resposta (201 Created):**
+```json
+{
+  "id": 1,
+  "nome": "João Silva",
+  "usuario_rede": "joao.silva",
+  "created_at": "2025-12-07T18:30:00.000Z"
+}
+```
+
+**Validações:**
+- `nome`: obrigatório, mínimo 3 caracteres
+- `usuario_rede`: obrigatório, único, sem espaços
+- `senha_hash`: obrigatório, mínimo 6 caracteres (criptografado com bcrypt)
+
+---
+
+### 2. Listar Usuários Ativos
+
+**GET** `/usuarios`
+
+```bash
 curl http://localhost:3000/api/usuarios
+```
 
-# Buscar por ID
+**Resposta (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "nome": "João Silva",
+    "usuario_rede": "joao.silva",
+    "created_at": "2025-12-07T18:30:00.000Z"
+  }
+]
+```
+
+**Nota:** Retorna apenas usuários com `status_usuario = 1` (ativos).
+
+---
+
+### 3. Buscar Usuário por ID
+
+**GET** `/usuarios/:id`
+
+```bash
 curl http://localhost:3000/api/usuarios/1
+```
 
-# Atualizar
-curl -X PUT http://localhost:3000/api/usuarios/1 \
-  -H "Content-Type: application/json" \
-  -d '{"nome": "João Pedro Silva"}'
+**Resposta (200 OK):**
+```json
+{
+  "id": 1,
+  "nome": "João Silva",
+  "usuario_rede": "joao.silva",
+  "created_at": "2025-12-07T18:30:00.000Z"
+}
+```
 
-# Excluir
-curl -X DELETE http://localhost:3000/api/usuarios/1
+**Erro (404 Not Found):**
+```json
+{
+  "error": "Usuário não encontrado"
+}
 ```
 
 ---
 
-## ⚠️ Problema Atual
+### 4. Atualizar Usuário
 
-O container está crasheando com erro do PrismaClient. Isso ocorre porque:
-
-1. O Prisma Client precisa ser gerado APÓS o `npm install`
-2. O Docker está tentando usar o Prisma antes de gerar
-
-**Solução temporária:** Rodar sem Docker
+**PUT** `/usuarios/:id`
 
 ```bash
-cd backend
-npm install
-npx prisma generate
-npm run dev
+curl -X PUT http://localhost:3000/api/usuarios/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "João Pedro Silva"
+  }'
 ```
 
-Depois testar os endpoints em `http://localhost:3000/api`
+**Resposta (200 OK):**
+```json
+{
+  "id": 1,
+  "nome": "João Pedro Silva",
+  "usuario_rede": "joao.silva",
+  "created_at": "2025-12-07T18:30:00.000Z"
+}
+```
+
+**Campos atualizáveis:**
+- `nome`
+- `usuario_rede` (se não estiver em uso)
+- `senha_hash` (será re-criptografada)
+
+---
+
+### 5. Desativar Usuário (Soft Delete)
+
+**DELETE** `/usuarios/:id`
+
+```bash
+curl -X DELETE http://localhost:3000/api/usuarios/1
+```
+
+**Resposta (200 OK):**
+```json
+{
+  "message": "Usuário desativado com sucesso"
+}
+```
+
+**Comportamento:**
+- Define `status_usuario = 0`
+- Registro **permanece no banco**
+- Não aparece mais na listagem padrão
+
+---
+
+## 🔐 Segurança
+
+### Criptografia de Senha
+
+```javascript
+const bcrypt = require('bcrypt');
+
+// Ao criar/atualizar
+const senhaHash = await bcrypt.hash(senha, 10);
+
+// Para validar (login futuro)
+const valido = await bcrypt.compare(senhaDigitada, senhaHash);
+```
+
+---
+
+## 🌎 Timezone
+
+O banco está configurado para **America/Sao_Paulo** (horário de Brasília).
+
+Todas as datas em `created_at` são salvas com timezone correto.
+
+---
+
+## 🐳 Docker
+
+### Comandos Úteis
+
+```bash
+# Subir containers
+docker compose up -d
+
+# Ver logs
+docker compose logs backend -f
+
+# Entrar no container
+docker compose exec backend bash
+
+# Rodar migrations
+docker compose exec backend npx prisma migrate deploy
+
+# Reiniciar
+docker compose restart backend
+```
+
+---
+
+## 🧪 Testando com Postman
+
+**Importe esta collection:**
+
+**Collection:** `Controle Estoque API`
+
+| Método | Endpoint | Body |
+|--------|----------|------|
+| POST | `/api/usuarios` | `{"nome":"Teste","usuario_rede":"teste","senha_hash":"123456"}` |
+| GET | `/api/usuarios` | - |
+| GET | `/api/usuarios/1` | - |
+| PUT | `/api/usuarios/1` | `{"nome":"Teste Atualizado"}` |
+| DELETE | `/api/usuarios/1` | - |
+
+---
+
+## 📊 Tecnologias
+
+- **Node.js 22** (Debian)
+- **Express 5**
+- **Prisma ORM 5.22**
+- **PostgreSQL 15**
+- **Docker & Docker Compose**
+- **bcrypt** (criptografia)
+
+---
+
+## 🎯 Próximos Passos
+
+Para implementar **CRUD de Equipamentos**, siga o mesmo padrão:
+
+1. Já tem o schema em `prisma/schema.prisma`
+2. Copie `usuarioService.js` → `equipamentoService.js`
+3. Copie `usuarioController.js` → `equipamentoController.js`
+4. Copie `usuarioRoutes.js` → `equipamentoRoutes.js`
+5. Registre em `routes/index.js`:
+   ```javascript
+   router.use('/equipamentos', equipamentoRoutes);
+   ```
+
+**Diferenças específicas:**
+- "Excluir" = mudar `status` para `DESCARTADO`
+- Validar `numero_serie` único
+- `patrimonio` é opcional
