@@ -13,7 +13,13 @@ const equipamentoController = {
         try {
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 10;
-            const result = await equipamentoService.listarAtivos(page, limit);
+
+            const filtros = {
+                status: req.query.status,
+                usuario_id: req.query.usuario_id
+            };
+
+            const result = await equipamentoService.listarAtivos(filtros, page, limit);
             return res.status(200).json(result);
         } catch (error) {
             return res.status(500).json({ error: error.message });

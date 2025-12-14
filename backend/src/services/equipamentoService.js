@@ -53,14 +53,26 @@ const equipamentoService = {
         return equipamento;
     },
 
-    async listarAtivos(page = 1, limit = 10) {
+    async listarAtivos(filtros = {}, page = 1, limit = 10) {
+        const { status, usuario_id } = filtros;
+
+        const where = {
+            status: {
+                not: 'DESCARTADO'
+            }
+        };
+
+        if (status && ['NO_DEPOSITO', 'FORA_DEPOSITO'].includes(status)) {
+            where.status = status;
+        }
+
+        if (usuario_id) {
+            where.usuario_id = parseInt(usuario_id);
+        }
+
         return await prisma.equipamento
             .paginate({
-                where: {
-                    status: {
-                        not: 'DESCARTADO'
-                    }
-                },
+                where,
                 include: {
                     usuario: {
                         select: {

@@ -24,6 +24,20 @@ const movimentacaoService = {
             throw new Error('Equipamento não encontrado');
         }
 
+        const currentStatus = equipamento.status;
+
+        if (currentStatus === 'DESCARTADO') {
+            throw new Error('Não é possível movimentar equipamento descartado');
+        }
+
+        if (tipo === 'SAIDA' && currentStatus !== 'NO_DEPOSITO') {
+            throw new Error('Equipamento deve estar NO_DEPOSITO para realizar SAIDA');
+        }
+
+        if (tipo === 'ENTRADA' && currentStatus !== 'FORA_DEPOSITO') {
+            throw new Error('Equipamento deve estar FORA_DEPOSITO para realizar ENTRADA');
+        }
+
         const usuario = await prisma.usuario.findUnique({
             where: { id: parseInt(usuario_id) }
         });
