@@ -2,8 +2,11 @@ const express = require('express');
 const router = express.Router();
 const movimentacaoController = require('../controllers/movimentacaoController');
 
+const validate = require('../middlewares/validateSchema');
+const { createMovimentacaoSchema } = require('../validators/schemas');
+
 // POST /api/movimentacoes - Criar movimentação
-router.post('/', movimentacaoController.criar);
+router.post('/', validate(createMovimentacaoSchema), movimentacaoController.criar);
 
 // GET /api/movimentacoes - Listar movimentações (com filtros opcionais)
 router.get('/', movimentacaoController.listar);

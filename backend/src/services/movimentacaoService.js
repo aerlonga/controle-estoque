@@ -1,11 +1,9 @@
 const prisma = require('../models/prisma');
 
 const movimentacaoService = {
-    // Criar movimentação
     async criar(dados) {
         const { equipamento_id, tipo, usuario_id, observacao, data_movimentacao } = dados;
 
-        // Validações
         if (!equipamento_id || isNaN(equipamento_id)) {
             throw new Error('ID do equipamento é obrigatório');
         }
@@ -18,7 +16,6 @@ const movimentacaoService = {
             throw new Error('ID do usuário é obrigatório');
         }
 
-        // Verificar se equipamento existe
         const equipamento = await prisma.equipamento.findUnique({
             where: { id: parseInt(equipamento_id) }
         });
@@ -27,7 +24,6 @@ const movimentacaoService = {
             throw new Error('Equipamento não encontrado');
         }
 
-        // Verificar se usuário existe
         const usuario = await prisma.usuario.findUnique({
             where: { id: parseInt(usuario_id) }
         });
@@ -36,7 +32,6 @@ const movimentacaoService = {
             throw new Error('Usuário não encontrado');
         }
 
-        // Criar movimentação
         const movimentacao = await prisma.movimentacao.create({
             data: {
                 equipamento_id: parseInt(equipamento_id),
@@ -65,7 +60,6 @@ const movimentacaoService = {
             }
         });
 
-        // Atualizar status do equipamento baseado no tipo de movimentação
         const novoStatus = tipo === 'ENTRADA' ? 'NO_DEPOSITO' : 'FORA_DEPOSITO';
 
         await prisma.equipamento.update({
@@ -76,28 +70,22 @@ const movimentacaoService = {
         return movimentacao;
     },
 
-    // Listar todas as movimentações
-    async listar(filtros = {}) {
+    async listar(filtros = {}, paginationParams = {}) {
         const { equipamento_id, tipo, usuario_id, data_inicio, data_fim } = filtros;
+        const { skip, limit } = paginationParams;
 
         const where = {};
 
-        // Filtro por equipamento
         if (equipamento_id) {
             where.equipamento_id = parseInt(equipamento_id);
         }
-
-        // Filtro por tipo
         if (tipo && ['ENTRADA', 'SAIDA'].includes(tipo)) {
             where.tipo = tipo;
         }
 
-        // Filtro por usuário
         if (usuario_id) {
             where.usuario_id = parseInt(usuario_id);
         }
-
-        // Filtro por data
         if (data_inicio || data_fim) {
             where.data_movimentacao = {};
 
@@ -109,6 +97,8 @@ const movimentacaoService = {
                 where.data_movimentacao.lte = new Date(data_fim);
             }
         }
+
+        const total = await prisma.movimentacao.count({ where });
 
         const movimentacoes = await prisma.movimentacao.findMany({
             where,
@@ -132,13 +122,14 @@ const movimentacaoService = {
             },
             orderBy: {
                 data_movimentacao: 'desc'
-            }
+            },
+            ...(skip !== undefined && { skip }),
+            ...(limit !== undefined && { take: limit })
         });
 
-        return movimentacoes;
+        return { data: movimentacoes, total };
     },
 
-    // Buscar movimentação por ID
     async buscarPorId(id) {
         const movimentacao = await prisma.movimentacao.findUnique({
             where: { id: parseInt(id) },
@@ -170,10 +161,14 @@ const movimentacaoService = {
         return movimentacao;
     },
 
-    // Listar movimentações por equipamento
-    async listarPorEquipamento(equipamento_id) {
+    async listarPorEquipamento(equipamento_id, paginationParams = {}) {
+        const { skip, limit } = paginationParams;
+        const where = { equipamento_id: parseInt(equipamento_id) };
+
+        const total = await prisma.movimentacao.count({ where });
+
         const movimentacoes = await prisma.movimentacao.findMany({
-            where: { equipamento_id: parseInt(equipamento_id) },
+            where,
             include: {
                 usuario: {
                     select: {
@@ -185,16 +180,22 @@ const movimentacaoService = {
             },
             orderBy: {
                 data_movimentacao: 'desc'
-            }
+            },
+            ...(skip !== undefined && { skip }),
+            ...(limit !== undefined && { take: limit })
         });
 
-        return movimentacoes;
+        return { data: movimentacoes, total };
     },
 
-    // Listar movimentações por usuário
-    async listarPorUsuario(usuario_id) {
+    async listarPorUsuario(usuario_id, paginationParams = {}) {
+        const { skip, limit } = paginationParams;
+        const where = { usuario_id: parseInt(usuario_id) };
+
+        const total = await prisma.movimentacao.count({ where });
+
         const movimentacoes = await prisma.movimentacao.findMany({
-            where: { usuario_id: parseInt(usuario_id) },
+            where,
             include: {
                 equipamento: {
                     select: {
@@ -208,10 +209,12 @@ const movimentacaoService = {
             },
             orderBy: {
                 data_movimentacao: 'desc'
-            }
+            },
+            ...(skip !== undefined && { skip }),
+            ...(limit !== undefined && { take: limit })
         });
 
-        return movimentacoes;
+        return { data: movimentacoes, total };
     }
 };
 

@@ -7,12 +7,10 @@ const authService = {
      * Fazer login e gerar token JWT
      */
     async login(usuario_rede, senha) {
-        // Validações
         if (!usuario_rede || !senha) {
             throw new Error('Usuário de rede e senha são obrigatórios');
         }
 
-        // Buscar usuário
         const usuario = await prisma.usuario.findUnique({
             where: { usuario_rede: usuario_rede.trim() }
         });
@@ -21,19 +19,16 @@ const authService = {
             throw new Error('Credenciais inválidas');
         }
 
-        // Verificar se usuário está ativo
         if (usuario.status_usuario !== 1) {
             throw new Error('Usuário desativado');
         }
 
-        // Verificar senha
         const senhaValida = await bcrypt.compare(senha, usuario.senha_hash);
 
         if (!senhaValida) {
             throw new Error('Credenciais inválidas');
         }
 
-        // Gerar token JWT
         const token = jwt.sign(
             {
                 id: usuario.id,
@@ -46,7 +41,6 @@ const authService = {
             }
         );
 
-        // Retornar token e dados do usuário (sem senha)
         return {
             token,
             usuario: {
@@ -61,8 +55,19 @@ const authService = {
     /**
      * Verificar e decodificar token JWT
      */
-    verificarToken(token) {
+    /**
+     * Verificar e decodificar token JWT
+     */
+    async verificarToken(token) {
         try {
+            const blacklisted = await prisma.tokenBlacklist.findUnique({
+                where: { token }
+            });
+
+            if (blacklisted) {
+                throw new Error('Token inválido');
+            }
+
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             return decoded;
         } catch (error) {
@@ -72,8 +77,25 @@ const authService = {
             if (error.name === 'JsonWebTokenError') {
                 throw new Error('Token inválido');
             }
-            throw new Error('Erro ao verificar token');
+            throw error;
         }
+    },
+
+    /**
+     * Invalidar token (blacklist)
+     */
+    async blacklistToken(token) {
+        const decoded = jwt.decode(token);
+        if (!decoded) return;
+
+        const expiresAt = new Date(decoded.exp * 1000);
+
+        await prisma.tokenBlacklist.create({
+            data: {
+                token,
+                expiresAt
+            }
+        });
     }
 };
 

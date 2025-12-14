@@ -5,30 +5,26 @@ const authService = require('../services/authService');
  */
 const authMiddleware = async (req, res, next) => {
     try {
-        // Pegar token do header Authorization
-        const authHeader = req.headers.authorization;
+        let token = req.cookies.token;
 
-        if (!authHeader) {
+        if (!token) {
+            const authHeader = req.headers.authorization;
+
+            if (authHeader) {
+                const parts = authHeader.split(' ');
+
+                if (parts.length === 2 && /^Bearer$/i.test(parts[0])) {
+                    token = parts[1];
+                }
+            }
+        }
+
+        if (!token) {
             return res.status(401).json({ error: 'Token não fornecido' });
         }
 
-        // O formato esperado é: "Bearer TOKEN"
-        const parts = authHeader.split(' ');
+        const decoded = await authService.verificarToken(token);
 
-        if (parts.length !== 2) {
-            return res.status(401).json({ error: 'Token mal formatado' });
-        }
-
-        const [scheme, token] = parts;
-
-        if (!/^Bearer$/i.test(scheme)) {
-            return res.status(401).json({ error: 'Token mal formatado' });
-        }
-
-        // Verificar token
-        const decoded = authService.verificarToken(token);
-
-        // Anexar usuário decodificado ao request
         req.user = {
             id: decoded.id,
             usuario_rede: decoded.usuario_rede,

@@ -6,12 +6,9 @@ class UsuarioService {
      * Criar novo usuário
      */
     async criar(dados) {
-        // Validações de negócio
         if (!dados.nome || !dados.usuario_rede || !dados.senha_hash) {
             throw new Error('Nome, usuário de rede e senha são obrigatórios');
         }
-
-        // Verifica se usuário já existe
         const usuarioExistente = await prisma.usuario.findUnique({
             where: { usuario_rede: dados.usuario_rede }
         });
@@ -20,10 +17,8 @@ class UsuarioService {
             throw new Error('Usuário de rede já cadastrado');
         }
 
-        // Criptografa senha
         const senhaHash = await bcrypt.hash(dados.senha_hash, 10);
 
-        // Cria usuário
         const usuario = await prisma.usuario.create({
             data: {
                 nome: dados.nome,
@@ -32,27 +27,35 @@ class UsuarioService {
             }
         });
 
-        // Remove senha do retorno
         delete usuario.senha_hash;
         return usuario;
     }
 
     /**
-     * Listar todos os usuários
+     * Listar todos os usuários (com paginação)
      */
-    async listar() {
+    async listar(paginationParams = {}) {
+        const { skip, limit } = paginationParams;
+
+        const where = { status_usuario: 1 };
+        const select = {
+            id: true,
+            nome: true,
+            usuario_rede: true,
+            created_at: true
+        };
+
+        const total = await prisma.usuario.count({ where });
+
         const usuarios = await prisma.usuario.findMany({
-            where: { status_usuario: 1 },
-            select: {
-                id: true,
-                nome: true,
-                usuario_rede: true,
-                created_at: true
-            },
-            orderBy: { nome: 'asc' }
+            where,
+            select,
+            orderBy: { nome: 'asc' },
+            ...(skip !== undefined && { skip }),
+            ...(limit !== undefined && { take: limit })
         });
 
-        return usuarios;
+        return { data: usuarios, total };
     }
 
     /**
@@ -80,10 +83,8 @@ class UsuarioService {
      * Atualizar usuário
      */
     async atualizar(id, dados) {
-        // Verifica se usuário existe
         await this.buscarPorId(id);
 
-        // Se está mudando o usuario_rede, verifica se já existe
         if (dados.usuario_rede) {
             const usuarioExistente = await prisma.usuario.findFirst({
                 where: {
@@ -97,7 +98,6 @@ class UsuarioService {
             }
         }
 
-        // Se está atualizando senha, criptografa
         if (dados.senha_hash) {
             dados.senha_hash = await bcrypt.hash(dados.senha_hash, 10);
         }
@@ -120,10 +120,8 @@ class UsuarioService {
      * Desativar usuário (soft delete)
      */
     async desativar(id) {
-        // Verifica se usuário existe
         await this.buscarPorId(id);
 
-        // Desativa o usuário
         await prisma.usuario.update({
             where: { id: parseInt(id) },
             data: { status_usuario: 0 }

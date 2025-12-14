@@ -53,13 +53,21 @@ const equipamentoService = {
         return equipamento;
     },
 
-    async listarAtivos() {
+    async listarAtivos(paginationParams = {}) {
+        const { skip, limit } = paginationParams;
+
+        const where = {
+            status: {
+                not: 'DESCARTADO'
+            }
+        };
+
+        // Buscar total de registros
+        const total = await prisma.equipamento.count({ where });
+
+        // Buscar dados paginados
         const equipamentos = await prisma.equipamento.findMany({
-            where: {
-                status: {
-                    not: 'DESCARTADO'
-                }
-            },
+            where,
             include: {
                 usuario: {
                     select: {
@@ -71,10 +79,12 @@ const equipamentoService = {
             },
             orderBy: {
                 created_at: 'desc'
-            }
+            },
+            ...(skip !== undefined && { skip }),
+            ...(limit !== undefined && { take: limit })
         });
 
-        return equipamentos;
+        return { data: equipamentos, total };
     },
 
     async buscarPorId(id) {

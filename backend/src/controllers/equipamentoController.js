@@ -1,4 +1,5 @@
 const equipamentoService = require('../services/equipamentoService');
+const { getPaginationParams, createPaginatedResponse } = require('../utils/pagination');
 
 const equipamentoController = {
     async criar(req, res) {
@@ -11,8 +12,9 @@ const equipamentoController = {
     },
     async listarAtivos(req, res) {
         try {
-            const equipamentos = await equipamentoService.listarAtivos();
-            return res.status(200).json(equipamentos);
+            const { page, limit, skip } = getPaginationParams(req.query);
+            const { data, total } = await equipamentoService.listarAtivos({ skip, limit });
+            return res.status(200).json(createPaginatedResponse(data, total, page, limit));
         } catch (error) {
             return res.status(500).json({ error: error.message });
         }
