@@ -110,7 +110,7 @@ const movimentacaoService = {
             }
         }
 
-        return await prisma.movimentacao
+        const [data, meta] = await prisma.movimentacao
             .paginate({
                 where,
                 include: {
@@ -140,6 +140,8 @@ const movimentacaoService = {
                 page,
                 includePageCount: true
             });
+        
+        return { data, meta };
     },
 
     async buscarPorId(id) {
@@ -174,7 +176,7 @@ const movimentacaoService = {
     },
 
     async listarPorEquipamento(equipamento_id, page = 1, limit = 10) {
-        return await prisma.movimentacao
+        const [data, meta] = await prisma.movimentacao
             .paginate({
                 where: { equipamento_id: parseInt(equipamento_id) },
                 include: {
@@ -195,10 +197,12 @@ const movimentacaoService = {
                 page,
                 includePageCount: true
             });
+        
+        return { data, meta };
     },
 
     async listarPorUsuario(usuario_id, page = 1, limit = 10) {
-        return await prisma.movimentacao
+        const [data, meta] = await prisma.movimentacao
             .paginate({
                 where: { usuario_id: parseInt(usuario_id) },
                 include: {
@@ -221,6 +225,8 @@ const movimentacaoService = {
                 page,
                 includePageCount: true
             });
+        
+        return { data, meta };
     }
 };
 

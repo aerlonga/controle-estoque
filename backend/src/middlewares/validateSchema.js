@@ -10,7 +10,9 @@ const validate = (schema, source = 'body') => (req, res, next) => {
         const result = schema.safeParse(req[source]);
 
         if (!result.success) {
-            const errorMessages = result.error.errors.map(err => ({
+            console.error('Validation Result Error Object:', JSON.stringify(result.error, null, 2));
+            const errors = result.error.errors || result.error.issues || [];
+            const errorMessages = errors.map(err => ({
                 field: err.path.join('.'),
                 message: err.message
             }));
@@ -25,6 +27,7 @@ const validate = (schema, source = 'body') => (req, res, next) => {
 
         next();
     } catch (error) {
+        console.error('Validation Middleware Error:', error);
         return res.status(500).json({ error: 'Erro interno na validação' });
     }
 };

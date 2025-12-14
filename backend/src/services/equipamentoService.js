@@ -70,7 +70,7 @@ const equipamentoService = {
             where.usuario_id = parseInt(usuario_id);
         }
 
-        return await prisma.equipamento
+        const [data, meta] = await prisma.equipamento
             .paginate({
                 where,
                 include: {
@@ -91,6 +91,8 @@ const equipamentoService = {
                 page,
                 includePageCount: true
             });
+        
+        return { data, meta };
     },
 
     async buscarPorId(id) {

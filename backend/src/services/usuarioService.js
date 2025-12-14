@@ -6,7 +6,7 @@ class UsuarioService {
      * Criar novo usuário
      */
     async criar(dados) {
-        if (!dados.nome || !dados.usuario_rede || !dados.senha_hash) {
+        if (!dados.nome || !dados.usuario_rede || !dados.senha) {
             throw new Error('Nome, usuário de rede e senha são obrigatórios');
         }
         const usuarioExistente = await prisma.usuario.findUnique({
@@ -17,7 +17,7 @@ class UsuarioService {
             throw new Error('Usuário de rede já cadastrado');
         }
 
-        const senhaHash = await bcrypt.hash(dados.senha_hash, 10);
+        const senhaHash = await bcrypt.hash(dados.senha, 10);
 
         const usuario = await prisma.usuario.create({
             data: {
@@ -35,7 +35,7 @@ class UsuarioService {
      * Listar todos os usuários (com paginação)
      */
     async listar(page = 1, limit = 10) {
-        return await prisma.usuario
+        const [data, meta] = await prisma.usuario
             .paginate({
                 where: { status_usuario: 1 },
                 select: {
@@ -51,6 +51,8 @@ class UsuarioService {
                 page,
                 includePageCount: true
             });
+        
+        return { data, meta };
     }
 
     /**
@@ -93,8 +95,9 @@ class UsuarioService {
             }
         }
 
-        if (dados.senha_hash) {
-            dados.senha_hash = await bcrypt.hash(dados.senha_hash, 10);
+        if (dados.senha) {
+            dados.senha_hash = await bcrypt.hash(dados.senha, 10);
+            delete dados.senha;
         }
 
         const usuario = await prisma.usuario.update({
