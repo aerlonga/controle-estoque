@@ -2,6 +2,11 @@
 
 ## 🏗️ Arquitetura: MVC + Services
 
+### Credenciais iniciais:
+
+Usuário: admin
+Senha: admin123
+
 ### Estrutura de Pastas
 
 ```

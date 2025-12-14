@@ -1,18 +1,24 @@
 const express = require('express');
 const router = express.Router();
 
+const authRoutes = require('./authRoutes');
 const usuarioRoutes = require('./usuarioRoutes');
+const equipamentoRoutes = require('./equipamentoRoutes');
+const movimentacaoRoutes = require('./movimentacaoRoutes');
+const authMiddleware = require('../middlewares/authMiddleware');
 
 /**
  * Arquivo central de rotas
  * Registra todas as rotas da aplicação com seus prefixos
  */
 
-// Registra rotas de usuários
-router.use('/usuarios', usuarioRoutes);
+// Rotas públicas (sem autenticação)
+router.use('/auth', authRoutes);
 
-// Futuras rotas:
-// router.use('/equipamentos', equipamentoRoutes);
-// router.use('/movimentacoes', movimentacaoRoutes);
+// Rotas protegidas (exigem autenticação JWT)
+router.use('/usuarios', authMiddleware, usuarioRoutes);
+router.use('/equipamentos', authMiddleware, equipamentoRoutes);
+router.use('/movimentacoes', authMiddleware, movimentacaoRoutes);
 
 module.exports = router;
+
