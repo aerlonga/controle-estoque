@@ -70,9 +70,8 @@ const movimentacaoService = {
         return movimentacao;
     },
 
-    async listar(filtros = {}, paginationParams = {}) {
+    async listar(filtros = {}, page = 1, limit = 10) {
         const { equipamento_id, tipo, usuario_id, data_inicio, data_fim } = filtros;
-        const { skip, limit } = paginationParams;
 
         const where = {};
 
@@ -82,7 +81,6 @@ const movimentacaoService = {
         if (tipo && ['ENTRADA', 'SAIDA'].includes(tipo)) {
             where.tipo = tipo;
         }
-
         if (usuario_id) {
             where.usuario_id = parseInt(usuario_id);
         }
@@ -98,36 +96,36 @@ const movimentacaoService = {
             }
         }
 
-        const total = await prisma.movimentacao.count({ where });
-
-        const movimentacoes = await prisma.movimentacao.findMany({
-            where,
-            include: {
-                equipamento: {
-                    select: {
-                        id: true,
-                        patrimonio: true,
-                        nome: true,
-                        modelo: true,
-                        numero_serie: true
+        return await prisma.movimentacao
+            .paginate({
+                where,
+                include: {
+                    equipamento: {
+                        select: {
+                            id: true,
+                            patrimonio: true,
+                            nome: true,
+                            modelo: true,
+                            numero_serie: true
+                        }
+                    },
+                    usuario: {
+                        select: {
+                            id: true,
+                            nome: true,
+                            usuario_rede: true
+                        }
                     }
                 },
-                usuario: {
-                    select: {
-                        id: true,
-                        nome: true,
-                        usuario_rede: true
-                    }
+                orderBy: {
+                    data_movimentacao: 'desc'
                 }
-            },
-            orderBy: {
-                data_movimentacao: 'desc'
-            },
-            ...(skip !== undefined && { skip }),
-            ...(limit !== undefined && { take: limit })
-        });
-
-        return { data: movimentacoes, total };
+            })
+            .withPages({
+                limit,
+                page,
+                includePageCount: true
+            });
     },
 
     async buscarPorId(id) {
@@ -161,60 +159,54 @@ const movimentacaoService = {
         return movimentacao;
     },
 
-    async listarPorEquipamento(equipamento_id, paginationParams = {}) {
-        const { skip, limit } = paginationParams;
-        const where = { equipamento_id: parseInt(equipamento_id) };
-
-        const total = await prisma.movimentacao.count({ where });
-
-        const movimentacoes = await prisma.movimentacao.findMany({
-            where,
-            include: {
-                usuario: {
-                    select: {
-                        id: true,
-                        nome: true,
-                        usuario_rede: true
+    async listarPorEquipamento(equipamento_id, page = 1, limit = 10) {
+        return await prisma.movimentacao
+            .paginate({
+                where: { equipamento_id: parseInt(equipamento_id) },
+                include: {
+                    usuario: {
+                        select: {
+                            id: true,
+                            nome: true,
+                            usuario_rede: true
+                        }
                     }
+                },
+                orderBy: {
+                    data_movimentacao: 'desc'
                 }
-            },
-            orderBy: {
-                data_movimentacao: 'desc'
-            },
-            ...(skip !== undefined && { skip }),
-            ...(limit !== undefined && { take: limit })
-        });
-
-        return { data: movimentacoes, total };
+            })
+            .withPages({
+                limit,
+                page,
+                includePageCount: true
+            });
     },
 
-    async listarPorUsuario(usuario_id, paginationParams = {}) {
-        const { skip, limit } = paginationParams;
-        const where = { usuario_id: parseInt(usuario_id) };
-
-        const total = await prisma.movimentacao.count({ where });
-
-        const movimentacoes = await prisma.movimentacao.findMany({
-            where,
-            include: {
-                equipamento: {
-                    select: {
-                        id: true,
-                        patrimonio: true,
-                        nome: true,
-                        modelo: true,
-                        numero_serie: true
+    async listarPorUsuario(usuario_id, page = 1, limit = 10) {
+        return await prisma.movimentacao
+            .paginate({
+                where: { usuario_id: parseInt(usuario_id) },
+                include: {
+                    equipamento: {
+                        select: {
+                            id: true,
+                            patrimonio: true,
+                            nome: true,
+                            modelo: true,
+                            numero_serie: true
+                        }
                     }
+                },
+                orderBy: {
+                    data_movimentacao: 'desc'
                 }
-            },
-            orderBy: {
-                data_movimentacao: 'desc'
-            },
-            ...(skip !== undefined && { skip }),
-            ...(limit !== undefined && { take: limit })
-        });
-
-        return { data: movimentacoes, total };
+            })
+            .withPages({
+                limit,
+                page,
+                includePageCount: true
+            });
     }
 };
 

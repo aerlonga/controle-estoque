@@ -53,38 +53,32 @@ const equipamentoService = {
         return equipamento;
     },
 
-    async listarAtivos(paginationParams = {}) {
-        const { skip, limit } = paginationParams;
-
-        const where = {
-            status: {
-                not: 'DESCARTADO'
-            }
-        };
-
-        // Buscar total de registros
-        const total = await prisma.equipamento.count({ where });
-
-        // Buscar dados paginados
-        const equipamentos = await prisma.equipamento.findMany({
-            where,
-            include: {
-                usuario: {
-                    select: {
-                        id: true,
-                        nome: true,
-                        usuario_rede: true
+    async listarAtivos(page = 1, limit = 10) {
+        return await prisma.equipamento
+            .paginate({
+                where: {
+                    status: {
+                        not: 'DESCARTADO'
                     }
+                },
+                include: {
+                    usuario: {
+                        select: {
+                            id: true,
+                            nome: true,
+                            usuario_rede: true
+                        }
+                    }
+                },
+                orderBy: {
+                    created_at: 'desc'
                 }
-            },
-            orderBy: {
-                created_at: 'desc'
-            },
-            ...(skip !== undefined && { skip }),
-            ...(limit !== undefined && { take: limit })
-        });
-
-        return { data: equipamentos, total };
+            })
+            .withPages({
+                limit,
+                page,
+                includePageCount: true
+            });
     },
 
     async buscarPorId(id) {

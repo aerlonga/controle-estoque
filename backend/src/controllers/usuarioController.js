@@ -1,5 +1,4 @@
 const usuarioService = require('../services/usuarioService');
-const { getPaginationParams, createPaginatedResponse } = require('../utils/pagination');
 
 class UsuarioController {
     /**
@@ -21,9 +20,10 @@ class UsuarioController {
      */
     async listar(req, res) {
         try {
-            const { page, limit, skip } = getPaginationParams(req.query);
-            const { data, total } = await usuarioService.listar({ skip, limit });
-            return res.status(200).json(createPaginatedResponse(data, total, page, limit));
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+            const result = await usuarioService.listar(page, limit);
+            return res.status(200).json(result);
         } catch (error) {
             return res.status(500).json({ error: error.message });
         }

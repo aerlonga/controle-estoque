@@ -34,28 +34,23 @@ class UsuarioService {
     /**
      * Listar todos os usuários (com paginação)
      */
-    async listar(paginationParams = {}) {
-        const { skip, limit } = paginationParams;
-
-        const where = { status_usuario: 1 };
-        const select = {
-            id: true,
-            nome: true,
-            usuario_rede: true,
-            created_at: true
-        };
-
-        const total = await prisma.usuario.count({ where });
-
-        const usuarios = await prisma.usuario.findMany({
-            where,
-            select,
-            orderBy: { nome: 'asc' },
-            ...(skip !== undefined && { skip }),
-            ...(limit !== undefined && { take: limit })
-        });
-
-        return { data: usuarios, total };
+    async listar(page = 1, limit = 10) {
+        return await prisma.usuario
+            .paginate({
+                where: { status_usuario: 1 },
+                select: {
+                    id: true,
+                    nome: true,
+                    usuario_rede: true,
+                    created_at: true
+                },
+                orderBy: { nome: 'asc' }
+            })
+            .withPages({
+                limit,
+                page,
+                includePageCount: true
+            });
     }
 
     /**

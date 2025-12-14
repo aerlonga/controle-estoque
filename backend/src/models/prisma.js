@@ -1,9 +1,16 @@
 const { PrismaClient } = require('@prisma/client');
+const pagination = require('prisma-extension-pagination');
 
 /**
- * Inicialização do Prisma Client v7
- * A URL é configurada via prisma.config.ts
+ * Inicialização do Prisma Client com pagination extension
  */
-const prisma = new PrismaClient();
+const prisma = new PrismaClient().$extends(
+    pagination.paginate({
+        pages: {
+            limit: 10,
+            includePageCount: true
+        }
+    })
+);
 
 module.exports = prisma;
