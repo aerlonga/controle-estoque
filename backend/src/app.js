@@ -1,10 +1,9 @@
 const express = require('express');
 const app = express();
+const routes = require('./routes');
 
+app.use(require('cookie-parser')());
 app.use(express.json());
-
-app.get('/', (req, res) => {
-  res.send('Hello world!');
-});
+app.use('/api', routes);
 
 module.exports = app;
