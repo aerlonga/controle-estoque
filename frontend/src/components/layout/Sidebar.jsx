@@ -1,6 +1,6 @@
 import {
     Drawer, List, ListItem, ListItemButton, ListItemIcon,
-    ListItemText, Collapse, Divider, Toolbar, Typography, useTheme, useMediaQuery
+    ListItemText, Collapse, Divider, Toolbar, Typography
 } from '@mui/material';
 import {
     Dashboard as DashboardIcon,
@@ -14,16 +14,24 @@ import { Link, useLocation } from '@tanstack/react-router';
 
 const DRAWER_WIDTH = 260;
 
-function Sidebar({ userProfile, open, onClose }) {
+function Sidebar({ userProfile }) {
     const [configOpen, setConfigOpen] = useState(true);
     const isAdmin = userProfile === 'ADMIN';
     const location = useLocation();
     const currentPath = location.pathname;
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-    const drawerContent = (
-        <>
+    return (
+        <Drawer
+            variant="permanent"
+            sx={{
+                width: DRAWER_WIDTH,
+                flexShrink: 0,
+                '& .MuiDrawer-paper': {
+                    width: DRAWER_WIDTH,
+                    boxSizing: 'border-box',
+                },
+            }}
+        >
             <Toolbar>
                 <Typography variant="h6" noWrap component="div" fontWeight="bold">
                     Controle Estoque
@@ -39,7 +47,6 @@ function Sidebar({ userProfile, open, onClose }) {
                         component={Link}
                         to="/"
                         selected={currentPath === '/'}
-                        onClick={isMobile ? onClose : undefined}
                     >
                         <ListItemIcon>
                             <DashboardIcon />
@@ -65,7 +72,6 @@ function Sidebar({ userProfile, open, onClose }) {
                                     component={Link}
                                     to="/users"
                                     selected={currentPath === '/users'}
-                                    onClick={isMobile ? onClose : undefined}
                                     sx={{ pl: 4 }}
                                 >
                                     <ListItemIcon>
@@ -78,47 +84,7 @@ function Sidebar({ userProfile, open, onClose }) {
                     </>
                 )}
             </List>
-        </>
-    );
-
-    return (
-        <>
-            {/* Mobile drawer (temporary) */}
-            <Drawer
-                variant="temporary"
-                open={open}
-                onClose={onClose}
-                ModalProps={{
-                    keepMounted: true,
-                }}
-                sx={{
-                    display: { xs: 'block', md: 'none' },
-                    '& .MuiDrawer-paper': {
-                        width: DRAWER_WIDTH,
-                        boxSizing: 'border-box',
-                    },
-                }}
-            >
-                {drawerContent}
-            </Drawer>
-
-            {/* Desktop drawer (permanent, controlado) */}
-            <Drawer
-                variant="persistent"
-                open={open}
-                sx={{
-                    display: { xs: 'none', md: 'block' },
-                    width: open ? DRAWER_WIDTH : 0,
-                    flexShrink: 0,
-                    '& .MuiDrawer-paper': {
-                        width: DRAWER_WIDTH,
-                        boxSizing: 'border-box',
-                    },
-                }}
-            >
-                {drawerContent}
-            </Drawer>
-        </>
+        </Drawer>
     );
 }
 

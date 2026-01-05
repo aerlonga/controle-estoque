@@ -61,7 +61,7 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
-    command: sh -c "npx prisma generate && npx prisma migrate deploy && npm run dev"
+    command: sh -c "npm install && npx prisma generate && npx prisma migrate deploy && npm run dev"
 
   # Frontend React + Vite
   frontend:
@@ -79,8 +79,7 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    stdin_open: true
-    tty: true
+    command: sh -c "npm install && npm run dev -- --host"
 
 volumes:
   postgres_data:

@@ -1,7 +1,19 @@
 import { DataGrid } from '@mui/x-data-grid';
 import { Chip } from '@mui/material';
+import { useEffect, useState } from 'react';
 
 function UsersDataGrid({ users, loading }) {
+    const [key, setKey] = useState(0);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setKey(prev => prev + 1);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const columns = [
         { field: 'nome', headerName: 'Nome', width: 200, flex: 1 },
         { field: 'usuario_rede', headerName: 'Usuário', width: 150 },
@@ -34,9 +46,11 @@ function UsersDataGrid({ users, loading }) {
 
     return (
         <DataGrid
+            key={key}
             rows={users}
             columns={columns}
             loading={loading}
+            autoHeight
             initialState={{
                 pagination: {
                     paginationModel: { page: 0, pageSize: 10 },
@@ -45,8 +59,8 @@ function UsersDataGrid({ users, loading }) {
             pageSizeOptions={[5, 10, 25]}
             disableRowSelectionOnClick
             disableColumnResize
-            autoHeight
             sx={{
+                width: '100%',
                 '& .MuiDataGrid-cell:hover': {
                     cursor: 'pointer',
                 },

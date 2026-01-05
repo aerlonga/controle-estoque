@@ -1,8 +1,8 @@
-import { AppBar, Toolbar, Typography, Button, Box, Avatar, IconButton } from '@mui/material';
-import { Logout as LogoutIcon, Menu as MenuIcon } from '@mui/icons-material';
+import { AppBar, Toolbar, Typography, Button, Box, Avatar } from '@mui/material';
+import { Logout as LogoutIcon } from '@mui/icons-material';
 import { useLocation } from '@tanstack/react-router';
 
-function AppHeader({ user, logout, onMenuClick }) {
+function AppHeader({ user, logout }) {
     const location = useLocation();
 
     const pageTitle = {
@@ -13,16 +13,6 @@ function AppHeader({ user, logout, onMenuClick }) {
     return (
         <AppBar position="static" color="default" elevation={1}>
             <Toolbar>
-                <IconButton
-                    color="inherit"
-                    aria-label="toggle sidebar"
-                    edge="start"
-                    onClick={onMenuClick}
-                    sx={{ mr: 2 }}
-                >
-                    <MenuIcon />
-                </IconButton>
-
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                     {pageTitle}
                 </Typography>
