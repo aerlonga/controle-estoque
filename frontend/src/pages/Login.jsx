@@ -108,13 +108,6 @@ function Login() {
                         {loginMutation.isPending ? 'Entrando...' : 'Entrar'}
                     </button>
                 </form>
-
-                <div className="mt-6 text-center text-sm text-gray-600">
-                    <p>Credenciais padrão:</p>
-                    <p className="font-mono text-xs mt-1">
-                        Usuário: <strong>admin</strong> / Senha: <strong>admin123</strong>
-                    </p>
-                </div>
             </div>
         </div>
     );
