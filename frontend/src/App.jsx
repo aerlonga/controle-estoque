@@ -1,10 +1,6 @@
-import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Users from './pages/Users';
-import Layout from './components/layout/Layout';
-import { useAuthStore } from './store/authStore';
+import { RouterProvider } from '@tanstack/react-router';
+import { router } from './router';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,24 +13,9 @@ const queryClient = new QueryClient({
 });
 
 function App() {
-  const { isAuthenticated, user, logout } = useAuthStore();
-  const [currentPage, setCurrentPage] = useState('dashboard');
-
   return (
     <QueryClientProvider client={queryClient}>
-      {isAuthenticated ? (
-        <Layout
-          user={user}
-          logout={logout}
-          currentPage={currentPage}
-          onNavigate={setCurrentPage}
-        >
-          {currentPage === 'dashboard' && <Dashboard />}
-          {currentPage === 'users' && <Users />}
-        </Layout>
-      ) : (
-        <Login />
-      )}
+      <RouterProvider router={router} />
     </QueryClientProvider>
   );
 }

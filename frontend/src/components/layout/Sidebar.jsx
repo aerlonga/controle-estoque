@@ -10,12 +10,15 @@ import {
     ChevronRight
 } from '@mui/icons-material';
 import { useState } from 'react';
+import { Link, useLocation } from '@tanstack/react-router';
 
 const DRAWER_WIDTH = 260;
 
-function Sidebar({ currentPage, onNavigate, userProfile }) {
+function Sidebar({ userProfile }) {
     const [configOpen, setConfigOpen] = useState(true);
     const isAdmin = userProfile === 'ADMIN';
+    const location = useLocation();
+    const currentPath = location.pathname;
 
     return (
         <Drawer
@@ -41,8 +44,9 @@ function Sidebar({ currentPage, onNavigate, userProfile }) {
                 {/* Dashboard */}
                 <ListItem disablePadding>
                     <ListItemButton
-                        selected={currentPage === 'dashboard'}
-                        onClick={() => onNavigate('dashboard')}
+                        component={Link}
+                        to="/"
+                        selected={currentPath === '/'}
                     >
                         <ListItemIcon>
                             <DashboardIcon />
@@ -65,8 +69,9 @@ function Sidebar({ currentPage, onNavigate, userProfile }) {
                         <Collapse in={configOpen} timeout="auto" unmountOnExit>
                             <List component="div" disablePadding>
                                 <ListItemButton
-                                    selected={currentPage === 'users'}
-                                    onClick={() => onNavigate('users')}
+                                    component={Link}
+                                    to="/users"
+                                    selected={currentPath === '/users'}
                                     sx={{ pl: 4 }}
                                 >
                                     <ListItemIcon>

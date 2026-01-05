@@ -1,11 +1,14 @@
 import { AppBar, Toolbar, Typography, Button, Box, Avatar } from '@mui/material';
 import { Logout as LogoutIcon } from '@mui/icons-material';
+import { useLocation } from '@tanstack/react-router';
 
-function AppHeader({ user, logout, currentPage }) {
+function AppHeader({ user, logout }) {
+    const location = useLocation();
+
     const pageTitle = {
-        dashboard: 'Dashboard',
-        users: 'Gerenciar Usuários',
-    }[currentPage] || 'Sistema';
+        '/': 'Dashboard',
+        '/users': 'Gerenciar Usuários',
+    }[location.pathname] || 'Sistema';
 
     return (
         <AppBar position="static" color="default" elevation={1}>

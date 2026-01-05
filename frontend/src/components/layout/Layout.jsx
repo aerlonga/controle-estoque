@@ -9,19 +9,15 @@ const theme = createTheme({
     },
 });
 
-function Layout({ children, user, logout, currentPage, onNavigate }) {
+function Layout({ children, user, logout }) {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-                <Sidebar
-                    currentPage={currentPage}
-                    onNavigate={onNavigate}
-                    userProfile={user?.perfil}
-                />
+                <Sidebar userProfile={user?.perfil} />
 
                 <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                    <AppHeader user={user} logout={logout} currentPage={currentPage} />
+                    <AppHeader user={user} logout={logout} />
 
                     <Box component="main" sx={{ flexGrow: 1, p: 3, bgcolor: '#f5f5f5' }}>
                         {children}
