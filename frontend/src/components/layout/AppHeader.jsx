@@ -1,9 +1,11 @@
-import { AppBar, Toolbar, Typography, Button, Box, Avatar } from '@mui/material';
-import { Logout as LogoutIcon } from '@mui/icons-material';
+import { AppBar, Toolbar, Typography, Button, Box, Avatar, IconButton, Menu, MenuItem } from '@mui/material';
+import { Logout as LogoutIcon, Brightness4, Brightness7 } from '@mui/icons-material';
 import { useLocation } from '@tanstack/react-router';
+import { useState } from 'react';
 
-function AppHeader({ user, logout }) {
+function AppHeader({ user, logout, mode, toggleTheme }) {
     const location = useLocation();
+    const [anchorEl, setAnchorEl] = useState(null);
 
     const pageTitle = {
         '/': 'Dashboard',
@@ -26,6 +28,27 @@ function AppHeader({ user, logout }) {
                             {user?.nome}
                         </Typography>
                     </Box>
+
+                    {/* Theme Toggle */}
+                    <IconButton
+                        onClick={(e) => setAnchorEl(e.currentTarget)}
+                        color="inherit"
+                    >
+                        {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
+                    </IconButton>
+
+                    <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={() => setAnchorEl(null)}
+                    >
+                        <MenuItem onClick={() => { toggleTheme('light'); setAnchorEl(null); }}>
+                            ☀️ Light
+                        </MenuItem>
+                        <MenuItem onClick={() => { toggleTheme('dark'); setAnchorEl(null); }}>
+                            🌙 Dark
+                        </MenuItem>
+                    </Menu>
 
                     <Button
                         color="error"
