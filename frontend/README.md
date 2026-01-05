@@ -81,11 +81,6 @@ npm run preview
 
 O sistema usa **JWT (JSON Web Token)** para autenticação.
 
-### Credenciais Padrão
-
-- **Usuário:** `admin`
-- **Senha:** `admin123`
-
 ### Como funciona
 
 1. Usuário faz login com `usuario_rede` e `senha`
