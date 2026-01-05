@@ -18,9 +18,12 @@ async function main() {
             nome: 'Administrador',
             usuario_rede: 'admin',
             senha_hash: senhaHash,
+            perfil: 'ADMIN',
             status_usuario: 1
         }
     });
+
+    console.log('Usuário admin criado com sucesso!');
 }
 
 main()
