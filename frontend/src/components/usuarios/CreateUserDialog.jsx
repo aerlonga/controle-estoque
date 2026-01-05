@@ -41,7 +41,17 @@ function CreateUserDialog({ open, onClose, onSuccess }) {
     };
 
     return (
-        <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+        <Dialog
+            open={open}
+            onClose={(event, reason) => {
+                if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
+                    return;
+                }
+                handleClose();
+            }}
+            maxWidth="sm"
+            fullWidth
+        >
             <DialogTitle>Criar Novo Usuário</DialogTitle>
 
             <form onSubmit={handleSubmit((data) => createMutation.mutate(data))}>

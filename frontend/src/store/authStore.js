@@ -18,6 +18,9 @@ export const useAuthStore = create(
                 localStorage.removeItem('token');
                 localStorage.removeItem('usuario');
                 set({ user: null, token: null, isAuthenticated: false });
+
+                window.history.pushState({}, '', '/');
+                window.dispatchEvent(new PopStateEvent('popstate'));
             },
 
             updateUser: (user) => {

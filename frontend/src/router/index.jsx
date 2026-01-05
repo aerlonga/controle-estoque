@@ -1,11 +1,19 @@
-import { createRootRoute, createRoute, createRouter, Outlet } from '@tanstack/react-router';
+import { createRootRoute, createRoute, createRouter, Outlet, redirect } from '@tanstack/react-router';
+import { lazy, Suspense } from 'react';
+import { CircularProgress, Box } from '@mui/material';
 import Login from '../pages/Login';
-import Dashboard from '../pages/Dashboard';
-import Users from '../pages/Users';
 import Layout from '../components/layout/Layout';
 import { useAuthStore } from '../store/authStore';
 
-// Root route
+const Dashboard = lazy(() => import('../pages/Dashboard'));
+const Users = lazy(() => import('../pages/Users'));
+
+const LoadingFallback = () => (
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+        <CircularProgress />
+    </Box>
+);
+
 const rootRoute = createRootRoute({
     component: () => {
         const { isAuthenticated, user, logout } = useAuthStore();
@@ -14,26 +22,37 @@ const rootRoute = createRootRoute({
             return <Login />;
         }
 
-        return <Layout user={user} logout={logout}><Outlet /></Layout>;
+        return (
+            <Layout user={user} logout={logout}>
+                <Suspense fallback={<LoadingFallback />}>
+                    <Outlet />
+                </Suspense>
+            </Layout>
+        );
     },
 });
 
-// Dashboard route
 const dashboardRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/',
     component: Dashboard,
 });
 
-// Users route
 const usersRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/users',
+    beforeLoad: () => {
+        const { isAuthenticated } = useAuthStore.getState();
+        if (!isAuthenticated) {
+            throw redirect({ to: '/' });
+        }
+    },
     component: Users,
 });
 
-// Create route tree
 const routeTree = rootRoute.addChildren([dashboardRoute, usersRoute]);
 
-// Create and export router
-export const router = createRouter({ routeTree });
+export const router = createRouter({
+    routeTree,
+    defaultPreload: 'intent',
+});

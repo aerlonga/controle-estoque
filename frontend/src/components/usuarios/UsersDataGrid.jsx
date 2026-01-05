@@ -3,7 +3,6 @@ import { Chip } from '@mui/material';
 
 function UsersDataGrid({ users, loading }) {
     const columns = [
-        { field: 'id', headerName: 'ID', width: 70 },
         { field: 'nome', headerName: 'Nome', width: 200, flex: 1 },
         { field: 'usuario_rede', headerName: 'Usuário', width: 150 },
         {
@@ -45,6 +44,7 @@ function UsersDataGrid({ users, loading }) {
             }}
             pageSizeOptions={[5, 10, 25]}
             disableRowSelectionOnClick
+            disableColumnResize
             autoHeight
             sx={{
                 '& .MuiDataGrid-cell:hover': {
