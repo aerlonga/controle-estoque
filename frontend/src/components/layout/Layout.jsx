@@ -1,45 +1,41 @@
-import { Box, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
-import { useState } from 'react';
+import { Box, CssBaseline, createTheme, ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { useState, useMemo } from 'react';
 import Sidebar from './Sidebar';
 import AppHeader from './AppHeader';
 
-const theme = createTheme({
-    palette: {
-        primary: { main: '#1976d2' },
-        secondary: { main: '#dc004e' },
-    },
-});
-
 function Layout({ children, user, logout }) {
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [mode, setMode] = useState(() => {
+        return localStorage.getItem('theme') || 'light';
+    });
 
-    const toggleSidebar = () => {
-        setSidebarOpen(!sidebarOpen);
+    const theme = useMemo(() => createTheme({
+        palette: {
+            mode,
+            primary: { main: '#1976d2' },
+            secondary: { main: '#dc004e' },
+        },
+    }), [mode]);
+
+    const toggleTheme = (newMode) => {
+        setMode(newMode);
+        localStorage.setItem('theme', newMode);
     };
 
     return (
-        <ThemeProvider theme={theme}>
+        <MuiThemeProvider theme={theme}>
             <CssBaseline />
             <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-                <Sidebar
-                    userProfile={user?.perfil}
-                    open={sidebarOpen}
-                    onClose={() => setSidebarOpen(false)}
-                />
+                <Sidebar userProfile={user?.perfil} />
 
                 <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                    <AppHeader
-                        user={user}
-                        logout={logout}
-                        onMenuClick={toggleSidebar}
-                    />
+                    <AppHeader user={user} logout={logout} mode={mode} toggleTheme={toggleTheme} />
 
-                    <Box component="main" sx={{ flexGrow: 1, p: 3, bgcolor: '#f5f5f5' }}>
+                    <Box component="main" sx={{ flexGrow: 1, p: 3, bgcolor: 'background.default' }}>
                         {children}
                     </Box>
                 </Box>
             </Box>
-        </ThemeProvider>
+        </MuiThemeProvider>
     );
 }
 

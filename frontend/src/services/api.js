@@ -62,6 +62,14 @@ export const equipamentoService = {
         const response = await api.delete(`/equipamentos/${id}`);
         return response.data;
     },
+
+    async movimentar(id, dados) {
+        const response = await api.post(`/movimentacoes`, {
+            equipamento_id: id,
+            ...dados
+        });
+        return response.data;
+    },
 };
 
 export const movimentacaoService = {
