@@ -29,7 +29,7 @@ function Users() {
                 </Button>
             </Box>
 
-            <Paper elevation={2}>
+            <Paper elevation={2} sx={{ width: '100%', overflow: 'hidden' }}>
                 <UsersDataGrid
                     users={data?.data || []}
                     loading={isLoading}

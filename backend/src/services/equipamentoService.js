@@ -1,4 +1,5 @@
 const prisma = require('../models/prisma');
+const historicoService = require('./historicoService');
 
 const equipamentoService = {
     async criar(dados) {
@@ -50,6 +51,9 @@ const equipamentoService = {
             }
         });
 
+        // Registrar histórico de cadastro
+        await historicoService.registrar(equipamento.id, usuario_id, 'CADASTRO');
+
         return equipamento;
     },
 
@@ -91,7 +95,7 @@ const equipamentoService = {
                 page,
                 includePageCount: true
             });
-        
+
         return { data, meta };
     },
 
@@ -123,10 +127,10 @@ const equipamentoService = {
         return equipamento;
     },
 
-    async atualizar(id, dados) {
-        const { patrimonio, nome, modelo, numero_serie, status, local, usuario_id } = dados;
+    async atualizar(id, dados, usuario_id_logado) {
+        const { patrimonio, nome, modelo, numero_serie, local } = dados;
 
-        await this.buscarPorId(id);
+        const equipamentoAnterior = await this.buscarPorId(id);
 
         if (numero_serie) {
             const existente = await prisma.equipamento.findFirst({
@@ -141,14 +145,83 @@ const equipamentoService = {
             }
         }
 
-        const dadosAtualizacao = {};
+        const dadosAtualizacao = {
+            usuario_id: parseInt(usuario_id_logado) // Atualiza responsável para quem editou
+        };
+        const historicoRegistros = [];
 
-        if (patrimonio !== undefined) dadosAtualizacao.patrimonio = patrimonio ? patrimonio.trim() : null;
-        if (nome) dadosAtualizacao.nome = nome.trim();
-        if (modelo) dadosAtualizacao.modelo = modelo.trim();
-        if (numero_serie) dadosAtualizacao.numero_serie = numero_serie.trim();
-        if (status) dadosAtualizacao.status = status;
-        if (local !== undefined) dadosAtualizacao.local = local ? local.trim() : null;
+        // Comparar e registrar mudanças
+        if (patrimonio !== undefined && patrimonio !== equipamentoAnterior.patrimonio) {
+            dadosAtualizacao.patrimonio = patrimonio ? patrimonio.trim() : null;
+            historicoRegistros.push({
+                equipamento_id: parseInt(id),
+                usuario_id: parseInt(usuario_id_logado),
+                acao: 'EDICAO',
+                campo_alterado: 'patrimonio',
+                valor_anterior: equipamentoAnterior.patrimonio,
+                valor_novo: dadosAtualizacao.patrimonio
+            });
+        }
+
+        if (nome && nome !== equipamentoAnterior.nome) {
+            dadosAtualizacao.nome = nome.trim();
+            historicoRegistros.push({
+                equipamento_id: parseInt(id),
+                usuario_id: parseInt(usuario_id_logado),
+                acao: 'EDICAO',
+                campo_alterado: 'nome',
+                valor_anterior: equipamentoAnterior.nome,
+                valor_novo: dadosAtualizacao.nome
+            });
+        }
+
+        if (modelo && modelo !== equipamentoAnterior.modelo) {
+            dadosAtualizacao.modelo = modelo.trim();
+            historicoRegistros.push({
+                equipamento_id: parseInt(id),
+                usuario_id: parseInt(usuario_id_logado),
+                acao: 'EDICAO',
+                campo_alterado: 'modelo',
+                valor_anterior: equipamentoAnterior.modelo,
+                valor_novo: dadosAtualizacao.modelo
+            });
+        }
+
+        if (numero_serie && numero_serie !== equipamentoAnterior.numero_serie) {
+            dadosAtualizacao.numero_serie = numero_serie.trim();
+            historicoRegistros.push({
+                equipamento_id: parseInt(id),
+                usuario_id: parseInt(usuario_id_logado),
+                acao: 'EDICAO',
+                campo_alterado: 'numero_serie',
+                valor_anterior: equipamentoAnterior.numero_serie,
+                valor_novo: dadosAtualizacao.numero_serie
+            });
+        }
+
+        if (local !== undefined && local !== equipamentoAnterior.local) {
+            dadosAtualizacao.local = local ? local.trim() : null;
+            historicoRegistros.push({
+                equipamento_id: parseInt(id),
+                usuario_id: parseInt(usuario_id_logado),
+                acao: 'EDICAO',
+                campo_alterado: 'local',
+                valor_anterior: equipamentoAnterior.local,
+                valor_novo: dadosAtualizacao.local
+            });
+        }
+
+        // Registrar mudança de responsável
+        if (parseInt(usuario_id_logado) !== equipamentoAnterior.usuario_id) {
+            historicoRegistros.push({
+                equipamento_id: parseInt(id),
+                usuario_id: parseInt(usuario_id_logado),
+                acao: 'EDICAO',
+                campo_alterado: 'usuario_id',
+                valor_anterior: String(equipamentoAnterior.usuario_id),
+                valor_novo: String(usuario_id_logado)
+            });
+        }
 
         const equipamentoAtualizado = await prisma.equipamento.update({
             where: { id: parseInt(id) },
@@ -164,16 +237,31 @@ const equipamentoService = {
             }
         });
 
+        // Registrar histórico de todas as mudanças
+        if (historicoRegistros.length > 0) {
+            await historicoService.registrarMultiplos(historicoRegistros);
+        }
+
         return equipamentoAtualizado;
     },
 
-    async descartar(id) {
-        await this.buscarPorId(id);
+    async descartar(id, usuario_id_logado) {
+        const equipamentoAnterior = await this.buscarPorId(id);
 
         await prisma.equipamento.update({
             where: { id: parseInt(id) },
             data: { status: 'DESCARTADO' }
         });
+
+        // Registrar histórico de descarte
+        await historicoService.registrar(
+            id,
+            usuario_id_logado,
+            'DESCARTE',
+            'status',
+            equipamentoAnterior.status,
+            'DESCARTADO'
+        );
 
         return { message: 'Equipamento descartado com sucesso' };
     }
