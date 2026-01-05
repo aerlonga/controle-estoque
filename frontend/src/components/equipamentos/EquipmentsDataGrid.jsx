@@ -1,7 +1,7 @@
 import { DataGrid } from '@mui/x-data-grid';
-import { Chip, IconButton, Box } from '@mui/material';
+import { Chip, IconButton, Box, useMediaQuery, useTheme } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 const statusConfig = {
     NO_DEPOSITO: { label: 'No Depósito', color: 'success' },
@@ -11,6 +11,11 @@ const statusConfig = {
 
 function EquipmentsDataGrid({ equipments, loading, onEdit, onDelete }) {
     const [key, setKey] = useState(0);
+    const theme = useTheme();
+
+    const isXl = useMediaQuery(theme.breakpoints.up('xl'));  // >= 1536px
+    const isLg = useMediaQuery(theme.breakpoints.up('lg'));  // >= 1200px
+    const isMd = useMediaQuery(theme.breakpoints.up('md'));  // >= 900px
 
     useEffect(() => {
         const handleResize = () => {
@@ -21,16 +26,24 @@ function EquipmentsDataGrid({ equipments, loading, onEdit, onDelete }) {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const columns = [
-        { field: 'nome', headerName: 'Nome', width: 200, flex: 1 },
-        { field: 'modelo', headerName: 'Modelo', width: 150 },
-        { field: 'numero_serie', headerName: 'Nº Série', width: 150 },
-        { field: 'patrimonio', headerName: 'Patrimônio', width: 130 },
-        { field: 'local', headerName: 'Local', width: 130 },
-        {
+    const columns = useMemo(() => {
+        const baseColumns = [
+            { field: 'nome', headerName: 'Nome', minWidth: 120, flex: 1 },
+            { field: 'modelo', headerName: 'Modelo', minWidth: 100, flex: 1 },
+            { field: 'numero_serie', headerName: 'Nº Série', minWidth: 120, flex: 1 },
+        ];
+
+        if (isLg) {
+            baseColumns.push({ field: 'patrimonio', headerName: 'Patrimônio', minWidth: 100, flex: 1 });
+        }
+        if (isXl) {
+            baseColumns.push({ field: 'local', headerName: 'Local', minWidth: 80, flex: 1 });
+        }
+
+        baseColumns.push({
             field: 'status',
             headerName: 'Status',
-            width: 150,
+            width: 130,
             renderCell: (params) => {
                 const config = statusConfig[params.value] || { label: params.value, color: 'default' };
                 return (
@@ -41,55 +54,79 @@ function EquipmentsDataGrid({ equipments, loading, onEdit, onDelete }) {
                     />
                 );
             },
-        },
-        {
-            field: 'responsavel',
-            headerName: 'Responsável',
-            width: 180,
-            renderCell: (params) => {
-                return params.row?.usuario?.nome || 'N/A';
-            },
-        },
-        {
-            field: 'created_at',
-            headerName: 'Cadastrado em',
-            width: 150,
-            renderCell: (params) => {
-                try {
-                    const date = new Date(params.value);
-                    return date.toLocaleDateString('pt-BR');
-                } catch {
-                    return params.value;
-                }
-            },
-        },
-        {
+        });
+
+        if (isMd) {
+            baseColumns.push({
+                field: 'responsavel',
+                headerName: 'Responsável',
+                minWidth: 120,
+                flex: 1,
+                renderCell: (params) => {
+                    return params.row?.usuario?.nome || 'N/A';
+                },
+            });
+        }
+
+        if (isLg) {
+            baseColumns.push({
+                field: 'created_at',
+                headerName: 'Cadastrado em',
+                width: 120,
+                renderCell: (params) => {
+                    try {
+                        const date = new Date(params.value);
+                        return date.toLocaleDateString('pt-BR');
+                    } catch {
+                        return params.value;
+                    }
+                },
+            });
+        }
+
+        baseColumns.push({
             field: 'actions',
             headerName: 'Ações',
-            width: 120,
+            width: 110,
             sortable: false,
+            align: 'center',
+            headerAlign: 'center',
             renderCell: (params) => (
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'center' }}>
+                <Box sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 0.5,
+                    height: '100%'
+                }}>
                     <IconButton
-                        size="large"
+                        size="small"
                         color="primary"
-                        onClick={() => onEdit(params.row)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onEdit(params.row);
+                        }}
                         title="Editar"
                     >
                         <EditIcon fontSize="small" />
                     </IconButton>
                     <IconButton
-                        size="large"
+                        size="small"
                         color="error"
-                        onClick={() => onDelete(params.row)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete(params.row);
+                        }}
                         title="Excluir"
                     >
                         <DeleteIcon fontSize="small" />
                     </IconButton>
                 </Box>
             ),
-        },
-    ];
+        });
+
+        return baseColumns;
+    }, [isXl, isLg, isMd, onEdit, onDelete]);
 
     return (
         <DataGrid
