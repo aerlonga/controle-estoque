@@ -16,7 +16,6 @@ const equipmentSchema = z.object({
     modelo: z.string().min(2, 'Modelo deve ter no mínimo 2 caracteres'),
     numero_serie: z.string().min(1, 'Número de série é obrigatório'),
     local: z.string().optional(),
-    status: z.enum(['NO_DEPOSITO', 'FORA_DEPOSITO', 'DESCARTADO']),
 });
 
 function EditEquipmentDialog({ open, onClose, onSuccess, equipment }) {
@@ -31,7 +30,6 @@ function EditEquipmentDialog({ open, onClose, onSuccess, equipment }) {
             modelo: equipment.modelo || '',
             numero_serie: equipment.numero_serie || '',
             local: equipment.local || '',
-            status: equipment.status || 'NO_DEPOSITO',
         } : undefined,
     });
 
@@ -162,25 +160,6 @@ function EditEquipmentDialog({ open, onClose, onSuccess, equipment }) {
                                     error={!!errors.local}
                                     helperText={errors.local?.message}
                                 />
-                            )}
-                        />
-
-                        <Controller
-                            name="status"
-                            control={control}
-                            render={({ field }) => (
-                                <TextField
-                                    {...field}
-                                    select
-                                    label="Status"
-                                    fullWidth
-                                    margin="normal"
-                                    required
-                                >
-                                    <MenuItem value="NO_DEPOSITO">No Depósito</MenuItem>
-                                    <MenuItem value="FORA_DEPOSITO">Fora do Depósito</MenuItem>
-                                    <MenuItem value="DESCARTADO">Descartado</MenuItem>
-                                </TextField>
                             )}
                         />
 

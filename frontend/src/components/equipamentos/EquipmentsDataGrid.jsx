@@ -1,6 +1,6 @@
 import { DataGrid } from '@mui/x-data-grid';
-import { Chip, IconButton, Box, useMediaQuery, useTheme } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Chip, IconButton, Box, useMediaQuery, useTheme, Tooltip } from '@mui/material';
+import { Edit as EditIcon, Delete as DeleteIcon, ArrowUpward as EntradaIcon, ArrowDownward as SaidaIcon } from '@mui/icons-material';
 import { useEffect, useState, useMemo } from 'react';
 
 const statusConfig = {
@@ -9,7 +9,7 @@ const statusConfig = {
     DESCARTADO: { label: 'Descartado', color: 'error' },
 };
 
-function EquipmentsDataGrid({ equipments, loading, onEdit, onDelete }) {
+function EquipmentsDataGrid({ equipments, loading, onEdit, onDelete, onMovement }) {
     const [key, setKey] = useState(0);
     const theme = useTheme();
 
@@ -43,7 +43,7 @@ function EquipmentsDataGrid({ equipments, loading, onEdit, onDelete }) {
         baseColumns.push({
             field: 'status',
             headerName: 'Status',
-            width: 130,
+            width: 160,
             renderCell: (params) => {
                 const config = statusConfig[params.value] || { label: params.value, color: 'default' };
                 return (
@@ -87,42 +87,80 @@ function EquipmentsDataGrid({ equipments, loading, onEdit, onDelete }) {
         baseColumns.push({
             field: 'actions',
             headerName: 'Ações',
-            width: 110,
+            width: 140,
             sortable: false,
             align: 'center',
             headerAlign: 'center',
-            renderCell: (params) => (
-                <Box sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 0.5,
-                    height: '100%'
-                }}>
-                    <IconButton
-                        size="small"
-                        color="primary"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onEdit(params.row);
-                        }}
-                        title="Editar"
-                    >
-                        <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                        size="small"
-                        color="error"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete(params.row);
-                        }}
-                        title="Excluir"
-                    >
-                        <DeleteIcon fontSize="small" />
-                    </IconButton>
-                </Box>
-            ),
+            renderCell: (params) => {
+                const isNoDeposito = params.row.status === 'NO_DEPOSITO';
+                const isForaDeposito = params.row.status === 'FORA_DEPOSITO';
+
+                return (
+                    <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 0.3,
+                        height: '100%'
+                    }}>
+                        <Tooltip title="Editar">
+                            <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onEdit(params.row);
+                                }}
+                            >
+                                <EditIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+
+                        {isNoDeposito && (
+                            <Tooltip title="Registrar Saída">
+                                <IconButton
+                                    size="small"
+                                    color="warning"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onMovement(params.row, 'SAIDA');
+                                    }}
+                                >
+                                    <SaidaIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+
+                        {isForaDeposito && (
+                            <Tooltip title="Registrar Entrada">
+                                <IconButton
+                                    size="small"
+                                    color="success"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onMovement(params.row, 'ENTRADA');
+                                    }}
+                                >
+                                    <EntradaIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+
+                        <Tooltip title="Excluir">
+                            <IconButton
+                                size="small"
+                                color="error"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(params.row);
+                                }}
+                            >
+                                <DeleteIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
+                );
+            },
         });
 
         return baseColumns;

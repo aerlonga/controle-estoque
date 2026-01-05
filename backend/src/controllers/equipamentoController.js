@@ -35,7 +35,8 @@ const equipamentoController = {
     },
     async atualizar(req, res) {
         try {
-            const equipamento = await equipamentoService.atualizar(req.params.id, req.body);
+            const usuario_id_logado = req.user.id; // Extrai ID do usuário autenticado
+            const equipamento = await equipamentoService.atualizar(req.params.id, req.body, usuario_id_logado);
             return res.status(200).json(equipamento);
         } catch (error) {
             return res.status(400).json({ error: error.message });
@@ -43,7 +44,8 @@ const equipamentoController = {
     },
     async descartar(req, res) {
         try {
-            const resultado = await equipamentoService.descartar(req.params.id);
+            const usuario_id_logado = req.user.id; // Extrai ID do usuário autenticado
+            const resultado = await equipamentoService.descartar(req.params.id, usuario_id_logado);
             return res.status(200).json(resultado);
         } catch (error) {
             return res.status(404).json({ error: error.message });

@@ -48,9 +48,9 @@ const updateEquipamentoSchema = z.object({
 const createMovimentacaoSchema = z.object({
     equipamento_id: z.number({ required_error: 'ID do equipamento é obrigatório' }).int(),
     tipo: z.enum(['ENTRADA', 'SAIDA'], { required_error: 'Tipo de movimentação (ENTRADA/SAIDA) é obrigatório' }),
-    usuario_id: z.number({ required_error: 'ID do usuário é obrigatório' }).int(),
+    usuario_id: z.number().int().optional(),
     observacao: z.string().optional().nullable(),
-    data_movimentacao: z.string().datetime().optional() // ISO 8601 string
+    data_movimentacao: z.string().datetime().optional()
 });
 
 module.exports = {

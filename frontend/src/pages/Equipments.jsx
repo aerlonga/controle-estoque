@@ -6,13 +6,16 @@ import { equipamentoService } from '../services/api';
 import EquipmentsDataGrid from '../components/equipamentos/EquipmentsDataGrid';
 import CreateEquipmentDialog from '../components/equipamentos/CreateEquipmentDialog';
 import EditEquipmentDialog from '../components/equipamentos/EditEquipmentDialog';
+import MovementDialog from '../components/equipamentos/MovementDialog';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 
 function Equipments() {
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [movementDialogOpen, setMovementDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [selectedEquipment, setSelectedEquipment] = useState(null);
+    const [tipoMovimentacao, setTipoMovimentacao] = useState(null);
 
     const { data, isLoading, refetch } = useQuery({
         queryKey: ['equipamentos'],
@@ -36,6 +39,12 @@ function Equipments() {
     const handleDelete = (equipment) => {
         setSelectedEquipment(equipment);
         setDeleteDialogOpen(true);
+    };
+
+    const handleMovement = (equipment, tipo) => {
+        setSelectedEquipment(equipment);
+        setTipoMovimentacao(tipo);
+        setMovementDialogOpen(true);
     };
 
     const handleConfirmDelete = () => {
@@ -65,6 +74,7 @@ function Equipments() {
                     loading={isLoading}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
+                    onMovement={handleMovement}
                 />
             </Paper>
 
@@ -91,16 +101,30 @@ function Equipments() {
                 equipment={selectedEquipment}
             />
 
+            <MovementDialog
+                open={movementDialogOpen}
+                onClose={() => {
+                    setMovementDialogOpen(false);
+                    setSelectedEquipment(null);
+                    setTipoMovimentacao(null);
+                }}
+                onSuccess={() => {
+                    refetch();
+                    setMovementDialogOpen(false);
+                    setSelectedEquipment(null);
+                    setTipoMovimentacao(null);
+                }}
+                equipment={selectedEquipment}
+                tipoMovimentacao={tipoMovimentacao}
+            />
+
             <ConfirmDialog
                 open={deleteDialogOpen}
-                onClose={() => {
-                    setDeleteDialogOpen(false);
-                    setSelectedEquipment(null);
-                }}
+                onClose={() => setDeleteDialogOpen(false)}
                 onConfirm={handleConfirmDelete}
-                title="Excluir Equipamento"
-                message={`Deseja realmente excluir o equipamento "${selectedEquipment?.nome}"?`}
-                confirmText="Excluir"
+                title="Confirmar Exclusão"
+                message={`Deseja realmente descartar o equipamento "${selectedEquipment?.nome}"? Esta ação não pode ser desfeita.`}
+                confirmText="Descartar"
                 cancelText="Cancelar"
                 confirmColor="error"
             />
