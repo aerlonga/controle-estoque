@@ -7,6 +7,7 @@ import { useAuthStore } from '../store/authStore';
 
 const Dashboard = lazy(() => import('../pages/Dashboard'));
 const Users = lazy(() => import('../pages/Users'));
+const Equipments = lazy(() => import('../pages/Equipments'));
 
 const LoadingFallback = () => (
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
@@ -50,7 +51,19 @@ const usersRoute = createRoute({
     component: Users,
 });
 
-const routeTree = rootRoute.addChildren([dashboardRoute, usersRoute]);
+const equipmentsRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/equipments',
+    beforeLoad: () => {
+        const { isAuthenticated } = useAuthStore.getState();
+        if (!isAuthenticated) {
+            throw redirect({ to: '/' });
+        }
+    },
+    component: Equipments,
+});
+
+const routeTree = rootRoute.addChildren([dashboardRoute, usersRoute, equipmentsRoute]);
 
 export const router = createRouter({
     routeTree,

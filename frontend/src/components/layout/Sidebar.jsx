@@ -6,6 +6,7 @@ import {
     Dashboard as DashboardIcon,
     Settings as SettingsIcon,
     People as PeopleIcon,
+    Inventory as InventoryIcon,
     ExpandMore,
     ChevronRight
 } from '@mui/icons-material';
@@ -52,6 +53,20 @@ function Sidebar({ userProfile }) {
                             <DashboardIcon />
                         </ListItemIcon>
                         <ListItemText primary="Dashboard" />
+                    </ListItemButton>
+                </ListItem>
+
+                {/* Equipamentos - Todos os perfis */}
+                <ListItem disablePadding>
+                    <ListItemButton
+                        component={Link}
+                        to="/equipments"
+                        selected={currentPath === '/equipments'}
+                    >
+                        <ListItemIcon>
+                            <InventoryIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Equipamentos" />
                     </ListItemButton>
                 </ListItem>
 
