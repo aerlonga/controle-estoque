@@ -2,19 +2,30 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
     Typography, Paper, Box, Grid, CircularProgress,
-    useTheme, alpha, Tooltip, Stack, MenuItem, Select, FormControl
+    useTheme, alpha, Tooltip, Stack, MenuItem, Select, FormControl, styled
 } from '@mui/material';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { LineChart } from '@mui/x-charts/LineChart';
 import { equipamentoService, movimentacaoService } from '../services/api';
 
-// Cores das séries (mantidas para consistência dos dados)
 const DATA_COLORS = {
     v6: '#4e60ff',
     v7: '#f6ad37',
     v8: '#e94c4c'
 };
+
+// Componente Item para o exemplo de Grid
+const Item = styled(Paper)(({ theme }) => ({
+    backgroundColor: '#fff',
+    ...theme.typography.body2,
+    padding: theme.spacing(1),
+    textAlign: 'center',
+    color: theme.palette.text.secondary,
+    ...theme.applyStyles('dark', {
+        backgroundColor: '#1A2027',
+    }),
+}));
 
 function Dashboard() {
     const theme = useTheme();
@@ -65,26 +76,25 @@ function Dashboard() {
         });
 
         const dates = Object.keys(movementsByDateMap);
-        const weekdays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+        const weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
         const weeklyTotal = Array(7).fill(0);
-        const heatmapMatrix = Array(6).fill(0).map(() => Array(7).fill(0));
+
+        // Heatmap de horários (6am-8pm) x Dias da semana
+        const heatmapMatrix = Array(15).fill(0).map(() => Array(7).fill(0)); // 15 horas x 7 dias
 
         movements.forEach(mov => {
             const date = new Date(mov.data_movimentacao);
-            const day = (date.getDay() + 6) % 7;
+            const day = date.getDay();
             const hour = date.getHours();
             weeklyTotal[day]++;
 
-            let hourIdx = 0;
-            if (hour >= 6 && hour < 10) hourIdx = 0;
-            else if (hour >= 10 && hour < 12) hourIdx = 1;
-            else if (hour >= 12 && hour < 14) hourIdx = 2;
-            else if (hour >= 14 && hour < 17) hourIdx = 3;
-            else if (hour >= 17 && hour < 20) hourIdx = 4;
-            else hourIdx = 5;
-
-            heatmapMatrix[hourIdx][day]++;
+            if (hour >= 6 && hour <= 20) {
+                heatmapMatrix[hour - 6][day]++;
+            }
         });
+
+        // Normalizar para escala de cores
+        const maxValue = Math.max(...heatmapMatrix.flat());
 
         return {
             noDeposito, foraDeposito, total, byType,
@@ -96,11 +106,11 @@ function Dashboard() {
                 ]
             },
             weeklyMovements: {
-                xAxis: weekdays,
+                xAxis: [{ scaleType: 'band', data: weekdays }],
                 series: [{ data: weeklyTotal, color: DATA_COLORS.v6 }]
             },
             heatmapData: heatmapMatrix,
-            heatmapMax: Math.max(...heatmapMatrix.flat())
+            heatmapMax: maxValue
         };
     }, [equipmentsData, movementsData]);
 
@@ -118,20 +128,151 @@ function Dashboard() {
         </Paper>
     );
 
-    const heatmapHours = ['6am', '10am', '12am', '2pm', '5pm', '8pm'];
+    const HeatmapCell = ({ value, max, label }) => {
+        const intensity = max > 0 ? value / max : 0;
+        const getColor = (intensity) => {
+            if (intensity === 0) return alpha(theme.palette.grey[300], 0.3);
+            if (intensity < 0.2) return alpha(theme.palette.primary.light, 0.3);
+            if (intensity < 0.4) return alpha(theme.palette.primary.light, 0.5);
+            if (intensity < 0.6) return alpha(theme.palette.primary.main, 0.6);
+            if (intensity < 0.8) return alpha(theme.palette.primary.main, 0.8);
+            return theme.palette.primary.dark;
+        };
+
+        return (
+            <Tooltip title={`${label}: ${value} movimentações`} arrow>
+                <Box
+                    sx={{
+                        width: '100%',
+                        height: '100%',
+                        minHeight: '32px',
+                        bgcolor: getColor(intensity),
+                        borderRadius: '4px',
+                        transition: 'all 0.2s',
+                        cursor: 'pointer',
+                        '&:hover': {
+                            transform: 'scale(1.1)',
+                            zIndex: 10,
+                            boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.4)}`
+                        }
+                    }}
+                />
+            </Tooltip>
+        );
+    };
+
+    const weekdays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+    const hours = ['6h', '7h', '8h', '9h', '10h', '11h', '12h', '13h', '14h', '15h', '16h', '17h', '18h', '19h', '20h'];
 
     return (
         <Box sx={{ p: 3, bgcolor: 'background.default', minHeight: '100vh', transition: 'background 0.3s ease' }}>
+
             {/* Header Stats */}
             <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
                 <StatCard title="No Depósito" value={`${stats.noDeposito}`} color={DATA_COLORS.v6} />
                 <StatCard title="Fora do Depósito" value={`${stats.foraDeposito}`} color={DATA_COLORS.v7} />
                 <StatCard title="Total" value={`${stats.total}`} color={DATA_COLORS.v8} />
             </Stack>
+            <Grid container spacing={2} sx={{ mb: 6 }}>
+                <Grid size={4}>
+                    <Stack spacing={2}>
+                        <Paper sx={{ p: 2, borderRadius: 2, bgcolor: 'background.paper', border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, height: '100%' }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block', fontWeight: 600 }}>Equipamentos por Tipo</Typography>
+                            <Box sx={{ height: 380, display: 'flex', justifyContent: 'center' }}>
+                                <PieChart
+                                    series={[{
+                                        data: stats.byType,
+                                        innerRadius: 90,
+                                        outerRadius: 140,
+                                        paddingAngle: 4,
+                                        cornerRadius: 4,
+                                    }]}
+                                    colors={[DATA_COLORS.v6, DATA_COLORS.v7, DATA_COLORS.v8]}
+                                    slotProps={{ legend: { hidden: true } }}
+                                />
+                            </Box>
+                        </Paper>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 3,
+                                borderRadius: 2,
+                                height: '280px',
+                                border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                                background: alpha(theme.palette.background.paper, 0.6),
+                            }}
+                        >
+                            <Typography variant="h6" fontWeight={700} gutterBottom>
+                                Movimentações por Dia
+                            </Typography>
+                            <Box sx={{ height: 'calc(100% - 40px)' }}>
+                                <BarChart
+                                    xAxis={stats.weeklyMovements.xAxis}
+                                    series={stats.weeklyMovements.series}
+                                    margin={{ left: 10, right: 10, top: 10, bottom: 30 }}
+                                    sx={{
+                                        '& .MuiBarElement-root': {
+                                            rx: 4,
+                                        }
+                                    }}
+                                    slotProps={{
+                                        legend: { hidden: true }
+                                    }}
+                                />
+                            </Box>
+                        </Paper>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 3,
+                                borderRadius: 2,
+                                border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                                background: alpha(theme.palette.background.paper, 0.6),
+                            }}
+                        >
+                            <Typography variant="h6" fontWeight={700} gutterBottom>
+                                Horários de Movimentação
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 0.5, mt: 2 }}>
+                                {/* Eixo Y (Horas) */}
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, justifyContent: 'space-around', py: 2 }}>
+                                    {hours.map((hour) => (
+                                        <Typography key={hour} variant="caption" sx={{ height: '32px', display: 'flex', alignItems: 'center', fontSize: '10px' }}>
+                                            {hour}
+                                        </Typography>
+                                    ))}
+                                </Box>
 
-            <Grid container spacing={2}>
-                {/* Linha Superior - Gráfico Principal (Largura Total) */}
-                <Grid item xs={12}>
+                                {/* Grid do Heatmap */}
+                                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                    {/* Eixo X (Dias) */}
+                                    <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'space-around', mb: 0.5 }}>
+                                        {weekdays.map((day) => (
+                                            <Typography key={day} variant="caption" sx={{ width: '100%', textAlign: 'center', fontWeight: 600, fontSize: '11px' }}>
+                                                {day}
+                                            </Typography>
+                                        ))}
+                                    </Box>
+
+                                    {/* Células do Heatmap */}
+                                    {stats.heatmapData.map((row, hourIdx) => (
+                                        <Box key={hourIdx} sx={{ display: 'flex', gap: 0.5 }}>
+                                            {row.map((value, dayIdx) => (
+                                                <HeatmapCell
+                                                    key={`${hourIdx}-${dayIdx}`}
+                                                    value={value}
+                                                    max={stats.heatmapMax}
+                                                    label={`${weekdays[dayIdx]} ${hours[hourIdx]}`}
+                                                />
+                                            ))}
+                                        </Box>
+                                    ))}
+                                </Box>
+                            </Box>
+                        </Paper>
+                    </Stack>
+                </Grid>
+                <Grid size={8}>
                     <Paper elevation={0} sx={{ p: 3, borderRadius: 2, bgcolor: 'background.paper', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
                         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
                             <Typography variant="subtitle2" color="text.secondary" fontWeight={600}>Movimentações</Typography>
@@ -152,86 +293,10 @@ function Dashboard() {
                         </Box>
                     </Paper>
                 </Grid>
-
-                {/* Linha Inferior - 3 Gráficos lado a lado */}
-                <Grid item xs={12} md={4}>
-                    <Paper sx={{ p: 2, borderRadius: 2, bgcolor: 'background.paper', border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, height: '100%' }}>
-                        <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block', fontWeight: 600 }}>Equipamentos por Tipo</Typography>
-                        <Box sx={{ height: 380, display: 'flex', justifyContent: 'center' }}>
-                            <PieChart
-                                series={[{
-                                    data: stats.byType,
-                                    innerRadius: 90,
-                                    outerRadius: 140,
-                                    paddingAngle: 4,
-                                    cornerRadius: 4,
-                                }]}
-                                colors={[DATA_COLORS.v6, DATA_COLORS.v7, DATA_COLORS.v8]}
-                                slotProps={{ legend: { hidden: true } }}
-                            />
-                        </Box>
-                    </Paper>
-                </Grid>
-
-                <Grid item xs={12} md={4}>
-                    <Paper sx={{ p: 2, borderRadius: 2, bgcolor: 'background.paper', border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, height: '100%' }}>
-                        <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block', fontWeight: 600 }}>Movimentações p/ Dia</Typography>
-                        <Box sx={{ height: 400 }}>
-                            <BarChart
-                                xAxis={[{ scaleType: 'band', data: stats.weeklyMovements.xAxis }]}
-                                series={stats.weeklyMovements.series}
-                                margin={{ top: 10, bottom: 30, left: 40, right: 10 }}
-                                sx={{
-                                    '.MuiBarElement-root': { rx: 2 },
-                                    '.MuiChartsAxis-bottom .MuiChartsAxis-tickLabel': { fill: theme.palette.text.secondary, fontSize: 12 },
-                                    '.MuiChartsAxis-bottom .MuiChartsAxis-line': { display: 'none' }
-                                }}
-                            />
-                        </Box>
-                    </Paper>
-                </Grid>
-
-                <Grid item xs={12} md={4}>
-                    <Paper sx={{ p: 2, borderRadius: 2, bgcolor: 'background.paper', border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, height: '100%' }}>
-                        <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block', fontWeight: 600 }}>Horários de Movimentação</Typography>
-                        <Box sx={{ display: 'flex', gap: 2, mt: 3, justifyContent: 'center', alignItems: 'center', height: 360 }}>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%', py: 1 }}>
-                                {heatmapHours.map(h => <Typography key={h} sx={{ fontSize: 11, color: theme.palette.text.secondary }}>{h}</Typography>)}
-                            </Box>
-                            <Box sx={{ flex: 1, maxWidth: 400 }}>
-                                <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
-                                    {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
-                                        <Typography key={i} sx={{ fontSize: 11, color: theme.palette.text.secondary, width: '14%', textAlign: 'center' }}>{d}</Typography>
-                                    ))}
-                                </Stack>
-                                <Stack spacing={1}>
-                                    {stats.heatmapData.map((row, i) => (
-                                        <Stack key={i} direction="row" justifyContent="space-between">
-                                            {row.map((val, j) => (
-                                                <Box
-                                                    key={j}
-                                                    sx={{
-                                                        width: '14%',
-                                                        aspectRatio: '1/1',
-                                                        borderRadius: 0.5,
-                                                        bgcolor: val > 0
-                                                            ? alpha(DATA_COLORS.v6, Math.min(val / (stats.heatmapMax || 1) + 0.2, 1))
-                                                            : alpha(theme.palette.divider, 0.1),
-                                                        transition: '0.2s',
-                                                        '&:hover': { bgcolor: DATA_COLORS.v6 }
-                                                    }}
-                                                />
-                                            ))}
-                                        </Stack>
-                                    ))}
-                                </Stack>
-                            </Box>
-                        </Box>
-                    </Paper>
-                </Grid>
             </Grid>
         </Box>
     );
+
 }
 
 export default Dashboard;
