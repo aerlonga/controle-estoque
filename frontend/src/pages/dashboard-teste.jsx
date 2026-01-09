@@ -196,17 +196,17 @@ function Dashboard() {
                 </Grid>
 
                 <Grid size={4}>
-                    <Stack spacing={2} sx={{ height: '100%' }}>
-                        <Paper sx={{ p: 2, borderRadius: 2, bgcolor: 'background.paper', border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, flex: 1, display: 'flex', flexDirection: 'column' }}>
-                            <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block', fontWeight: 600 }}>Equipamentos por Tipo</Typography>
+                    <Stack spacing={1}>
+                        <Paper sx={{ p: 1.5, borderRadius: 1.5, bgcolor: 'background.paper', border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block', fontWeight: 600, fontSize: '0.65rem' }}>Equipamentos por Tipo</Typography>
                             <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 0 }}>
                                 <PieChart
                                     series={[{
                                         data: stats.byType,
-                                        innerRadius: '40%',
-                                        outerRadius: '80%',
-                                        paddingAngle: 4,
-                                        cornerRadius: 4,
+                                        innerRadius: '50%',
+                                        outerRadius: '90%',
+                                        paddingAngle: 2,
+                                        cornerRadius: 2,
                                     }]}
                                     colors={[DATA_COLORS.v6, DATA_COLORS.v7, DATA_COLORS.v8]}
                                     slotProps={{
@@ -214,20 +214,20 @@ function Dashboard() {
                                             hidden: false,
                                             direction: 'column',
                                             position: { vertical: 'middle', horizontal: 'right' },
-                                            labelStyle: { fontSize: 10, fontWeight: 600 },
-                                            itemMarkWidth: 8,
-                                            itemMarkHeight: 8,
+                                            labelStyle: { fontSize: 8, fontWeight: 600 },
+                                            itemMarkWidth: 5,
+                                            itemMarkHeight: 5,
                                         }
                                     }}
-                                    margin={{ top: 10, bottom: 10, left: 10, right: 80 }}
+                                    margin={{ top: 0, bottom: 0, left: 0, right: 50 }}
                                 />
                             </Box>
                         </Paper>
                         <Paper
                             elevation={0}
                             sx={{
-                                p: 3,
-                                borderRadius: 2,
+                                p: 1.5,
+                                borderRadius: 1.5,
                                 border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
                                 background: alpha(theme.palette.background.paper, 0.6),
                                 flex: 1,
@@ -235,17 +235,20 @@ function Dashboard() {
                                 flexDirection: 'column'
                             }}
                         >
-                            <Typography variant="h6" fontWeight={700} gutterBottom>
+                            <Typography variant="caption" fontWeight={600} gutterBottom sx={{ fontSize: '0.65rem' }}>
                                 Movimentações por Dia
                             </Typography>
                             <Box sx={{ flex: 1, minHeight: 0 }}>
                                 <BarChart
                                     xAxis={stats.weeklyMovements.xAxis}
                                     series={stats.weeklyMovements.series}
-                                    margin={{ left: 10, right: 10, top: 10, bottom: 30 }}
+                                    margin={{ left: 5, right: 5, top: 5, bottom: 15 }}
                                     sx={{
                                         '& .MuiBarElement-root': {
-                                            rx: 4,
+                                            rx: 2,
+                                        },
+                                        '& .MuiChartsAxis-tickLabel': {
+                                            fontSize: '9px'
                                         }
                                     }}
                                     slotProps={{
@@ -257,8 +260,8 @@ function Dashboard() {
                         <Paper
                             elevation={0}
                             sx={{
-                                p: 3,
-                                borderRadius: 2,
+                                p: 1.5,
+                                borderRadius: 1.5,
                                 border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
                                 background: alpha(theme.palette.background.paper, 0.6),
                                 flex: 1,
@@ -266,25 +269,25 @@ function Dashboard() {
                                 flexDirection: 'column'
                             }}
                         >
-                            <Typography variant="h6" fontWeight={700} gutterBottom>
+                            <Typography variant="caption" fontWeight={600} gutterBottom sx={{ fontSize: '0.65rem' }}>
                                 Horários de Movimentação
                             </Typography>
-                            <Box sx={{ display: 'flex', gap: 0.5, mt: 2, flex: 1, minHeight: 0 }}>
+                            <Box sx={{ display: 'flex', gap: 0.2, mt: 0.5, flex: 1, minHeight: 0 }}>
                                 {/* Eixo Y (Horas) */}
-                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, justifyContent: 'space-around', py: 2 }}>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.2, justifyContent: 'space-around', py: 0.5 }}>
                                     {hours.map((hour) => (
-                                        <Typography key={hour} variant="caption" sx={{ height: '32px', display: 'flex', alignItems: 'center', fontSize: '10px' }}>
+                                        <Typography key={hour} variant="caption" sx={{ height: '16px', display: 'flex', alignItems: 'center', fontSize: '7px' }}>
                                             {hour}
                                         </Typography>
                                     ))}
                                 </Box>
 
                                 {/* Grid do Heatmap */}
-                                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.2 }}>
                                     {/* Eixo X (Dias) */}
-                                    <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'space-around', mb: 0.5 }}>
+                                    <Box sx={{ display: 'flex', gap: 0.2, justifyContent: 'space-around', mb: 0.2 }}>
                                         {weekdays.map((day) => (
-                                            <Typography key={day} variant="caption" sx={{ width: '100%', textAlign: 'center', fontWeight: 600, fontSize: '11px' }}>
+                                            <Typography key={day} variant="caption" sx={{ width: '100%', textAlign: 'center', fontWeight: 600, fontSize: '8px' }}>
                                                 {day}
                                             </Typography>
                                         ))}
@@ -292,7 +295,7 @@ function Dashboard() {
 
                                     {/* Células do Heatmap */}
                                     {stats.heatmapData.map((row, hourIdx) => (
-                                        <Box key={hourIdx} sx={{ display: 'flex', gap: 0.5 }}>
+                                        <Box key={hourIdx} sx={{ display: 'flex', gap: 0.2 }}>
                                             {row.map((value, dayIdx) => (
                                                 <HeatmapCell
                                                     key={`${hourIdx}-${dayIdx}`}
