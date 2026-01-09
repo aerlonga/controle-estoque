@@ -8,6 +8,7 @@ import { useAuthStore } from '../store/authStore';
 const Dashboard = lazy(() => import('../pages/Dashboard'));
 const Users = lazy(() => import('../pages/Users'));
 const Equipments = lazy(() => import('../pages/Equipments'));
+const dashboardTeste = lazy(() => import('../pages/dashboard-teste'));
 
 const LoadingFallback = () => (
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
@@ -39,6 +40,12 @@ const dashboardRoute = createRoute({
     component: Dashboard,
 });
 
+const dashboardTesteRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/dashboard-teste',
+    component: dashboardTeste,
+})
+
 const usersRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/users',
@@ -63,7 +70,7 @@ const equipmentsRoute = createRoute({
     component: Equipments,
 });
 
-const routeTree = rootRoute.addChildren([dashboardRoute, usersRoute, equipmentsRoute]);
+const routeTree = rootRoute.addChildren([dashboardRoute, usersRoute, equipmentsRoute, dashboardTesteRoute]);
 
 export const router = createRouter({
     routeTree,
