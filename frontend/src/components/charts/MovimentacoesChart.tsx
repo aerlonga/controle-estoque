@@ -15,6 +15,7 @@ interface MovimentacoesChartProps {
             color: string
         }[]
     }
+    period: number
 }
 
 function AreaGradient({ color, id }: { color: string; id: string }) {
@@ -28,7 +29,7 @@ function AreaGradient({ color, id }: { color: string; id: string }) {
     )
 }
 
-export default function MovimentacoesChart({ data }: MovimentacoesChartProps) {
+export default function MovimentacoesChart({ data, period }: MovimentacoesChartProps) {
     const theme = useTheme()
 
     const total = data.series.reduce((sum, serie) => {
@@ -38,9 +39,12 @@ export default function MovimentacoesChart({ data }: MovimentacoesChartProps) {
     return (
         <Card variant="outlined" sx={{ width: '100%' }}>
             <CardContent>
-                <Typography component="h2" variant="subtitle2" gutterBottom>
-                    Movimentações
-                </Typography>
+                <Stack direction="row" sx={{ alignItems: 'center', gap: 1, mb: 1 }}>
+                    <Typography component="h2" variant="subtitle2">
+                        Movimentações
+                    </Typography>
+                    <Chip size="small" color="success" label={`Últimos ${period} dias`} />
+                </Stack>
                 <Stack sx={{ justifyContent: 'space-between' }}>
                     <Stack
                         direction="row"
@@ -50,10 +54,6 @@ export default function MovimentacoesChart({ data }: MovimentacoesChartProps) {
                             gap: 1,
                         }}
                     >
-                        <Typography variant="h4" component="p">
-                            {total}
-                        </Typography>
-                        <Chip size="small" color="success" label="Últimos dias" />
                     </Stack>
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                         Entradas e saídas de equipamentos

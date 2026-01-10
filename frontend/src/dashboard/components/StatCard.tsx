@@ -2,7 +2,6 @@ import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { SparkLineChart } from '@mui/x-charts/SparkLineChart';
@@ -14,6 +13,7 @@ export type StatCardProps = {
   interval: string;
   trend: 'up' | 'down' | 'neutral';
   data: number[];
+  customColor?: string;
 };
 
 function getDaysInMonth(month: number, year: number) {
@@ -48,6 +48,7 @@ export default function StatCard({
   interval,
   trend,
   data,
+  customColor,
 }: StatCardProps) {
   const theme = useTheme();
   const daysInWeek = getDaysInMonth(4, 2024);
@@ -67,15 +68,7 @@ export default function StatCard({
         : theme.palette.grey[700],
   };
 
-  const labelColors = {
-    up: 'success' as const,
-    down: 'error' as const,
-    neutral: 'default' as const,
-  };
-
-  const color = labelColors[trend];
-  const chartColor = trendColors[trend];
-  const trendValues = { up: '+25%', down: '-25%', neutral: '+5%' };
+  const chartColor = customColor || trendColors[trend];
 
   return (
     <Card variant="outlined" sx={{ height: '100%', flexGrow: 1 }}>
@@ -95,7 +88,6 @@ export default function StatCard({
               <Typography variant="h4" component="p">
                 {value}
               </Typography>
-              <Chip size="small" color={color} label={trendValues[trend]} />
             </Stack>
             <Typography variant="caption" sx={{ color: 'text.secondary' }}>
               {interval}

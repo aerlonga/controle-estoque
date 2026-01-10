@@ -47,24 +47,16 @@ const equipmentTypes = [
 ];
 
 async function clearDatabase() {
-    console.log('🗑️  Limpando banco de dados...');
-
-    // Ordem de deleção respeitando as foreign keys
     await prisma.historicoEquipamento.deleteMany({});
     await prisma.movimentacao.deleteMany({});
     await prisma.equipamento.deleteMany({});
     await prisma.tokenBlacklist.deleteMany({});
     await prisma.usuario.deleteMany({});
-
-    console.log('✅ Banco de dados limpo');
 }
 
 async function createUsers() {
-    console.log('👥 Criando usuários...');
-
     const hashedPassword = await bcrypt.hash('senha123', 10);
 
-    // Admin
     const admin = await prisma.usuario.create({
         data: {
             nome: 'Administrador Sistema',
@@ -75,7 +67,6 @@ async function createUsers() {
         }
     });
 
-    // Usuários normais
     const users = [];
     for (let i = 0; i < 5; i++) {
         const user = await prisma.usuario.create({
@@ -90,12 +81,10 @@ async function createUsers() {
         users.push(user);
     }
 
-    console.log(`✅ ${users.length + 1} usuários criados`);
     return [admin, ...users];
 }
 
 async function createEquipments(users) {
-    console.log('💻 Criando equipamentos...');
 
     const equipments = [];
     let totalCreated = 0;
@@ -105,10 +94,8 @@ async function createEquipments(users) {
             const randomUser = users[Math.floor(Math.random() * users.length)];
             const randomModel = equipType.models[Math.floor(Math.random() * equipType.models.length)];
 
-            // Gerar número de série único
             const serialNumber = `${equipType.type.substring(0, 3).toUpperCase()}${faker.string.alphanumeric(8).toUpperCase()}`;
 
-            // Status aleatório com peso: 60% NO_DEPOSITO, 30% FORA_DEPOSITO, 10% DESCARTADO
             const rand = Math.random();
             let status;
             if (rand < 0.6) status = 'NO_DEPOSITO';
@@ -139,24 +126,19 @@ async function createEquipments(users) {
         }
     }
 
-    console.log(`✅ ${totalCreated} equipamentos criados`);
     return equipments;
 }
 
 async function createMovements(equipments, users) {
-    console.log('📦 Criando movimentações...');
-
     const movements = [];
-    const movementCount = Math.floor(equipments.length * 2); // ~2 movimentações por equipamento
+    const movementCount = Math.floor(equipments.length * 2);
 
     for (let i = 0; i < movementCount; i++) {
         const randomEquipment = equipments[Math.floor(Math.random() * equipments.length)];
         const randomUser = users[Math.floor(Math.random() * users.length)];
 
-        // Tipo de movimentação aleatório
         const tipo = Math.random() > 0.5 ? 'ENTRADA' : 'SAIDA';
 
-        // Data nos últimos 60 dias
         const dataMovimentacao = faker.date.recent({ days: 60 });
 
         const observacoes = [
@@ -166,7 +148,7 @@ async function createMovements(equipments, users) {
             'Atualização de software',
             'Instalação em nova sala',
             'Retorno de empréstimo',
-            null, // Algumas sem observação
+            null,
             null
         ];
 
@@ -184,12 +166,10 @@ async function createMovements(equipments, users) {
         movements.push(movement);
     }
 
-    console.log(`✅ ${movements.length} movimentações criadas`);
     return movements;
 }
 
 async function main() {
-    console.log('🚀 Iniciando seed do banco de dados...\n');
 
     try {
         await clearDatabase();
@@ -197,14 +177,7 @@ async function main() {
         const equipments = await createEquipments(users);
         await createMovements(equipments, users);
 
-        console.log('\n✨ Seed concluído com sucesso!');
-        console.log('📊 Resumo:');
-        console.log(`   - Usuários: ${users.length}`);
-        console.log(`   - Equipamentos: ${equipments.length}`);
-        console.log(`   - Tipos: ${equipmentTypes.map(t => `${t.type} (${t.count})`).join(', ')}`);
-
     } catch (error) {
-        console.error('❌ Erro ao executar seed:', error);
         throw error;
     } finally {
         await prisma.$disconnect();
