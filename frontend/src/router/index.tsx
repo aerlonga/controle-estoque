@@ -1,44 +1,44 @@
-import { createRootRoute, createRoute, createRouter, Outlet, redirect } from '@tanstack/react-router';
-import { lazy, Suspense } from 'react';
-import { CircularProgress, Box } from '@mui/material';
-import Login from '../pages/Login';
-import Layout from '../components/layout/Layout';
-import { useAuthStore } from '../store/authStore';
+import { createRootRoute, createRoute, createRouter, Outlet, redirect } from '@tanstack/react-router'
+import { lazy, Suspense } from 'react'
+import { CircularProgress, Box } from '@mui/material'
+import Login from '../pages/Login'
+import AppLayout from '../layouts/AppLayout'
+import { useAuthStore } from '../store/authStore'
 
-const Dashboard = lazy(() => import('../pages/Dashboard'));
-const Users = lazy(() => import('../pages/Users'));
-const Equipments = lazy(() => import('../pages/Equipments'));
-const dashboardTeste = lazy(() => import('../pages/dashboard-teste'));
+const Dashboard = lazy(() => import('../pages/Dashboard'))
+const Users = lazy(() => import('../pages/Users'))
+const Equipments = lazy(() => import('../pages/Equipments'))
+const dashboardTeste = lazy(() => import('../pages/dashboard-teste'))
 
 const LoadingFallback = () => (
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
         <CircularProgress />
     </Box>
-);
+)
 
 const rootRoute = createRootRoute({
     component: () => {
-        const { isAuthenticated, user, logout } = useAuthStore();
+        const { isAuthenticated } = useAuthStore()
 
         if (!isAuthenticated) {
-            return <Login />;
+            return <Login />
         }
 
         return (
-            <Layout user={user} logout={logout}>
+            <AppLayout>
                 <Suspense fallback={<LoadingFallback />}>
                     <Outlet />
                 </Suspense>
-            </Layout>
-        );
+            </AppLayout>
+        )
     },
-});
+})
 
 const dashboardRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/',
     component: Dashboard,
-});
+})
 
 const dashboardTesteRoute = createRoute({
     getParentRoute: () => rootRoute,
@@ -50,29 +50,29 @@ const usersRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/users',
     beforeLoad: () => {
-        const { isAuthenticated } = useAuthStore.getState();
+        const { isAuthenticated } = useAuthStore.getState()
         if (!isAuthenticated) {
-            throw redirect({ to: '/' });
+            throw redirect({ to: '/' })
         }
     },
     component: Users,
-});
+})
 
 const equipmentsRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/equipments',
     beforeLoad: () => {
-        const { isAuthenticated } = useAuthStore.getState();
+        const { isAuthenticated } = useAuthStore.getState()
         if (!isAuthenticated) {
-            throw redirect({ to: '/' });
+            throw redirect({ to: '/' })
         }
     },
     component: Equipments,
-});
+})
 
-const routeTree = rootRoute.addChildren([dashboardRoute, usersRoute, equipmentsRoute, dashboardTesteRoute]);
+const routeTree = rootRoute.addChildren([dashboardRoute, usersRoute, equipmentsRoute, dashboardTesteRoute])
 
 export const router = createRouter({
     routeTree,
     defaultPreload: 'intent',
-});
+})
