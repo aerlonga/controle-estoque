@@ -13,8 +13,12 @@ import { useMutation } from '@tanstack/react-query';
 import { authService } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 import AppTheme from '../shared-theme/AppTheme';
-import ColorModeSelect from '../shared-theme/ColorModeSelect';
+import ColorModeIconDropdown from '../shared-theme/ColorModeIconDropdown';
 import { SitemarkIcon } from './components/LogoIcon';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -60,8 +64,6 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
 
 interface SignInProps {
   disableCustomTheme?: boolean;
-  mode?: 'light' | 'dark';
-  toggleColorMode?: () => void;
 }
 
 export default function SignIn(props: SignInProps) {
@@ -71,6 +73,13 @@ export default function SignIn(props: SignInProps) {
   const [senhaError, setSenhaError] = React.useState(false);
   const [senhaErrorMessage, setSenhaErrorMessage] = React.useState('');
   const [errorMessage, setErrorMessage] = React.useState('');
+  const [showPassword, setShowPassword] = React.useState(false);
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+  };
 
   const loginMutation = useMutation({
     mutationFn: ({ usuario_rede, senha }: { usuario_rede: string; senha: string }) =>
@@ -131,9 +140,9 @@ export default function SignIn(props: SignInProps) {
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
       <SignInContainer direction="column" justifyContent="space-between">
-        <ColorModeSelect
-          sx={{ position: 'fixed', top: '1rem', right: '1rem' }}
-        />
+        <Stack direction="row" sx={{ position: 'fixed', top: '1rem', right: '1rem' }}>
+          <ColorModeIconDropdown />
+        </Stack>
         <Card variant="outlined">
           <SitemarkIcon />
           <Typography
@@ -142,9 +151,6 @@ export default function SignIn(props: SignInProps) {
             sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
           >
             Controle de Estoque
-          </Typography>
-          <Typography component="h2" variant="h6" sx={{ color: 'text.secondary', mb: 2 }}>
-            Entrar
           </Typography>
           <Box
             component="form"
@@ -181,13 +187,42 @@ export default function SignIn(props: SignInProps) {
                 helperText={senhaErrorMessage}
                 name="senha"
                 placeholder="Digite sua senha"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 id="senha"
                 autoComplete="current-password"
                 required
                 fullWidth
                 variant="outlined"
                 color={senhaError ? 'error' : 'primary'}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge="end"
+                        size="small"
+                        disableRipple
+                        sx={{
+                          color: 'text.secondary',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          width: 'auto',
+                          height: 'auto',
+                          padding: 0,
+                          minWidth: 0,
+                          '&:hover': {
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                          },
+                        }}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
             </FormControl>
             {errorMessage && (
