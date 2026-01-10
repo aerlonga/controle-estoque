@@ -7,8 +7,8 @@ import { alpha } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
-import AppNavbar from '../dashboard/components/AppNavbar'
-import NavbarBreadcrumbs from '../dashboard/components/NavbarBreadcrumbs'
+import AppNavbar from '../dashboard/componentsMuUI/AppNavbar'
+import NavbarBreadcrumbs from '../dashboard/componentsMuUI/NavbarBreadcrumbs'
 import AppTheme from '../shared-theme/AppTheme'
 import {
     chartsCustomizations,

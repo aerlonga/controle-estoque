@@ -16,7 +16,7 @@ const StyledBreadcrumbs = styled(Breadcrumbs)(({ theme }) => ({
 }));
 
 const routeNameMap: Record<string, string> = {
-  '/': 'Dashboard',
+  '/': 'Home',
   '/users': 'Usuários',
   '/equipments': 'Equipamentos',
   '/dashboard-teste': 'Dashboard Teste',
@@ -31,12 +31,12 @@ export default function NavbarBreadcrumbs() {
       aria-label="breadcrumb"
       separator={<NavigateNextRoundedIcon fontSize="small" />}
     >
-      <Typography variant="body1">Dashboard</Typography>
+      <Typography variant="body1">Home</Typography>
       {pathnames.length > 0 ? (
         pathnames.map((value, index) => {
           const last = index === pathnames.length - 1;
           const to = `/${pathnames.slice(0, index + 1).join('/')}`;
-          const name = routeNameMap[to] || value; // Fallback to path segment if not mapped
+          const name = routeNameMap[to] || value;
 
           return (
             <Typography
@@ -50,7 +50,7 @@ export default function NavbarBreadcrumbs() {
         })
       ) : (
         <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 600 }}>
-          Home
+          Dashboard
         </Typography>
       )}
     </StyledBreadcrumbs>

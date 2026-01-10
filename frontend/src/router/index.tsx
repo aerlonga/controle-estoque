@@ -1,7 +1,7 @@
 import { createRootRoute, createRoute, createRouter, Outlet, redirect } from '@tanstack/react-router'
 import { lazy, Suspense } from 'react'
 import { CircularProgress, Box } from '@mui/material'
-import Login from '../pages/Login'
+import SignIn from '../components/sign-in/SignIn'
 import AppLayout from '../layouts/AppLayout'
 import { useAuthStore } from '../store/authStore'
 
@@ -21,7 +21,7 @@ const rootRoute = createRootRoute({
         const { isAuthenticated } = useAuthStore()
 
         if (!isAuthenticated) {
-            return <Login />
+            return <SignIn />
         }
 
         return (

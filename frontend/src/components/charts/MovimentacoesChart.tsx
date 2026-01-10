@@ -4,6 +4,7 @@ import CardContent from '@mui/material/CardContent'
 import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
+import Box from '@mui/material/Box'
 import { LineChart } from '@mui/x-charts/LineChart'
 
 interface MovimentacoesChartProps {
@@ -37,28 +38,17 @@ export default function MovimentacoesChart({ data, period }: MovimentacoesChartP
     }, 0)
 
     return (
-        <Card variant="outlined" sx={{ width: '100%' }}>
-            <CardContent>
+        <Card variant="outlined" sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ flexGrow: 1 }}>
                 <Stack direction="row" sx={{ alignItems: 'center', gap: 1, mb: 1 }}>
                     <Typography component="h2" variant="subtitle2">
                         Movimentações
                     </Typography>
                     <Chip size="small" color="success" label={`Últimos ${period} dias`} />
                 </Stack>
-                <Stack sx={{ justifyContent: 'space-between' }}>
-                    <Stack
-                        direction="row"
-                        sx={{
-                            alignContent: { xs: 'center', sm: 'flex-start' },
-                            alignItems: 'center',
-                            gap: 1,
-                        }}
-                    >
-                    </Stack>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                        Entradas e saídas de equipamentos
-                    </Typography>
-                </Stack>
+                <Typography variant="caption" sx={{ color: 'text.secondary', mb: 2, display: 'block' }}>
+                    Entradas e saídas de equipamentos
+                </Typography>
                 <LineChart
                     xAxis={[
                         {
@@ -96,6 +86,37 @@ export default function MovimentacoesChart({ data, period }: MovimentacoesChartP
                     <AreaGradient color={data.series[0]?.color || theme.palette.primary.main} id="entrada-gradient" />
                     <AreaGradient color={data.series[1]?.color || theme.palette.secondary.main} id="saida-gradient" />
                 </LineChart>
+                <Stack
+                    direction="row"
+                    sx={{
+                        alignContent: { xs: 'center', sm: 'flex-start' },
+                        alignItems: 'center',
+                        gap: 2,
+                        mt: 2,
+                        justifyContent: 'center',
+                    }}
+                >
+                    {data.series.map((serie) => (
+                        <Stack
+                            key={serie.label}
+                            direction="row"
+                            spacing={1}
+                            alignItems="center"
+                        >
+                            <Box
+                                sx={{
+                                    width: 12,
+                                    height: 12,
+                                    borderRadius: '50%',
+                                    backgroundColor: serie.color,
+                                }}
+                            />
+                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                {serie.label}
+                            </Typography>
+                        </Stack>
+                    ))}
+                </Stack>
             </CardContent>
         </Card>
     )

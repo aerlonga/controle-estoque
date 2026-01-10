@@ -25,11 +25,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error: AxiosError) => {
-        if (error.response?.status === 401) {
+        if (error.response?.status === 401 && !error.config?.url?.includes('/auth/login')) {
             // Token expirado ou inválido
             localStorage.removeItem('token')
             localStorage.removeItem('usuario')
-            window.location.href = '/login'
+            window.location.href = '/'
         }
         return Promise.reject(error)
     }

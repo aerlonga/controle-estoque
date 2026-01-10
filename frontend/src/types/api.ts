@@ -76,8 +76,9 @@ export interface MovimentacaoFormData {
     observacao?: string
 }
 
+
 export interface LoginFormData {
-    email: string
+    usuario_rede: string
     senha: string
 }
 
@@ -100,7 +101,7 @@ export interface PaginatedResponse<T> {
 
 export interface AuthResponse {
     token: string
-    user: Usuario
+    usuario: Usuario
 }
 
 // ===============================================

@@ -19,15 +19,15 @@ export default function MovimentacoesPorDiaChart({ data }: MovimentacoesPorDiaCh
     const total = data.series[0]?.data.reduce((sum, v) => sum + v, 0) || 0
 
     return (
-        <Card variant="outlined" sx={{ width: '100%' }}>
-            <CardContent>
+        <Card variant="outlined" sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ flexGrow: 1 }}>
                 <Stack direction="row" sx={{ alignItems: 'center', gap: 1, mb: 1 }}>
                     <Typography component="h2" variant="subtitle2">
                         Movimentações por Dia da Semana
                     </Typography>
                     <Chip size="small" color="primary" label="Total" />
                 </Stack>
-                <Stack sx={{ justifyContent: 'space-between' }}>
+                <Stack sx={{ justifyContent: 'space-between', mb: 2 }}>
                     <Stack
                         direction="row"
                         sx={{

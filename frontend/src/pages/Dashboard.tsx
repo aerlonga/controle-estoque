@@ -2,7 +2,9 @@ import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
-import CircularProgress from '@mui/material/CircularProgress'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import Skeleton from '@mui/material/Skeleton'
 import Typography from '@mui/material/Typography'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
@@ -14,12 +16,37 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { analyticsService } from '../services/api'
 import MovimentacoesChart from '../components/charts/MovimentacoesChart'
 import MovimentacoesPorDiaChart from '../components/charts/MovimentacoesPorDiaChart'
-import StatCard from '../dashboard/components/StatCard'
-import EquipamentosPorTipoChart from '../dashboard/components/EquipamentosPorTipoChart'
+import StatCard from '../dashboard/componentsMuUI/StatCard'
+import EquipamentosPorTipoChart from '../dashboard/componentsMuUI/EquipamentosPorTipoChart'
 
 const DATA_COLORS = {
     entrada: '#4e60ff',
     saida: '#f6ad37',
+}
+
+// Componente de Skeleton para StatCard
+function StatCardSkeleton() {
+    return (
+        <Card variant="outlined" sx={{ height: '100%' }}>
+            <CardContent>
+                <Skeleton variant="text" width="60%" height={24} />
+                <Skeleton variant="text" width="40%" height={48} sx={{ mt: 1 }} />
+                <Skeleton variant="rectangular" height={80} sx={{ mt: 2, borderRadius: 1 }} />
+            </CardContent>
+        </Card>
+    )
+}
+
+// Componente de Skeleton para Charts
+function ChartSkeleton() {
+    return (
+        <Card variant="outlined" sx={{ height: '100%' }}>
+            <CardContent>
+                <Skeleton variant="text" width="40%" height={28} sx={{ mb: 2 }} />
+                <Skeleton variant="rectangular" height={250} sx={{ borderRadius: 1 }} />
+            </CardContent>
+        </Card>
+    )
 }
 
 export default function Dashboard() {
@@ -60,13 +87,8 @@ export default function Dashboard() {
         return typeof periodFilter === 'number' ? periodFilter : 30
     }, [periodFilter, customStartDate, customEndDate])
 
-    if (isLoadingMovimentacoes || isLoadingEquipamentos) {
-        return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-                <CircularProgress />
-            </Box>
-        )
-    }
+    // Usar skeleton loaders ao invés de CircularProgress
+    const isLoading = isLoadingMovimentacoes || isLoadingEquipamentos
 
     const movData = movimentacoesAnalytics?.data
     const eqData = equipamentosAnalytics?.data
@@ -115,53 +137,77 @@ export default function Dashboard() {
             {/* Cards de Estatísticas */}
             <Grid container spacing={2} columns={12} sx={{ mb: (theme) => theme.spacing(2) }}>
                 <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                    <StatCard
-                        title="No Depósito"
-                        value={eqData?.porStatus.noDeposito?.toString() || '0'}
-                        interval="Total"
-                        trend="neutral"
-                        data={eqData?.porStatus.depositoHistory || []}
-                        customColor={DATA_COLORS.entrada}
-                    />
+                    {isLoading ? (
+                        <StatCardSkeleton />
+                    ) : (
+                        <StatCard
+                            title="No Depósito"
+                            value={eqData?.porStatus.noDeposito?.toString() || '0'}
+                            interval="Total"
+                            trend="neutral"
+                            data={eqData?.porStatus.depositoHistory || []}
+                            customColor={DATA_COLORS.entrada}
+                        />
+                    )}
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                    <StatCard
-                        title="Fora do Depósito"
-                        value={eqData?.porStatus.foraDeposito?.toString() || '0'}
-                        interval="Em uso"
-                        trend="neutral"
-                        data={eqData?.porStatus.foraHistory || []}
-                        customColor={DATA_COLORS.saida}
-                    />
+                    {isLoading ? (
+                        <StatCardSkeleton />
+                    ) : (
+                        <StatCard
+                            title="Fora do Depósito"
+                            value={eqData?.porStatus.foraDeposito?.toString() || '0'}
+                            interval="Em uso"
+                            trend="neutral"
+                            data={eqData?.porStatus.foraHistory || []}
+                            customColor={DATA_COLORS.saida}
+                        />
+                    )}
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                    <StatCard
-                        title="Total de Equipamentos"
-                        value={eqData?.porStatus.total?.toString() || '0'}
-                        interval="Total"
-                        trend="neutral"
-                        data={eqData?.porStatus.totalHistory || []}
-                    />
+                    {isLoading ? (
+                        <StatCardSkeleton />
+                    ) : (
+                        <StatCard
+                            title="Total de Equipamentos"
+                            value={eqData?.porStatus.total?.toString() || '0'}
+                            interval="Total"
+                            trend="neutral"
+                            data={eqData?.porStatus.totalHistory || []}
+                        />
+                    )}
                 </Grid>
             </Grid>
 
             {/* Gráficos */}
             <Grid container spacing={2} columns={12}>
                 <Grid size={{ xs: 12, lg: 6 }}>
-                    <MovimentacoesChart
-                        data={movData?.porData || { xAxis: [], series: [] }}
-                        period={periodoDias}
-                    />
+                    {isLoading ? (
+                        <ChartSkeleton />
+                    ) : (
+                        <MovimentacoesChart
+                            data={movData?.porData || { xAxis: [], series: [] }}
+                            period={periodoDias}
+                        />
+                    )}
                 </Grid>
                 <Grid size={{ xs: 12, lg: 6 }}>
-                    <MovimentacoesPorDiaChart
-                        data={movData?.porDiaSemana || { xAxis: [{ scaleType: 'band' as const, data: [] }], series: [] }}
-                    />
+                    {isLoading ? (
+                        <ChartSkeleton />
+                    ) : (
+                        <MovimentacoesPorDiaChart
+                            data={movData?.porDiaSemana || { xAxis: [{ scaleType: 'band' as const, data: [] }], series: [] }}
+                        />
+                    )}
                 </Grid>
-                <Grid size={{ xs: 12, lg: 4 }}>
-                    <EquipamentosPorTipoChart
-                        data={eqData?.porTipo || []}
-                    />
+                <Grid size={{ xs: 12, lg: 6 }}>
+                    {isLoading ? (
+                        <ChartSkeleton />
+                    ) : (
+                        <EquipamentosPorTipoChart
+                            data={eqData?.porTipo || []}
+                        />
+                    )}
                 </Grid>
             </Grid>
         </Box>
