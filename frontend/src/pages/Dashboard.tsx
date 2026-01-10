@@ -8,6 +8,7 @@ import { equipamentoService, movimentacaoService } from '../services/api'
 import MovimentacoesChart from '../components/charts/MovimentacoesChart'
 import MovimentacoesPorDiaChart from '../components/charts/MovimentacoesPorDiaChart'
 import StatCard from '../dashboard/components/StatCard'
+import ColorModeIconDropdown from '../shared-theme/ColorModeIconDropdown'
 
 const DATA_COLORS = {
     entrada: '#4e60ff',
@@ -121,9 +122,12 @@ export default function Dashboard() {
     return (
         <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
             {/* Header */}
-            <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
-                Visão Geral
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography component="h2" variant="h6">
+                    Visão Geral
+                </Typography>
+                <ColorModeIconDropdown />
+            </Box>
 
             {/* Cards de Estatísticas */}
             <Grid container spacing={2} columns={12} sx={{ mb: (theme) => theme.spacing(2) }}>

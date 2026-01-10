@@ -64,12 +64,12 @@ export default function MovimentacoesChart({ data }: MovimentacoesChartProps) {
                         {
                             scaleType: 'point',
                             data: data.xAxis,
-                            tickInterval: (index, i) => (i + 1) % 5 === 0,
+                            tickInterval: (_index, i) => (i + 1) % 5 === 0,
                             height: 24,
                         },
                     ]}
                     yAxis={[{ width: 50 }]}
-                    series={data.series.map((serie, index) => ({
+                    series={data.series.map((serie, _index) => ({
                         id: serie.label.toLowerCase(),
                         label: serie.label,
                         showMark: false,
