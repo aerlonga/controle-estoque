@@ -33,7 +33,8 @@ const authService = {
             {
                 id: usuario.id,
                 usuario_rede: usuario.usuario_rede,
-                nome: usuario.nome
+                nome: usuario.nome,
+                perfil: usuario.perfil
             },
             process.env.JWT_SECRET,
             {
@@ -47,6 +48,7 @@ const authService = {
                 id: usuario.id,
                 nome: usuario.nome,
                 usuario_rede: usuario.usuario_rede,
+                perfil: usuario.perfil,
                 created_at: usuario.created_at
             }
         };

@@ -10,13 +10,15 @@ const loginSchema = z.object({
 const createUsuarioSchema = z.object({
     nome: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres').trim(),
     usuario_rede: z.string().min(3, 'Usuário de rede deve ter no mínimo 3 caracteres').trim(),
-    senha: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres')
+    senha: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
+    perfil: z.enum(['USUARIO', 'ADMIN']).optional()
 });
 
 const updateUsuarioSchema = z.object({
     nome: z.string().min(3).optional(),
     usuario_rede: z.string().min(3).optional(),
     senha: z.string().min(6).optional(),
+    perfil: z.enum(['USUARIO', 'ADMIN']).optional(),
     status_usuario: z.number().int().optional()
 });
 
@@ -46,9 +48,9 @@ const updateEquipamentoSchema = z.object({
 const createMovimentacaoSchema = z.object({
     equipamento_id: z.number({ required_error: 'ID do equipamento é obrigatório' }).int(),
     tipo: z.enum(['ENTRADA', 'SAIDA'], { required_error: 'Tipo de movimentação (ENTRADA/SAIDA) é obrigatório' }),
-    usuario_id: z.number({ required_error: 'ID do usuário é obrigatório' }).int(),
+    usuario_id: z.number().int().optional(),
     observacao: z.string().optional().nullable(),
-    data_movimentacao: z.string().datetime().optional() // ISO 8601 string
+    data_movimentacao: z.string().datetime().optional()
 });
 
 module.exports = {

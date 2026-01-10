@@ -23,7 +23,8 @@ class UsuarioService {
             data: {
                 nome: dados.nome,
                 usuario_rede: dados.usuario_rede,
-                senha_hash: senhaHash
+                senha_hash: senhaHash,
+                perfil: dados.perfil // Aceita perfil, default será USUARIO
             }
         });
 
@@ -42,6 +43,7 @@ class UsuarioService {
                     id: true,
                     nome: true,
                     usuario_rede: true,
+                    perfil: true,
                     created_at: true
                 },
                 orderBy: { nome: 'asc' }
@@ -51,7 +53,7 @@ class UsuarioService {
                 page,
                 includePageCount: true
             });
-        
+
         return { data, meta };
     }
 
@@ -65,6 +67,7 @@ class UsuarioService {
                 id: true,
                 nome: true,
                 usuario_rede: true,
+                perfil: true,
                 created_at: true
             }
         });
@@ -107,6 +110,7 @@ class UsuarioService {
                 id: true,
                 nome: true,
                 usuario_rede: true,
+                perfil: true,
                 created_at: true
             }
         });

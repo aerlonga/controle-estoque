@@ -18,16 +18,23 @@ enum TipoMovimentacao {
   SAIDA
 }
 
-model Usuario {
-  id             Int      @id @default(autoincrement())
-  nome           String
-  usuario_rede   String   @unique
-  senha_hash     String
-  status_usuario Int      @default(1)
-  created_at     DateTime @default(now()) @db.Timestamptz(3)
+enum PerfilUsuario {
+  USUARIO
+  ADMIN
+}
 
-  equipamentos  Equipamento[]  @relation("EquipamentoCadastrado")
-  movimentacoes Movimentacao[] @relation("MovimentacaoUsuario")
+model Usuario {
+  id             Int           @id @default(autoincrement())
+  nome           String
+  usuario_rede   String        @unique
+  senha_hash     String
+  perfil         PerfilUsuario @default(USUARIO)
+  status_usuario Int           @default(1)
+  created_at     DateTime      @default(now()) @db.Timestamptz(3)
+
+  equipamentos           Equipamento[]          @relation("EquipamentoCadastrado")
+  movimentacoes          Movimentacao[]         @relation("MovimentacaoUsuario")
+  historico_equipamentos HistoricoEquipamento[] @relation("HistoricoUsuario")
 
   @@map("usuarios")
 }
@@ -44,8 +51,9 @@ model Equipamento {
   created_at   DateTime          @default(now())
   updated_at   DateTime          @updatedAt
 
-  usuario       Usuario        @relation("EquipamentoCadastrado", fields: [usuario_id], references: [id])
-  movimentacoes Movimentacao[] @relation("MovimentacaoEquipamento")
+  usuario                Usuario                @relation("EquipamentoCadastrado", fields: [usuario_id], references: [id])
+  movimentacoes          Movimentacao[]         @relation("MovimentacaoEquipamento")
+  historico_equipamentos HistoricoEquipamento[] @relation("HistoricoEquipamento")
 
   @@map("equipamentos")
 }
@@ -63,6 +71,22 @@ model Movimentacao {
   usuario     Usuario     @relation("MovimentacaoUsuario", fields: [usuario_id], references: [id])
 
   @@map("movimentacoes")
+}
+
+model HistoricoEquipamento {
+  id             Int      @id @default(autoincrement())
+  equipamento_id Int
+  usuario_id     Int
+  acao           String
+  campo_alterado String?
+  valor_anterior String?
+  valor_novo     String?
+  created_at     DateTime @default(now())
+
+  equipamento Equipamento @relation("HistoricoEquipamento", fields: [equipamento_id], references: [id])
+  usuario     Usuario     @relation("HistoricoUsuario", fields: [usuario_id], references: [id])
+
+  @@map("historico_equipamentos")
 }
 
 model TokenBlacklist {
