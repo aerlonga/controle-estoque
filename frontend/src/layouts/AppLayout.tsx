@@ -8,7 +8,7 @@ import CssBaseline from '@mui/material/CssBaseline'
 import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
 import AppNavbar from '../dashboard/components/AppNavbar'
-import SideMenu from '../dashboard/components/SideMenu'
+import NavbarBreadcrumbs from '../dashboard/components/NavbarBreadcrumbs'
 import AppTheme from '../shared-theme/AppTheme'
 import {
     chartsCustomizations,
@@ -33,7 +33,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <AppTheme themeComponents={xThemeComponents}>
             <CssBaseline enableColorScheme />
             <Box sx={{ display: 'flex' }}>
-                <SideMenu />
+                {/* <SideMenu /> */}
                 <AppNavbar />
                 {/* Main content */}
                 <Box
@@ -52,9 +52,12 @@ export default function AppLayout({ children }: AppLayoutProps) {
                             alignItems: 'center',
                             mx: 3,
                             pb: 5,
-                            mt: { xs: 8, md: 0 },
+                            mt: { xs: 8, md: 8 },
                         }}
                     >
+                        <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
+                            <NavbarBreadcrumbs />
+                        </Box>
                         {children}
                     </Stack>
                 </Box>

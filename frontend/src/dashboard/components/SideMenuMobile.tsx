@@ -5,8 +5,10 @@ import Drawer, { drawerClasses } from '@mui/material/Drawer';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
-import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
-import MenuButton from './MenuButton';
+// import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
+// import MenuButton from './MenuButton';
+import { useNavigate } from '@tanstack/react-router'
+import { useAuthStore } from '../../store/authStore'
 import MenuContent from './MenuContent';
 
 interface SideMenuMobileProps {
@@ -15,9 +17,17 @@ interface SideMenuMobileProps {
 }
 
 export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobileProps) {
+  const navigate = useNavigate()
+  const { logout } = useAuthStore()
+
+  const handleLogout = () => {
+    logout()
+    navigate({ to: '/' })
+  }
+
   return (
     <Drawer
-      anchor="right"
+      anchor="left"
       open={open}
       onClose={toggleDrawer(false)}
       sx={{
@@ -30,10 +40,11 @@ export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobilePro
     >
       <Stack
         sx={{
-          maxWidth: '70dvw',
+          width: { xs: 'auto', md: 360 },
+          maxWidth: { xs: '70dvw', md: '100%' },
           height: '100%',
         }}
-      >
+      >Dashboard
         <Stack direction="row" sx={{ p: 2, pb: 0, gap: 1 }}>
           <Stack
             direction="row"
@@ -41,17 +52,27 @@ export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobilePro
           >
             <Avatar
               sizes="small"
-              alt="Riley Carter"
-              src="/static/images/avatar/7.jpg"
-              sx={{ width: 24, height: 24 }}
-            />
+              alt={(() => {
+                const usuario = localStorage.getItem('usuario')
+                return usuario ? JSON.parse(usuario).nome : 'Usuário'
+              })()}
+              sx={{ width: 24, height: 24, bgcolor: 'primary.main' }}
+            >
+              {(() => {
+                const usuario = localStorage.getItem('usuario')
+                return usuario ? JSON.parse(usuario).nome?.charAt(0).toUpperCase() : 'U'
+              })()}
+            </Avatar>
             <Typography component="p" variant="h6">
-              Riley Carter
+              {(() => {
+                const usuario = localStorage.getItem('usuario')
+                return usuario ? JSON.parse(usuario).nome : 'Usuário'
+              })()}
             </Typography>
           </Stack>
-          <MenuButton showBadge>
+          {/* <MenuButton showBadge>
             <NotificationsRoundedIcon />
-          </MenuButton>
+          </MenuButton> */}
         </Stack>
         <Divider />
         <Stack sx={{ flexGrow: 1 }}>
@@ -59,7 +80,7 @@ export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobilePro
           <Divider />
         </Stack>
         <Stack sx={{ p: 2 }}>
-          <Button variant="outlined" fullWidth startIcon={<LogoutRoundedIcon />}>
+          <Button variant="outlined" fullWidth startIcon={<LogoutRoundedIcon />} onClick={handleLogout}>
             Logout
           </Button>
         </Stack>

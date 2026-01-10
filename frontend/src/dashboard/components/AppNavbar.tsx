@@ -39,7 +39,7 @@ export default function AppNavbar() {
     <AppBar
       position="fixed"
       sx={{
-        display: { xs: 'auto', md: 'none' },
+        display: 'auto',
         boxShadow: 0,
         bgcolor: 'background.paper',
         backgroundImage: 'none',
@@ -58,6 +58,9 @@ export default function AppNavbar() {
             gap: 1,
           }}
         >
+          <MenuButton aria-label="menu" onClick={toggleDrawer(true)} sx={{ mr: 1 }}>
+            <MenuRoundedIcon />
+          </MenuButton>
           <Stack
             direction="row"
             spacing={1}
@@ -69,9 +72,6 @@ export default function AppNavbar() {
             </Typography>
           </Stack>
           <ColorModeIconDropdown />
-          <MenuButton aria-label="menu" onClick={toggleDrawer(true)}>
-            <MenuRoundedIcon />
-          </MenuButton>
           <SideMenuMobile open={open} toggleDrawer={toggleDrawer} />
         </Stack>
       </Toolbar>
