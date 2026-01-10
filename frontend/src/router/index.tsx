@@ -1,7 +1,7 @@
 import { createRootRoute, createRoute, createRouter, Outlet, redirect } from '@tanstack/react-router'
 import { lazy, Suspense } from 'react'
 import { CircularProgress, Box } from '@mui/material'
-import SignIn from '../components/sign-in/SignIn'
+import SignIn from '../sign-in/SignIn'
 import AppLayout from '../layouts/AppLayout'
 import { useAuthStore } from '../store/authStore'
 

@@ -16,8 +16,8 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { analyticsService } from '../services/api'
 import MovimentacoesChart from '../components/charts/MovimentacoesChart'
 import MovimentacoesPorDiaChart from '../components/charts/MovimentacoesPorDiaChart'
-import StatCard from '../dashboard/componentsMuUI/StatCard'
-import EquipamentosPorTipoChart from '../dashboard/componentsMuUI/EquipamentosPorTipoChart'
+import StatCard from '../dashboard/components/StatCard'
+import EquipamentosPorTipoChart from '../dashboard/components/EquipamentosPorTipoChart'
 
 const DATA_COLORS = {
     entrada: '#4e60ff',

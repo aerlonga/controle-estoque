@@ -1,22 +1,20 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
 import CssBaseline from '@mui/material/CssBaseline';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Divider from '@mui/material/Divider';
 import FormLabel from '@mui/material/FormLabel';
 import FormControl from '@mui/material/FormControl';
-import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
-import ForgotPassword from './components/ForgotPassword';
+import { useMutation } from '@tanstack/react-query';
+import { authService } from '../services/api';
+import { useAuthStore } from '../store/authStore';
 import AppTheme from '../shared-theme/AppTheme';
 import ColorModeSelect from '../shared-theme/ColorModeSelect';
-import { GoogleIcon, FacebookIcon, SitemarkIcon } from './components/CustomIcons';
+import { SitemarkIcon } from './components/LogoIcon';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -60,55 +58,70 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-export default function SignIn(props: { disableCustomTheme?: boolean }) {
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
-  const [open, setOpen] = React.useState(false);
+interface SignInProps {
+  disableCustomTheme?: boolean;
+  mode?: 'light' | 'dark';
+  toggleColorMode?: () => void;
+}
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
+export default function SignIn(props: SignInProps) {
+  const { login } = useAuthStore();
+  const [usuarioError, setUsuarioError] = React.useState(false);
+  const [usuarioErrorMessage, setUsuarioErrorMessage] = React.useState('');
+  const [senhaError, setSenhaError] = React.useState(false);
+  const [senhaErrorMessage, setSenhaErrorMessage] = React.useState('');
+  const [errorMessage, setErrorMessage] = React.useState('');
 
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const loginMutation = useMutation({
+    mutationFn: ({ usuario_rede, senha }: { usuario_rede: string; senha: string }) =>
+      authService.login(usuario_rede, senha),
+    onSuccess: (data) => {
+      login(data.usuario, data.token);
+      setErrorMessage('');
+    },
+    onError: (error: any) => {
+      setErrorMessage(
+        error.response?.data?.error || 'Erro ao fazer login. Tente novamente.'
+      );
+    },
+  });
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    if (emailError || passwordError) {
-      event.preventDefault();
+    event.preventDefault();
+
+    if (!validateInputs()) {
       return;
     }
+
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    const usuario_rede = data.get('usuario_rede') as string;
+    const senha = data.get('senha') as string;
+
+    loginMutation.mutate({ usuario_rede, senha });
   };
 
   const validateInputs = () => {
-    const email = document.getElementById('email') as HTMLInputElement;
-    const password = document.getElementById('password') as HTMLInputElement;
+    const usuario = document.getElementById('usuario_rede') as HTMLInputElement;
+    const senha = document.getElementById('senha') as HTMLInputElement;
 
     let isValid = true;
 
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
-      setEmailError(true);
-      setEmailErrorMessage('Please enter a valid email address.');
+    if (!usuario.value || usuario.value.length < 3) {
+      setUsuarioError(true);
+      setUsuarioErrorMessage('Usuário deve ter no mínimo 3 caracteres.');
       isValid = false;
     } else {
-      setEmailError(false);
-      setEmailErrorMessage('');
+      setUsuarioError(false);
+      setUsuarioErrorMessage('');
     }
 
-    if (!password.value || password.value.length < 6) {
-      setPasswordError(true);
-      setPasswordErrorMessage('Password must be at least 6 characters long.');
+    if (!senha.value || senha.value.length < 1) {
+      setSenhaError(true);
+      setSenhaErrorMessage('Senha é obrigatória.');
       isValid = false;
     } else {
-      setPasswordError(false);
-      setPasswordErrorMessage('');
+      setSenhaError(false);
+      setSenhaErrorMessage('');
     }
 
     return isValid;
@@ -118,7 +131,9 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
       <SignInContainer direction="column" justifyContent="space-between">
-        <ColorModeSelect sx={{ position: 'fixed', top: '1rem', right: '1rem' }} />
+        <ColorModeSelect
+          sx={{ position: 'fixed', top: '1rem', right: '1rem' }}
+        />
         <Card variant="outlined">
           <SitemarkIcon />
           <Typography
@@ -126,7 +141,10 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
             variant="h4"
             sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
           >
-            Sign in
+            Controle de Estoque
+          </Typography>
+          <Typography component="h2" variant="h6" sx={{ color: 'text.secondary', mb: 2 }}>
+            Entrar
           </Typography>
           <Box
             component="form"
@@ -140,90 +158,51 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
             }}
           >
             <FormControl>
-              <FormLabel htmlFor="email">Email</FormLabel>
+              <FormLabel htmlFor="usuario_rede">Usuário de Rede</FormLabel>
               <TextField
-                error={emailError}
-                helperText={emailErrorMessage}
-                id="email"
-                type="email"
-                name="email"
-                placeholder="your@email.com"
-                autoComplete="email"
+                error={usuarioError}
+                helperText={usuarioErrorMessage}
+                id="usuario_rede"
+                type="text"
+                name="usuario_rede"
+                placeholder="Digite seu usuário"
+                autoComplete="username"
                 autoFocus
                 required
                 fullWidth
                 variant="outlined"
-                color={emailError ? 'error' : 'primary'}
+                color={usuarioError ? 'error' : 'primary'}
               />
             </FormControl>
             <FormControl>
-              <FormLabel htmlFor="password">Password</FormLabel>
+              <FormLabel htmlFor="senha">Senha</FormLabel>
               <TextField
-                error={passwordError}
-                helperText={passwordErrorMessage}
-                name="password"
-                placeholder="••••••"
+                error={senhaError}
+                helperText={senhaErrorMessage}
+                name="senha"
+                placeholder="Digite sua senha"
                 type="password"
-                id="password"
+                id="senha"
                 autoComplete="current-password"
-                autoFocus
                 required
                 fullWidth
                 variant="outlined"
-                color={passwordError ? 'error' : 'primary'}
+                color={senhaError ? 'error' : 'primary'}
               />
             </FormControl>
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            />
-            <ForgotPassword open={open} handleClose={handleClose} />
+            {errorMessage && (
+              <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+                {errorMessage}
+              </Typography>
+            )}
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              onClick={validateInputs}
+              disabled={loginMutation.isPending}
             >
-              Sign in
+              {loginMutation.isPending ? 'Entrando...' : 'Entrar'}
             </Button>
-            <Link
-              component="button"
-              type="button"
-              onClick={handleClickOpen}
-              variant="body2"
-              sx={{ alignSelf: 'center' }}
-            >
-              Forgot your password?
-            </Link>
-          </Box>
-          <Divider>or</Divider>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => alert('Sign in with Google')}
-              startIcon={<GoogleIcon />}
-            >
-              Sign in with Google
-            </Button>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => alert('Sign in with Facebook')}
-              startIcon={<FacebookIcon />}
-            >
-              Sign in with Facebook
-            </Button>
-            <Typography sx={{ textAlign: 'center' }}>
-              Don&apos;t have an account?{' '}
-              <Link
-                href="/material-ui/getting-started/templates/sign-in/"
-                variant="body2"
-                sx={{ alignSelf: 'center' }}
-              >
-                Sign up
-              </Link>
-            </Typography>
           </Box>
         </Card>
       </SignInContainer>
