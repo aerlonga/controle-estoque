@@ -68,7 +68,7 @@ function Equipments() {
                 </Button>
             </Box>
 
-            <Paper elevation={2} sx={{ width: '100%', overflow: 'hidden' }}>
+            <Paper elevation={2} sx={{ width: '100%' }}>
                 <EquipmentsDataGrid
                     equipments={data?.data || []}
                     loading={isLoading}
