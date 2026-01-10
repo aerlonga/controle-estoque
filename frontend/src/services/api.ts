@@ -121,3 +121,6 @@ export const movimentacaoService = {
         return response.data
     },
 }
+
+export { analyticsService } from './analyticsService'
+

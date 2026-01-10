@@ -5,6 +5,7 @@ const authRoutes = require('./authRoutes');
 const usuarioRoutes = require('./usuarioRoutes');
 const equipamentoRoutes = require('./equipamentoRoutes');
 const movimentacaoRoutes = require('./movimentacaoRoutes');
+const analyticsRoutes = require('./analyticsRoutes');
 const authMiddleware = require('../middlewares/authMiddleware');
 
 /**
@@ -19,6 +20,7 @@ router.use('/auth', authRoutes);
 router.use('/usuarios', authMiddleware, usuarioRoutes);
 router.use('/equipamentos', authMiddleware, equipamentoRoutes);
 router.use('/movimentacoes', authMiddleware, movimentacaoRoutes);
+router.use('/analytics', authMiddleware, analyticsRoutes);
 
 module.exports = router;
 
