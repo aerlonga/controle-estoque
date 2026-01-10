@@ -44,7 +44,7 @@ export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobilePro
           maxWidth: { xs: '70dvw', md: '100%' },
           height: '100%',
         }}
-      >Dashboard
+      >
         <Stack direction="row" sx={{ p: 2, pb: 0, gap: 1 }}>
           <Stack
             direction="row"

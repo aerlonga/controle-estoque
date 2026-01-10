@@ -55,7 +55,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                             mt: { xs: 8, md: 8 },
                         }}
                     >
-                        <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
+                        <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '100%' } }}>
                             <NavbarBreadcrumbs />
                         </Box>
                         {children}
