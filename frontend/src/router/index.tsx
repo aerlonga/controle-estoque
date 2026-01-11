@@ -4,11 +4,18 @@ import { CircularProgress, Box } from '@mui/material'
 import SignIn from '../sign-in/SignIn'
 import AppLayout from '../layouts/AppLayout'
 import { useAuthStore } from '../store/authStore'
+import NotificationsProvider from '../equipamentos/hooks/useNotifications/NotificationsProvider'
+import DialogsProvider from '../equipamentos/hooks/useDialogs/DialogsProvider'
 
 const Dashboard = lazy(() => import('../pages/Dashboard'))
 const Users = lazy(() => import('../pages/Users'))
-const Equipments = lazy(() => import('../pages/Equipments'))
 const dashboardTeste = lazy(() => import('../pages/dashboard-teste'))
+
+// Equipment components from MUI template
+const EquipmentList = lazy(() => import('../equipamentos/components/EquipmentList'))
+const EquipmentCreate = lazy(() => import('../equipamentos/components/EquipmentCreate'))
+const EquipmentEdit = lazy(() => import('../equipamentos/components/EquipmentEdit'))
+const EquipmentShow = lazy(() => import('../equipamentos/components/EquipmentShow'))
 
 const LoadingFallback = () => (
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
@@ -26,9 +33,13 @@ const rootRoute = createRootRoute({
 
         return (
             <AppLayout>
-                <Suspense fallback={<LoadingFallback />}>
-                    <Outlet />
-                </Suspense>
+                <NotificationsProvider>
+                    <DialogsProvider>
+                        <Suspense fallback={<LoadingFallback />}>
+                            <Outlet />
+                        </Suspense>
+                    </DialogsProvider>
+                </NotificationsProvider>
             </AppLayout>
         )
     },
@@ -58,6 +69,7 @@ const usersRoute = createRoute({
     component: Users,
 })
 
+// Equipment routes
 const equipmentsRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/equipments',
@@ -67,10 +79,54 @@ const equipmentsRoute = createRoute({
             throw redirect({ to: '/' })
         }
     },
-    component: Equipments,
+    component: EquipmentList,
 })
 
-const routeTree = rootRoute.addChildren([dashboardRoute, usersRoute, equipmentsRoute, dashboardTesteRoute])
+const equipmentNewRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/equipments/new',
+    beforeLoad: () => {
+        const { isAuthenticated } = useAuthStore.getState()
+        if (!isAuthenticated) {
+            throw redirect({ to: '/' })
+        }
+    },
+    component: EquipmentCreate,
+})
+
+const equipmentShowRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/equipments/$id',
+    beforeLoad: () => {
+        const { isAuthenticated } = useAuthStore.getState()
+        if (!isAuthenticated) {
+            throw redirect({ to: '/' })
+        }
+    },
+    component: EquipmentShow,
+})
+
+const equipmentEditRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/equipments/$id/edit',
+    beforeLoad: () => {
+        const { isAuthenticated } = useAuthStore.getState()
+        if (!isAuthenticated) {
+            throw redirect({ to: '/' })
+        }
+    },
+    component: EquipmentEdit,
+})
+
+const routeTree = rootRoute.addChildren([
+    dashboardRoute,
+    usersRoute,
+    equipmentsRoute,
+    equipmentNewRoute,
+    equipmentShowRoute,
+    equipmentEditRoute,
+    dashboardTesteRoute,
+])
 
 export const router = createRouter({
     routeTree,

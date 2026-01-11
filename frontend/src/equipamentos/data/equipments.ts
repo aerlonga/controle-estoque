@@ -1,0 +1,69 @@
+/**
+ * Data layer para Equipamentos
+ * Wrapper simples que usa o equipamentoService existente
+ * Todo processamento de dados é feito no backend
+ */
+
+import { equipamentoService } from '../../services/api';
+import type { Equipamento, EquipamentoFormData } from '../../types/api';
+
+export type Equipment = Equipamento;
+
+export interface GetManyParams {
+    paginationModel?: { page: number; pageSize: number };
+    sortModel?: { field: string; sort: 'asc' | 'desc' }[];
+    filterModel?: { items: { field: string; operator: string; value: string }[] };
+}
+
+export interface GetManyResult {
+    items: Equipment[];
+    itemCount: number;
+}
+
+export async function getMany(params?: GetManyParams): Promise<GetManyResult> {
+    const response = await equipamentoService.listar();
+    const items = response.data || [];
+
+    return {
+        items,
+        itemCount: items.length,
+    };
+}
+
+export async function getOne(id: number): Promise<Equipment> {
+    const response = await equipamentoService.buscarPorId(id);
+    return response.data;
+}
+
+export async function createOne(data: EquipamentoFormData): Promise<Equipment> {
+    const response = await equipamentoService.criar(data);
+    return response.data;
+}
+
+export async function updateOne(id: number, data: Partial<EquipamentoFormData>): Promise<Equipment> {
+    const response = await equipamentoService.atualizar(id, data);
+    return response.data;
+}
+
+export async function deleteOne(id: number): Promise<void> {
+    await equipamentoService.descartar(id);
+}
+
+// Validação simples no frontend (validação completa é feita no backend)
+export function validate(values: Partial<EquipamentoFormData>): { issues?: { path: string[]; message: string }[] } {
+    const issues: { path: string[]; message: string }[] = [];
+
+    if (!values.nome || values.nome.trim().length < 3) {
+        issues.push({ path: ['nome'], message: 'Nome deve ter pelo menos 3 caracteres' });
+    }
+
+    if (!values.modelo || values.modelo.trim().length < 2) {
+        issues.push({ path: ['modelo'], message: 'Modelo deve ter pelo menos 2 caracteres' });
+    }
+
+    if (!values.numero_serie || values.numero_serie.trim().length < 3) {
+        issues.push({ path: ['numero_serie'], message: 'Número de série deve ter pelo menos 3 caracteres' });
+    }
+
+    return issues.length > 0 ? { issues } : {};
+}

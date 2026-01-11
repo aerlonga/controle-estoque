@@ -1,5 +1,8 @@
 FROM node:22-alpine
 
+# Instala bash para facilidade de uso
+RUN apk add --no-cache bash
+
 WORKDIR /app
 
 # Copia package.json e package-lock.json
