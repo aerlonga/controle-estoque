@@ -12,7 +12,7 @@ import {
   useSplitFieldProps,
 } from '@mui/x-date-pickers';
 
-interface ButtonFieldProps extends DatePickerFieldProps {}
+interface ButtonFieldProps extends DatePickerFieldProps { }
 
 function ButtonField(props: ButtonFieldProps) {
   const { forwardedProps } = useSplitFieldProps(props, 'date');
@@ -22,7 +22,7 @@ function ButtonField(props: ButtonFieldProps) {
   const valueStr =
     pickerContext.value == null
       ? parsedFormat
-      : pickerContext.value.format(pickerContext.fieldFormat);
+      : dayjs(pickerContext.value).format(pickerContext.fieldFormat);
 
   return (
     <Button
@@ -47,7 +47,7 @@ export default function CustomDatePicker() {
       <DatePicker
         value={value}
         label={value == null ? null : value.format('MMM DD, YYYY')}
-        onChange={(newValue) => setValue(newValue)}
+        onChange={(newValue) => setValue(newValue as Dayjs | null)}
         slots={{ field: ButtonField }}
         slotProps={{
           nextIconButton: { size: 'small' },
