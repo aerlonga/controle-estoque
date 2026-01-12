@@ -58,45 +58,67 @@ const equipamentoService = {
     },
 
     async listarAtivos(filtros = {}, page = 1, limit = 10) {
-        const { status, usuario_id } = filtros;
+        try {
+            const { status, usuario_id } = filtros;
 
-        const where = {
-            status: {
-                not: 'DESCARTADO'
-            }
-        };
-
-        if (status && ['NO_DEPOSITO', 'FORA_DEPOSITO'].includes(status)) {
-            where.status = status;
-        }
-
-        if (usuario_id) {
-            where.usuario_id = parseInt(usuario_id);
-        }
-
-        const [data, meta] = await prisma.equipamento
-            .paginate({
-                where,
-                include: {
-                    usuario: {
-                        select: {
-                            id: true,
-                            nome: true,
-                            usuario_rede: true
-                        }
-                    }
-                },
-                orderBy: {
-                    created_at: 'desc'
+            const where = {
+                status: {
+                    not: 'DESCARTADO'
                 }
-            })
-            .withPages({
-                limit,
-                page,
-                includePageCount: true
-            });
+            };
 
-        return { data, meta };
+            if (status && ['NO_DEPOSITO', 'FORA_DEPOSITO'].includes(status)) {
+                where.status = status;
+            }
+
+            if (usuario_id) {
+                where.usuario_id = parseInt(usuario_id);
+            }
+
+            // Calcular total de registros correspondentes para preencher corretamente meta.total
+            const totalCount = await prisma.equipamento.count({ where });
+
+            const [data, meta] = await prisma.equipamento
+                .paginate({
+                    where,
+                    include: {
+                        usuario: {
+                            select: {
+                                id: true,
+                                nome: true,
+                                usuario_rede: true
+                            }
+                        }
+                    },
+                    orderBy: {
+                        created_at: 'desc'
+                    }
+                })
+                .withPages({
+                    limit: parseInt(limit),
+                    page: parseInt(page),
+                    includePageCount: true
+                });
+
+            // Normalizar e garantir formato consistente com total e totalPages corretos
+            const normalizedMeta = meta || {};
+            normalizedMeta.total = Number.isInteger(normalizedMeta.total) && normalizedMeta.total > 0
+                ? normalizedMeta.total
+                : totalCount;
+            normalizedMeta.page = parseInt(page);
+            normalizedMeta.limit = parseInt(limit);
+            normalizedMeta.totalPages = normalizedMeta.totalPages || Math.max(1, Math.ceil(totalCount / parseInt(limit)));
+            normalizedMeta.isFirstPage = normalizedMeta.page <= 1;
+            normalizedMeta.isLastPage = normalizedMeta.page >= normalizedMeta.totalPages;
+
+            return {
+                data: Array.isArray(data) ? data : [],
+                meta: normalizedMeta,
+            };
+        } catch (error) {
+            console.error('Erro no equipamentoService.listarAtivos:', error);
+            throw error;
+        }
     },
 
     async buscarPorId(id) {

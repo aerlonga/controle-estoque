@@ -4,7 +4,7 @@ const equipamentoController = {
     async criar(req, res) {
         try {
             const equipamento = await equipamentoService.criar(req.body);
-            return res.status(201).json(equipamento);
+            return res.status(201).json({ data: equipamento });
         } catch (error) {
             return res.status(400).json({ error: error.message });
         }
@@ -20,15 +20,30 @@ const equipamentoController = {
             };
 
             const result = await equipamentoService.listarAtivos(filtros, page, limit);
-            return res.status(200).json(result);
+
+            // Garantir que a resposta sempre tenha data e meta
+            return res.status(200).json({
+                data: result.data || [],
+                meta: result.meta || {
+                    total: 0,
+                    page: page,
+                    limit: limit,
+                    totalPages: 0
+                }
+            });
         } catch (error) {
-            return res.status(500).json({ error: error.message });
+            console.error('Erro ao listar equipamentos:', error);
+            return res.status(500).json({
+                error: error.message,
+                data: [],
+                meta: { total: 0, page: 1, limit: 10, totalPages: 0 }
+            });
         }
     },
     async buscarPorId(req, res) {
         try {
             const equipamento = await equipamentoService.buscarPorId(req.params.id);
-            return res.status(200).json(equipamento);
+            return res.status(200).json({ data: equipamento });
         } catch (error) {
             return res.status(404).json({ error: error.message });
         }
@@ -37,7 +52,7 @@ const equipamentoController = {
         try {
             const usuario_id_logado = req.user.id; // Extrai ID do usuário autenticado
             const equipamento = await equipamentoService.atualizar(req.params.id, req.body, usuario_id_logado);
-            return res.status(200).json(equipamento);
+            return res.status(200).json({ data: equipamento });
         } catch (error) {
             return res.status(400).json({ error: error.message });
         }
@@ -46,7 +61,7 @@ const equipamentoController = {
         try {
             const usuario_id_logado = req.user.id; // Extrai ID do usuário autenticado
             const resultado = await equipamentoService.descartar(req.params.id, usuario_id_logado);
-            return res.status(200).json(resultado);
+            return res.status(200).json({ data: resultado });
         } catch (error) {
             return res.status(404).json({ error: error.message });
         }

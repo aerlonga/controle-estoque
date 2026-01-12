@@ -283,14 +283,15 @@ export default function EquipmentShow() {
         handleMovement,
     ]);
 
-    const pageTitle = `Equipamento ${equipmentId}`;
+    const equipmentName = equipment?.nome ?? '';
+    const pageTitle = equipmentName || `Equipamento ${equipmentId}`;
 
     return (
         <PageContainer
             title={pageTitle}
             breadcrumbs={[
                 { title: 'Equipamentos', path: '/equipments' },
-                { title: pageTitle },
+                { title: pageTitle, path: `/equipments/${equipmentId}` },
             ]}
         >
             <Box sx={{ display: 'flex', flex: 1, width: '100%' }}>{renderShow}</Box>

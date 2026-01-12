@@ -1,10 +1,8 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import FormControl from '@mui/material/FormControl';
 import FormGroup from '@mui/material/FormGroup';
-import FormHelperText from '@mui/material/FormHelperText';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid'; 
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -30,6 +28,43 @@ export interface EquipmentFormProps {
     backButtonPath?: string;
 }
 
+const textFieldStyle = {
+    '& .MuiInputLabel-root': {
+        fontSize: '1.1rem',
+        color: '#94a3b8', // Cor suave para o estado parado
+        transform: 'translate(14px, 16px) scale(1)',
+        transition: 'all 0.2s ease-out',
+    },
+    '& .MuiInputLabel-shrink': {
+        // EFEITO DE CÁPSULA:
+        fontSize: '1rem',
+        transform: 'translate(14px, -10px) scale(0.85)', // Sobe exatamente em cima da borda
+        backgroundColor: '#020617', // DEVE SER A MESMA COR DO FUNDO DO SEU FORM
+        padding: '0 8px',            // Espaço nas laterais para "quebrar" a borda
+        borderRadius: '10px',        // Arredonda o fundo do label
+        zIndex: 1,                   // Garante que fique acima da linha da borda
+        color: '#3b82f6',            // Cor de destaque ao subir (azul)
+    },
+    '& .MuiOutlinedInput-root': {
+        height: '56px',
+        fontSize: '1.1rem',
+        backgroundColor: 'transparent',
+        '& fieldset': {
+            borderColor: 'rgba(255, 255, 255, 0.2)', // Borda discreta
+        },
+        '&:hover fieldset': {
+            borderColor: 'rgba(255, 255, 255, 0.4)',
+        },
+        '&.Mui-focused fieldset': {
+            borderWidth: '2px',
+        },
+        '& input': {
+            padding: '12px 14px', 
+            color: '#f8fafc',
+        },
+    },
+};
+
 export default function EquipmentForm(props: EquipmentFormProps) {
     const {
         formState,
@@ -44,13 +79,11 @@ export default function EquipmentForm(props: EquipmentFormProps) {
     const formErrors = formState.errors;
 
     const navigate = useNavigate();
-
     const [isSubmitting, setIsSubmitting] = React.useState(false);
 
     const handleSubmit = React.useCallback(
         async (event: React.FormEvent<HTMLFormElement>) => {
             event.preventDefault();
-
             setIsSubmitting(true);
             try {
                 await onSubmit(formValues);
@@ -72,9 +105,7 @@ export default function EquipmentForm(props: EquipmentFormProps) {
     );
 
     const handleReset = React.useCallback(() => {
-        if (onReset) {
-            onReset(formValues);
-        }
+        if (onReset) onReset(formValues);
     }, [formValues, onReset]);
 
     const handleBack = React.useCallback(() => {
@@ -91,8 +122,8 @@ export default function EquipmentForm(props: EquipmentFormProps) {
             sx={{ width: '100%' }}
         >
             <FormGroup>
-                <Grid container spacing={2} sx={{ mb: 2, width: '100%' }}>
-                    <Grid size={{ xs: 12, sm: 6 }} sx={{ display: 'flex' }}>
+                <Grid container spacing={3} sx={{ mb: 4, width: '100%' }}>
+                    <Grid component="div" size={{ xs: 12, sm: 6 }}>
                         <TextField
                             value={formValues.nome ?? ''}
                             onChange={handleTextFieldChange}
@@ -102,9 +133,10 @@ export default function EquipmentForm(props: EquipmentFormProps) {
                             helperText={formErrors.nome ?? ' '}
                             fullWidth
                             required
+                            sx={textFieldStyle}
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6 }} sx={{ display: 'flex' }}>
+                    <Grid component="div" size={{ xs: 12, sm: 6 }}>
                         <TextField
                             value={formValues.modelo ?? ''}
                             onChange={handleTextFieldChange}
@@ -114,9 +146,10 @@ export default function EquipmentForm(props: EquipmentFormProps) {
                             helperText={formErrors.modelo ?? ' '}
                             fullWidth
                             required
+                            sx={textFieldStyle}
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6 }} sx={{ display: 'flex' }}>
+                    <Grid component="div" size={{ xs: 12, sm: 6 }}>
                         <TextField
                             value={formValues.numero_serie ?? ''}
                             onChange={handleTextFieldChange}
@@ -126,9 +159,10 @@ export default function EquipmentForm(props: EquipmentFormProps) {
                             helperText={formErrors.numero_serie ?? ' '}
                             fullWidth
                             required
+                            sx={textFieldStyle}
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6 }} sx={{ display: 'flex' }}>
+                    <Grid component="div" size={{ xs: 12, sm: 6 }}>
                         <TextField
                             value={formValues.patrimonio ?? ''}
                             onChange={handleTextFieldChange}
@@ -137,9 +171,10 @@ export default function EquipmentForm(props: EquipmentFormProps) {
                             error={!!formErrors.patrimonio}
                             helperText={formErrors.patrimonio ?? ' '}
                             fullWidth
+                            sx={textFieldStyle}
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6 }} sx={{ display: 'flex' }}>
+                    <Grid component="div" size={{ xs: 12, sm: 12 }}>
                         <TextField
                             value={formValues.local ?? ''}
                             onChange={handleTextFieldChange}
@@ -148,25 +183,42 @@ export default function EquipmentForm(props: EquipmentFormProps) {
                             error={!!formErrors.local}
                             helperText={formErrors.local ?? ' '}
                             fullWidth
+                            sx={textFieldStyle}
                         />
                     </Grid>
                 </Grid>
             </FormGroup>
+
             <Stack direction="row" spacing={2} justifyContent="space-between">
                 <Button
                     variant="contained"
                     startIcon={<ArrowBackIcon />}
                     onClick={handleBack}
+                    sx={{ 
+                        bgcolor: '#1e293b', 
+                        '&:hover': { bgcolor: '#334155' },
+                        textTransform: 'none',
+                        px: 4,
+                        py: 1.5,
+                        borderRadius: '8px'
+                    }}
                 >
                     Voltar
                 </Button>
                 <Button
                     type="submit"
                     variant="contained"
-                    size="large"
-                    loading={isSubmitting}
+                    disabled={isSubmitting}
+                    sx={{ 
+                        textTransform: 'none', 
+                        px: 6,
+                        py: 1.5,
+                        borderRadius: '8px',
+                        fontSize: '1rem',
+                        fontWeight: '600'
+                    }}
                 >
-                    {submitButtonLabel}
+                    {isSubmitting ? 'Cadastrando...' : submitButtonLabel}
                 </Button>
             </Stack>
         </Box>

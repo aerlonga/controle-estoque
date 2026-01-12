@@ -50,8 +50,12 @@ export const usuarioService = {
 }
 
 export const equipamentoService = {
-    async listar(): Promise<ApiResponse<Equipamento[]>> {
-        const response = await api.get<ApiResponse<Equipamento[]>>('/equipamentos')
+    async listar(
+        params: Record<string, any> = {}
+    ): Promise<{ data: Equipamento[]; meta: any }> {
+        const response = await api.get<{ data: Equipamento[]; meta: any }>('/equipamentos', {
+            params,
+        })
         return response.data
     },
 

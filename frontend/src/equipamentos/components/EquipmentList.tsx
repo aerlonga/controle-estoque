@@ -122,7 +122,6 @@ export default function EquipmentList() {
     React.useEffect(() => {
         loadData();
     }, [loadData]);
-
     const handleRefresh = React.useCallback(() => {
         if (!isLoading) {
             loadData();
@@ -312,7 +311,8 @@ export default function EquipmentList() {
     return (
         <PageContainer
             title={pageTitle}
-            breadcrumbs={[{ title: pageTitle }]}
+            // breadcrumbs={[{ title: pageTitle }]}
+            fullWidth
             actions={
                 <Stack direction="row" alignItems="center" spacing={1}>
                     <Tooltip title="Atualizar dados" placement="right" enterDelay={1000}>
@@ -327,7 +327,7 @@ export default function EquipmentList() {
                         onClick={handleCreateClick}
                         startIcon={<AddIcon />}
                     >
-                        Cadastrar
+                        Cadastrar Equipamento
                     </Button>
                 </Stack>
             }
@@ -343,9 +343,9 @@ export default function EquipmentList() {
                         rowCount={rowsState.rowCount}
                         columns={columns}
                         pagination
-                        sortingMode="client"
-                        filterMode="client"
-                        paginationMode="client"
+                        sortingMode="server"
+                        filterMode="server"
+                        paginationMode="server"
                         paginationModel={paginationModel}
                         onPaginationModelChange={handlePaginationModelChange}
                         sortModel={sortModel}

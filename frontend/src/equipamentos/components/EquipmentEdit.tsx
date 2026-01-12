@@ -22,7 +22,8 @@ function EquipmentEditForm({
     onSubmit,
     equipmentId,
 }: {
-    initialValues: Partial<EquipmentFormState['values']>;
+    // Aceitar tanto o tipo de formulário quanto o tipo retornado pela API
+    initialValues: Partial<EquipmentFormState['values']> | Partial<EquipamentoFormData>;
     onSubmit: (formValues: Partial<EquipmentFormState['values']>) => Promise<void>;
     equipmentId: string;
 }) {
@@ -128,6 +129,9 @@ export default function EquipmentEdit() {
     const [isLoading, setIsLoading] = React.useState(true);
     const [error, setError] = React.useState<Error | null>(null);
 
+    // Nome do equipamento derivado do objeto carregado (usado no título/breadcrumbs)
+    const equipmentName = equipment?.nome ?? '';
+
     const loadData = React.useCallback(async () => {
         setError(null);
         setIsLoading(true);
@@ -151,6 +155,16 @@ export default function EquipmentEdit() {
             setEquipment(updatedData);
         },
         [equipmentId],
+    );
+
+    const sanitizeEquipmentForForm = React.useCallback(
+        (e: Equipment | null) =>
+            e
+                ? (Object.fromEntries(
+                    Object.entries(e).map(([k, v]) => [k, v === null ? undefined : v]),
+                ) as Partial<EquipamentoFormData>)
+                : {},
+        [],
     );
 
     const renderEdit = React.useMemo(() => {
@@ -181,7 +195,7 @@ export default function EquipmentEdit() {
 
         return equipment ? (
             <EquipmentEditForm
-                initialValues={equipment}
+                initialValues={sanitizeEquipmentForForm(equipment)}
                 onSubmit={handleSubmit}
                 equipmentId={equipmentId}
             />
@@ -190,10 +204,10 @@ export default function EquipmentEdit() {
 
     return (
         <PageContainer
-            title={`Editar Equipamento ${equipmentId}`}
+            title={`Editar ${equipmentName || `Equipamento ${equipmentId}`}`}
             breadcrumbs={[
                 { title: 'Equipamentos', path: '/equipments' },
-                { title: `Equipamento ${equipmentId}`, path: `/equipments/${equipmentId}` },
+                { title: equipmentName || `Equipamento ${equipmentId}`, path: `/equipments/${equipmentId}` },
                 { title: 'Editar' },
             ]}
         >

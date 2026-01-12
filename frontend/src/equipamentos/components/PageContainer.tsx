@@ -45,13 +45,19 @@ export interface PageContainerProps extends ContainerProps {
   title?: string;
   breadcrumbs?: Breadcrumb[];
   actions?: React.ReactNode;
+  fullWidth?: boolean;
 }
 
 export default function PageContainer(props: PageContainerProps) {
   const { children, breadcrumbs, title, actions = null } = props;
 
+  const { fullWidth = false } = props;
+
   return (
-    <Container sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+    <Container
+      maxWidth={fullWidth ? false : 'lg'}
+      sx={{ flex: 1, display: 'flex', flexDirection: 'column', px: fullWidth ? 3 : undefined }}
+    >
       <Stack sx={{ flex: 1, my: 2 }} spacing={2}>
         <Stack>
           <PageHeaderBreadcrumbs

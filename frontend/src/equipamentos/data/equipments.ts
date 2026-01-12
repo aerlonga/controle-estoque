@@ -20,14 +20,32 @@ export interface GetManyResult {
     itemCount: number;
 }
 
-export async function getMany(params?: GetManyParams): Promise<GetManyResult> {
-    const response = await equipamentoService.listar();
-    const items = response.data || [];
+export async function getMany(params: GetManyParams = {}): Promise<GetManyResult> {
+    try {
+        const { paginationModel = { page: 0, pageSize: 10 } } = params;
 
-    return {
-        items,
-        itemCount: items.length,
-    };
+        const queryParams: Record<string, any> = {
+            page: paginationModel.page + 1, 
+            limit: paginationModel.pageSize,
+        };
+
+        const response = await equipamentoService.listar(queryParams);
+
+        const items = Array.isArray(response.data) ? response.data : [];
+        const itemCount = response.meta?.total ?? 0;
+
+
+        return {
+            items,
+            itemCount,
+        };
+    } catch (error) {
+        console.error('Erro ao buscar equipamentos:', error);
+        return {
+            items: [],
+            itemCount: 0,
+        };
+    }
 }
 
 export async function getOne(id: number): Promise<Equipment> {

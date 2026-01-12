@@ -10,8 +10,17 @@ import PersonIcon from '@mui/icons-material/Person';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import DescriptionIcon from '@mui/icons-material/Description';
 import LayersIcon from '@mui/icons-material/Layers';
-// Using window.location.pathname since matchPath from react-router is not available
-// import { useLocation } from '@tanstack/react-router';
+function matchPath(pattern: string, pathname: string): boolean {
+  const normalize = (p: string) => p.replace(/\/+$/, '') || '/';
+  const pn = normalize(pathname);
+  if (pattern.endsWith('/*')) {
+    const base = normalize(pattern.slice(0, -2));
+    return pn === base || pn.startsWith(base + '/');
+  }
+  return pn === normalize(pattern);
+}
+
+import { useLocation } from '@tanstack/react-router';
 import DashboardSidebarContext from '../context/DashboardSidebarContext';
 import { DRAWER_WIDTH, MINI_DRAWER_WIDTH } from '../constants';
 import DashboardSidebarPageItem from './DashboardSidebarPageItem';
