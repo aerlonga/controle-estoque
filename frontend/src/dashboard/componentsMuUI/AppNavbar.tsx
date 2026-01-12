@@ -11,6 +11,7 @@ import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import SideMenuMobile from '../components/SideMenuMobile';
 import MenuButton from '../components/MenuButton';
 import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
+import { usePageTitle } from '../../contexts/PageTitleContext';
 
 const Toolbar = styled(MuiToolbar)({
   width: '100%',
@@ -30,6 +31,7 @@ const Toolbar = styled(MuiToolbar)({
 
 export default function AppNavbar() {
   const [open, setOpen] = React.useState(false);
+  const { menuTitle } = usePageTitle();
 
   const toggleDrawer = (newOpen: boolean) => () => {
     setOpen(newOpen);
@@ -67,7 +69,7 @@ export default function AppNavbar() {
             sx={{ justifyContent: 'center', mr: 'auto' }}
           >
             <Typography variant="h4" component="h1" sx={{ color: 'text.primary' }}>
-              Dashboard
+              {menuTitle}
             </Typography>
           </Stack>
           <ColorModeIconDropdown />

@@ -26,6 +26,7 @@ import {
 import PageContainer from './PageContainer';
 import MovementDialog from './MovementDialog';
 import type { TipoMovimentacao } from '../../types/api';
+import { usePageTitle } from '../../contexts/PageTitleContext';
 
 const statusConfig: Record<string, { label: string; color: 'success' | 'warning' | 'error' | 'default' }> = {
     NO_DEPOSITO: { label: 'No Depósito', color: 'success' },
@@ -40,14 +41,18 @@ export default function EquipmentShow() {
 
     const dialogs = useDialogs();
     const notifications = useNotifications();
+    const { setMenuTitle } = usePageTitle();
 
     const [equipment, setEquipment] = React.useState<Equipment | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
     const [error, setError] = React.useState<Error | null>(null);
 
-    // Movement dialog state
     const [movementDialogOpen, setMovementDialogOpen] = React.useState(false);
     const [tipoMovimentacao, setTipoMovimentacao] = React.useState<TipoMovimentacao | null>(null);
+
+    React.useEffect(() => {
+        setMenuTitle('Equipamentos');
+    }, [setMenuTitle]);
 
     const loadData = React.useCallback(async () => {
         setError(null);
@@ -289,10 +294,6 @@ export default function EquipmentShow() {
     return (
         <PageContainer
             title={pageTitle}
-            breadcrumbs={[
-                { title: 'Equipamentos', path: '/equipments' },
-                { title: pageTitle, path: `/equipments/${equipmentId}` },
-            ]}
         >
             <Box sx={{ display: 'flex', flex: 1, width: '100%' }}>{renderShow}</Box>
 

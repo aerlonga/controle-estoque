@@ -12,6 +12,7 @@ import EquipmentForm, {
 } from './EquipmentForm';
 import PageContainer from './PageContainer';
 import type { EquipamentoFormData } from '../../types/api';
+import { usePageTitle } from '../../contexts/PageTitleContext';
 
 const INITIAL_FORM_VALUES: Partial<EquipamentoFormData> = {
     nome: '',
@@ -25,6 +26,7 @@ export default function EquipmentCreate() {
     const navigate = useNavigate();
     const notifications = useNotifications();
     const { user } = useAuthStore();
+    const { setMenuTitle } = usePageTitle();
 
     const [formState, setFormState] = React.useState<EquipmentFormState>(() => ({
         values: INITIAL_FORM_VALUES,
@@ -32,6 +34,10 @@ export default function EquipmentCreate() {
     }));
     const formValues = formState.values;
     const formErrors = formState.errors;
+
+    React.useEffect(() => {
+        setMenuTitle('Equipamentos');
+    }, [setMenuTitle]);
 
     const setFormValues = React.useCallback(
         (newFormValues: Partial<EquipmentFormState['values']>) => {
@@ -114,7 +120,6 @@ export default function EquipmentCreate() {
     return (
         <PageContainer
             title="Novo Equipamento"
-            breadcrumbs={[{ title: 'Equipamentos', path: '/equipments' }, { title: 'Novo' }]}
         >
             <EquipmentForm
                 formState={formState}

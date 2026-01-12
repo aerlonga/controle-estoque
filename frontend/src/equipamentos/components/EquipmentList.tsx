@@ -32,6 +32,7 @@ import {
 } from '../data/equipments';
 import PageContainer from './PageContainer';
 import MovementDialog from './MovementDialog';
+import { usePageTitle } from '../../contexts/PageTitleContext';
 
 const INITIAL_PAGE_SIZE = 10;
 
@@ -46,6 +47,7 @@ export default function EquipmentList() {
 
     const dialogs = useDialogs();
     const notifications = useNotifications();
+    const { setMenuTitle } = usePageTitle();
 
     const [paginationModel, setPaginationModel] = React.useState<GridPaginationModel>({
         page: 0,
@@ -65,10 +67,13 @@ export default function EquipmentList() {
     const [isLoading, setIsLoading] = React.useState(true);
     const [error, setError] = React.useState<Error | null>(null);
 
-    // Movement dialog state
     const [movementDialogOpen, setMovementDialogOpen] = React.useState(false);
     const [selectedEquipment, setSelectedEquipment] = React.useState<Equipment | null>(null);
     const [tipoMovimentacao, setTipoMovimentacao] = React.useState<'ENTRADA' | 'SAIDA' | null>(null);
+
+    React.useEffect(() => {
+        setMenuTitle('Equipamentos');
+    }, [setMenuTitle]);
 
     const handlePaginationModelChange = React.useCallback(
         (model: GridPaginationModel) => {

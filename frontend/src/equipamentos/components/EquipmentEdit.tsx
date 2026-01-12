@@ -16,6 +16,7 @@ import EquipmentForm, {
 } from './EquipmentForm';
 import PageContainer from './PageContainer';
 import type { EquipamentoFormData } from '../../types/api';
+import { usePageTitle } from '../../contexts/PageTitleContext';
 
 function EquipmentEditForm({
     initialValues,
@@ -124,13 +125,23 @@ function EquipmentEditForm({
 export default function EquipmentEdit() {
     const params = useParams({ strict: false });
     const equipmentId = (params as { id?: string }).id || '';
+    const { setMenuTitle, setDetailTitle } = usePageTitle();
 
     const [equipment, setEquipment] = React.useState<Equipment | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
     const [error, setError] = React.useState<Error | null>(null);
 
-    // Nome do equipamento derivado do objeto carregado (usado no título/breadcrumbs)
     const equipmentName = equipment?.nome ?? '';
+
+    React.useEffect(() => {
+        setMenuTitle('Equipamentos');
+    }, [setMenuTitle]);
+
+    React.useEffect(() => {
+        if (equipmentName) {
+            setDetailTitle(equipmentName);
+        }
+    }, [equipmentName, setDetailTitle]);
 
     const loadData = React.useCallback(async () => {
         setError(null);
@@ -205,11 +216,6 @@ export default function EquipmentEdit() {
     return (
         <PageContainer
             title={`Editar ${equipmentName || `Equipamento ${equipmentId}`}`}
-            breadcrumbs={[
-                { title: 'Equipamentos', path: '/equipments' },
-                { title: equipmentName || `Equipamento ${equipmentId}`, path: `/equipments/${equipmentId}` },
-                { title: 'Editar' },
-            ]}
         >
             <Box sx={{ display: 'flex', flex: 1 }}>{renderEdit}</Box>
         </PageContainer>

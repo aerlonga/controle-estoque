@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
@@ -18,6 +18,7 @@ import MovimentacoesChart from '../components/charts/MovimentacoesChart'
 import MovimentacoesPorDiaChart from '../components/charts/MovimentacoesPorDiaChart'
 import StatCard from '../dashboard/components/StatCard'
 import EquipamentosPorTipoChart from '../dashboard/components/EquipamentosPorTipoChart'
+import { usePageTitle } from '../contexts/PageTitleContext'
 
 const DATA_COLORS = {
     entrada: '#4e60ff',
@@ -53,6 +54,13 @@ export default function Dashboard() {
     const [periodFilter, setPeriodFilter] = useState<number | 'custom'>(30)
     const [customStartDate, setCustomStartDate] = useState<Date | null>(null)
     const [customEndDate, setCustomEndDate] = useState<Date | null>(new Date())
+    const { setMenuTitle, setDetailTitle } = usePageTitle()
+
+    // Definir menuTitle como Dashboard quando entrar nesta página
+    useEffect(() => {
+        setMenuTitle('Dashboard')
+        setDetailTitle('') // Limpar detailTitle
+    }, [setMenuTitle, setDetailTitle])
 
     // Query para dados de movimentações
     const { data: movimentacoesAnalytics, isLoading: isLoadingMovimentacoes } = useQuery({
