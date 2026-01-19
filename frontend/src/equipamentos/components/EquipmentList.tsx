@@ -15,6 +15,7 @@ import {
     GridSortModel,
     GridEventListener,
     gridClasses,
+    GridRowModel,
 } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -33,6 +34,8 @@ import {
 import PageContainer from './PageContainer';
 import MovementDialog from './MovementDialog';
 import { usePageTitle } from '../../contexts/PageTitleContext';
+import { exportToExcel, exportToPDF } from '../utils/exportHelpers';
+import CustomToolbar from './CustomToolbar';
 
 const INITIAL_PAGE_SIZE = 10;
 
@@ -208,6 +211,38 @@ export default function EquipmentList() {
         handleMovementClose();
     }, [loadData, handleMovementClose]);
 
+    const handleExportExcel = React.useCallback(() => {
+        try {
+            exportToExcel(rowsState.rows, 'equipamentos');
+            notifications.show('Exportado para Excel com sucesso!', {
+                severity: 'success',
+                autoHideDuration: 3000,
+            });
+        } catch (error) {
+            notifications.show('Erro ao exportar para Excel', {
+                severity: 'error',
+                autoHideDuration: 3000,
+            });
+        }
+    }, [rowsState.rows, notifications]);
+
+    const handleExportPDF = React.useCallback(() => {
+        try {
+            exportToPDF(rowsState.rows, 'equipamentos');
+            notifications.show('Exportado para PDF com sucesso!', {
+                severity: 'success',
+                autoHideDuration: 3000,
+            });
+        } catch (error) {
+            notifications.show('Erro ao exportar para PDF', {
+                severity: 'error',
+                autoHideDuration: 3000,
+            });
+        }
+    }, [rowsState.rows, notifications]);
+
+
+
     const initialState = React.useMemo(
         () => ({
             pagination: { paginationModel: { pageSize: INITIAL_PAGE_SIZE } },
@@ -362,6 +397,9 @@ export default function EquipmentList() {
                         loading={isLoading}
                         initialState={initialState}
                         showToolbar
+                        slots={{
+                            toolbar: CustomToolbar,
+                        }}
                         pageSizeOptions={[5, INITIAL_PAGE_SIZE, 25]}
                         sx={{
                             [`& .${gridClasses.columnHeader}, & .${gridClasses.cell}`]: {
@@ -376,6 +414,10 @@ export default function EquipmentList() {
                             },
                         }}
                         slotProps={{
+                            toolbar: {
+                                onExportPDF: handleExportPDF,
+                                onExportExcel: handleExportExcel,
+                            },
                             loadingOverlay: {
                                 variant: 'circular-progress',
                                 noRowsVariant: 'circular-progress',
@@ -386,6 +428,16 @@ export default function EquipmentList() {
                         }}
                         localeText={{
                             noRowsLabel: 'Nenhum equipamento cadastrado',
+                            // Toolbar
+                            toolbarColumns: 'Colunas',
+                            toolbarColumnsLabel: 'Selecionar colunas',
+                            toolbarFilters: 'Filtros',
+                            toolbarFiltersLabel: 'Mostrar filtros',
+                            toolbarDensity: 'Densidade',
+                            toolbarDensityLabel: 'Densidade',
+                            toolbarDensityCompact: 'Compacta',
+                            toolbarDensityStandard: 'Padrão',
+                            toolbarDensityComfortable: 'Confortável',
                         }}
                     />
                 )}
