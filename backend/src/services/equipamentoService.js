@@ -59,7 +59,7 @@ const equipamentoService = {
 
     async listarAtivos(filtros = {}, page = 1, limit = 10) {
         try {
-            const { status, usuario_id } = filtros;
+            const { status, usuario_id, search } = filtros;
 
             const where = {
                 status: {
@@ -73,6 +73,17 @@ const equipamentoService = {
 
             if (usuario_id) {
                 where.usuario_id = parseInt(usuario_id);
+            }
+
+            // Adicionar busca por texto em múltiplos campos
+            if (search && search.trim()) {
+                where.OR = [
+                    { nome: { contains: search.trim(), mode: 'insensitive' } },
+                    { modelo: { contains: search.trim(), mode: 'insensitive' } },
+                    { numero_serie: { contains: search.trim(), mode: 'insensitive' } },
+                    { patrimonio: { contains: search.trim(), mode: 'insensitive' } },
+                    { local: { contains: search.trim(), mode: 'insensitive' } }
+                ];
             }
 
             // Calcular total de registros correspondentes para preencher corretamente meta.total
@@ -117,6 +128,61 @@ const equipamentoService = {
             };
         } catch (error) {
             console.error('Erro no equipamentoService.listarAtivos:', error);
+            throw error;
+        }
+    },
+
+    async listarTodos(filtros = {}) {
+        try {
+            const { status, usuario_id, search } = filtros;
+
+            const where = {
+                status: {
+                    not: 'DESCARTADO'
+                }
+            };
+
+            if (status && ['NO_DEPOSITO', 'FORA_DEPOSITO'].includes(status)) {
+                where.status = status;
+            }
+
+            if (usuario_id) {
+                where.usuario_id = parseInt(usuario_id);
+            }
+
+            // Adicionar busca por texto em múltiplos campos
+            if (search && search.trim()) {
+                where.OR = [
+                    { nome: { contains: search.trim(), mode: 'insensitive' } },
+                    { modelo: { contains: search.trim(), mode: 'insensitive' } },
+                    { numero_serie: { contains: search.trim(), mode: 'insensitive' } },
+                    { patrimonio: { contains: search.trim(), mode: 'insensitive' } },
+                    { local: { contains: search.trim(), mode: 'insensitive' } }
+                ];
+            }
+
+            const data = await prisma.equipamento.findMany({
+                where,
+                include: {
+                    usuario: {
+                        select: {
+                            id: true,
+                            nome: true,
+                            usuario_rede: true
+                        }
+                    }
+                },
+                orderBy: {
+                    created_at: 'desc'
+                }
+            });
+
+            return {
+                data: Array.isArray(data) ? data : [],
+                total: data.length
+            };
+        } catch (error) {
+            console.error('Erro no equipamentoService.listarTodos:', error);
             throw error;
         }
     },

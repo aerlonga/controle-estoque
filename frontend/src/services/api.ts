@@ -6,7 +6,6 @@ import type {
     UsuarioFormData,
     EquipamentoFormData,
     MovimentacaoFormData,
-    LoginFormData,
     AuthResponse,
     ApiResponse,
     MovimentacaoFiltros,
@@ -54,6 +53,15 @@ export const equipamentoService = {
         params: Record<string, any> = {}
     ): Promise<{ data: Equipamento[]; meta: any }> {
         const response = await api.get<{ data: Equipamento[]; meta: any }>('/equipamentos', {
+            params,
+        })
+        return response.data
+    },
+
+    async listarTodos(
+        params: Record<string, any> = {}
+    ): Promise<{ data: Equipamento[]; total: number }> {
+        const response = await api.get<{ data: Equipamento[]; total: number }>('/equipamentos/export/all', {
             params,
         })
         return response.data

@@ -4,6 +4,7 @@
  * Todo processamento de dados é feito no backend
  */
 
+import type { GridFilterModel } from '@mui/x-data-grid';
 import { equipamentoService } from '../../services/api';
 import type { Equipamento, EquipamentoFormData } from '../../types/api';
 
@@ -12,7 +13,7 @@ export type Equipment = Equipamento;
 export interface GetManyParams {
     paginationModel?: { page: number; pageSize: number };
     sortModel?: { field: string; sort: 'asc' | 'desc' }[];
-    filterModel?: { items: { field: string; operator: string; value: string }[] };
+    filterModel?: GridFilterModel;
 }
 
 export interface GetManyResult {
@@ -22,12 +23,24 @@ export interface GetManyResult {
 
 export async function getMany(params: GetManyParams = {}): Promise<GetManyResult> {
     try {
-        const { paginationModel = { page: 0, pageSize: 10 } } = params;
+        const { paginationModel = { page: 0, pageSize: 10 }, filterModel } = params;
 
         const queryParams: Record<string, any> = {
-            page: paginationModel.page + 1, 
+            page: paginationModel.page + 1,
             limit: paginationModel.pageSize,
         };
+
+        // Processar filtros do DataGrid
+        if (filterModel?.items && filterModel.items.length > 0) {
+            const searchFilters = filterModel.items
+                .filter(item => item.value && item.value.trim())
+                .map(item => item.value.trim());
+
+            if (searchFilters.length > 0) {
+                // Combinar todos os filtros em uma única busca
+                queryParams.search = searchFilters.join(' ');
+            }
+        }
 
         const response = await equipamentoService.listar(queryParams);
 
@@ -45,6 +58,33 @@ export async function getMany(params: GetManyParams = {}): Promise<GetManyResult
             items: [],
             itemCount: 0,
         };
+    }
+}
+
+export async function getAll(params: GetManyParams = {}): Promise<Equipment[]> {
+    try {
+        const { filterModel } = params;
+
+        const queryParams: Record<string, any> = {};
+
+        // Processar filtros do DataGrid
+        if (filterModel?.items && filterModel.items.length > 0) {
+            const searchFilters = filterModel.items
+                .filter(item => item.value && item.value.trim())
+                .map(item => item.value.trim());
+
+            if (searchFilters.length > 0) {
+                // Combinar todos os filtros em uma única busca
+                queryParams.search = searchFilters.join(' ');
+            }
+        }
+
+        const response = await equipamentoService.listarTodos(queryParams);
+
+        return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+        console.error('Erro ao buscar todos os equipamentos:', error);
+        return [];
     }
 }
 

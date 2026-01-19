@@ -14,6 +14,8 @@ import Tooltip from '@mui/material/Tooltip';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import TableViewIcon from '@mui/icons-material/TableView';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 
 declare module '@mui/x-data-grid' {
     interface ToolbarPropsOverrides {
@@ -51,8 +53,8 @@ export default function CustomToolbar({ onExportPDF, onExportExcel }: CustomTool
 
     return (
         <Toolbar>
-            <ColumnsPanelTrigger render={<ToolbarButton />} />
-            <FilterPanelTrigger render={<ToolbarButton />} />
+            <ColumnsPanelTrigger render={<ToolbarButton><ViewColumnIcon fontSize="small" /></ToolbarButton>} />
+            <FilterPanelTrigger render={<ToolbarButton><FilterListIcon fontSize="small" /></ToolbarButton>} />
             <Tooltip title="Exportar">
                 <ToolbarButton onClick={handleClick}>
                     <FileDownloadIcon fontSize="small" />
@@ -78,7 +80,6 @@ export default function CustomToolbar({ onExportPDF, onExportExcel }: CustomTool
                     </ListItemIcon>
                     <ListItemText>Excel</ListItemText>
                 </MenuItem>
-                <ExportPrint render={<MenuItem>Imprimir</MenuItem>} />
             </Menu>
         </Toolbar>
     );

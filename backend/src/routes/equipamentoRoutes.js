@@ -7,6 +7,7 @@ const { createEquipamentoSchema, updateEquipamentoSchema } = require('../validat
 
 router.post('/', validate(createEquipamentoSchema), equipamentoController.criar);
 router.get('/', equipamentoController.listarAtivos);
+router.get('/export/all', equipamentoController.listarTodos);
 router.get('/:id', equipamentoController.buscarPorId);
 router.put('/:id', validate(updateEquipamentoSchema), equipamentoController.atualizar);
 router.delete('/:id', equipamentoController.descartar);

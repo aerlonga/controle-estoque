@@ -29,6 +29,7 @@ import useNotifications from '../hooks/useNotifications/useNotifications';
 import {
     deleteOne as deleteEquipment,
     getMany as getEquipments,
+    getAll as getAllEquipments,
     type Equipment,
 } from '../data/equipments';
 import PageContainer from './PageContainer';
@@ -211,35 +212,49 @@ export default function EquipmentList() {
         handleMovementClose();
     }, [loadData, handleMovementClose]);
 
-    const handleExportExcel = React.useCallback(() => {
+    const handleExportExcel = React.useCallback(async () => {
         try {
-            exportToExcel(rowsState.rows, 'equipamentos');
-            notifications.show('Exportado para Excel com sucesso!', {
+            setIsLoading(true);
+            const allData = await getAllEquipments({ filterModel });
+
+            exportToExcel(allData, 'equipamentos');
+            notifications.show(`Exportado ${allData.length} equipamento(s) para Excel com sucesso!`, {
                 severity: 'success',
                 autoHideDuration: 3000,
             });
         } catch (error) {
+            console.error('Erro na exportação:', error);
             notifications.show('Erro ao exportar para Excel', {
                 severity: 'error',
                 autoHideDuration: 3000,
             });
+        } finally {
+            setIsLoading(false);
         }
-    }, [rowsState.rows, notifications]);
+    }, [filterModel, rowsState.rowCount, notifications]);
 
-    const handleExportPDF = React.useCallback(() => {
+    const handleExportPDF = React.useCallback(async () => {
+
         try {
-            exportToPDF(rowsState.rows, 'equipamentos');
-            notifications.show('Exportado para PDF com sucesso!', {
+            setIsLoading(true);
+
+            const allData = await getAllEquipments({ filterModel });
+
+            exportToPDF(allData, 'equipamentos');
+            notifications.show(`Exportado ${allData.length} equipamento(s) para PDF com sucesso!`, {
                 severity: 'success',
                 autoHideDuration: 3000,
             });
         } catch (error) {
+            console.error('Erro na exportação:', error);
             notifications.show('Erro ao exportar para PDF', {
                 severity: 'error',
                 autoHideDuration: 3000,
             });
+        } finally {
+            setIsLoading(false);
         }
-    }, [rowsState.rows, notifications]);
+    }, [filterModel, rowsState.rowCount, notifications]);
 
 
 
@@ -252,16 +267,58 @@ export default function EquipmentList() {
 
     const columns = React.useMemo<GridColDef[]>(
         () => [
-            { field: 'id', headerName: 'ID', width: 80 },
-            { field: 'nome', headerName: 'Nome', minWidth: 140, flex: 1 },
-            { field: 'modelo', headerName: 'Modelo', minWidth: 120, flex: 1 },
-            { field: 'numero_serie', headerName: 'Nº Série', minWidth: 120, flex: 1 },
-            { field: 'patrimonio', headerName: 'Patrimônio', minWidth: 100, flex: 1 },
-            { field: 'local', headerName: 'Local', minWidth: 100, flex: 1 },
+            { field: 'id', headerName: 'ID', width: 80, disableColumnMenu: true, sortable: false },
+            {
+                field: 'nome',
+                headerName: 'Nome',
+                minWidth: 140,
+                flex: 1,
+                disableColumnMenu: true,
+                sortable: false,
+                valueGetter: (value: string) => value || '-'
+            },
+            {
+                field: 'modelo',
+                headerName: 'Modelo',
+                minWidth: 120,
+                flex: 1,
+                disableColumnMenu: true,
+                sortable: false,
+                valueGetter: (value: string) => value || '-'
+            },
+            {
+                field: 'numero_serie',
+                headerName: 'Nº Série',
+                minWidth: 120,
+                flex: 1,
+                disableColumnMenu: true,
+                sortable: false,
+                valueGetter: (value: string) => value || '-'
+            },
+            {
+                field: 'patrimonio',
+                headerName: 'Patrimônio',
+                minWidth: 100,
+                flex: 1,
+                disableColumnMenu: true,
+                sortable: false,
+                valueGetter: (value: string) => value || '-'
+            },
+            {
+                field: 'local',
+                headerName: 'Local',
+                minWidth: 100,
+                flex: 1,
+                disableColumnMenu: true,
+                sortable: false,
+                valueGetter: (value: string) => value || '-'
+            },
             {
                 field: 'status',
                 headerName: 'Status',
                 width: 160,
+                disableColumnMenu: true,
+                sortable: false,
                 renderCell: (params) => {
                     const config = statusConfig[params.value as string] || { label: params.value, color: 'default' as const };
                     return (
@@ -278,18 +335,22 @@ export default function EquipmentList() {
                 headerName: 'Responsável',
                 minWidth: 120,
                 flex: 1,
+                disableColumnMenu: true,
+                sortable: false,
                 valueGetter: (value: { nome?: string } | undefined) => value?.nome || 'N/A',
             },
             {
                 field: 'created_at',
                 headerName: 'Cadastrado em',
                 width: 120,
+                disableColumnMenu: true,
+                sortable: false,
                 valueGetter: (value: string) => {
                     try {
                         const date = new Date(value);
                         return date.toLocaleDateString('pt-BR');
                     } catch {
-                        return value;
+                        return value || '-';
                     }
                 },
             },
@@ -402,16 +463,34 @@ export default function EquipmentList() {
                         }}
                         pageSizeOptions={[5, INITIAL_PAGE_SIZE, 25]}
                         sx={{
-                            [`& .${gridClasses.columnHeader}, & .${gridClasses.cell}`]: {
+                            // Bordas nas células e headers
+                            [`& .${gridClasses.columnHeader}`]: {
                                 outline: 'transparent',
+                                borderRight: '1px solid',
+                                borderColor: 'divider',
                             },
+                            [`& .${gridClasses.cell}`]: {
+                                outline: 'transparent',
+                                borderRight: '1px solid',
+                                borderColor: 'divider',
+                            },
+                            // Remover outline ao focar
                             [`& .${gridClasses.columnHeader}:focus-within, & .${gridClasses.cell}:focus-within`]:
                             {
                                 outline: 'none',
                             },
+                            // Cursor pointer ao passar o mouse
                             [`& .${gridClasses.row}:hover`]: {
                                 cursor: 'pointer',
                             },
+                            // Borda horizontal entre linhas
+                            [`& .${gridClasses.row}`]: {
+                                borderBottom: '1px solid',
+                                borderColor: 'divider',
+                            },
+                            // Borda ao redor da tabela
+                            border: '1px solid',
+                            borderColor: 'divider',
                         }}
                         slotProps={{
                             toolbar: {

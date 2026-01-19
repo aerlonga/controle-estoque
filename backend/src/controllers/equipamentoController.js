@@ -16,7 +16,8 @@ const equipamentoController = {
 
             const filtros = {
                 status: req.query.status,
-                usuario_id: req.query.usuario_id
+                usuario_id: req.query.usuario_id,
+                search: req.query.search
             };
 
             const result = await equipamentoService.listarAtivos(filtros, page, limit);
@@ -37,6 +38,29 @@ const equipamentoController = {
                 error: error.message,
                 data: [],
                 meta: { total: 0, page: 1, limit: 10, totalPages: 0 }
+            });
+        }
+    },
+    async listarTodos(req, res) {
+        try {
+            const filtros = {
+                status: req.query.status,
+                usuario_id: req.query.usuario_id,
+                search: req.query.search
+            };
+
+            const result = await equipamentoService.listarTodos(filtros);
+
+            return res.status(200).json({
+                data: result.data || [],
+                total: result.total || 0
+            });
+        } catch (error) {
+            console.error('Erro ao listar todos os equipamentos:', error);
+            return res.status(500).json({
+                error: error.message,
+                data: [],
+                total: 0
             });
         }
     },

@@ -60,12 +60,17 @@ export const exportToPDF = (data: Equipment[], filename: string = 'equipamentos'
     format: 'a4',
   });
 
+  // Calcular largura total da tabela e margem para centralização
+  const tableWidth = 12 + 38 + 32 + 28 + 24 + 30 + 30 + 35 + 22; // 251mm
+  const pageWidth = doc.internal.pageSize.getWidth(); // 297mm (A4 landscape)
+  const horizontalMargin = (pageWidth - tableWidth) / 2; // Margem para centralizar
+
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text('Controle de Estoque', 14, 15);
+  doc.text('Controle de Estoque', horizontalMargin, 15);
   doc.setDrawColor(25, 118, 210);
   doc.setLineWidth(0.5);
-  doc.line(14, 18, 283, 18);
+  doc.line(horizontalMargin, 18, pageWidth - horizontalMargin, 18);
 
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
@@ -75,7 +80,7 @@ export const exportToPDF = (data: Equipment[], filename: string = 'equipamentos'
     month: 'long',
     year: 'numeric'
   });
-  doc.text(`Exportado em: ${dataExportacao}`, 14, 24);
+  doc.text(`Exportado em: ${dataExportacao}`, horizontalMargin, 24);
 
   const tableData = data.map(item => [
     String(item.id),
@@ -129,7 +134,7 @@ export const exportToPDF = (data: Equipment[], filename: string = 'equipamentos'
       7: { cellWidth: 35 },
       8: { cellWidth: 22, halign: 'center' },
     },
-    margin: { left: 14, right: 14 },
+    margin: { left: horizontalMargin, right: horizontalMargin },
     theme: 'grid',
   });
 
