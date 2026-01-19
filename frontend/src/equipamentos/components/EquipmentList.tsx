@@ -366,6 +366,7 @@ export default function EquipmentList() {
                             icon={<EditIcon />}
                             label="Editar"
                             onClick={handleRowEdit(row)}
+                            showInMenu={false}
                         />,
                     ];
 
@@ -376,6 +377,7 @@ export default function EquipmentList() {
                                 icon={<ArrowDownwardIcon />}
                                 label="Registrar Saída"
                                 onClick={handleMovement(row, 'SAIDA')}
+                                showInMenu={false}
                             />
                         );
                     }
@@ -387,6 +389,7 @@ export default function EquipmentList() {
                                 icon={<ArrowUpwardIcon />}
                                 label="Registrar Entrada"
                                 onClick={handleMovement(row, 'ENTRADA')}
+                                showInMenu={false}
                             />
                         );
                     }
@@ -395,8 +398,9 @@ export default function EquipmentList() {
                         <GridActionsCellItem
                             key="delete-item"
                             icon={<DeleteIcon />}
-                            label="Descartar"
+                            label="Excluir"
                             onClick={handleRowDelete(row)}
+                            showInMenu={false}
                         />
                     );
 

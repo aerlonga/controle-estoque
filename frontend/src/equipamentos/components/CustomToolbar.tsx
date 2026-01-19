@@ -53,8 +53,12 @@ export default function CustomToolbar({ onExportPDF, onExportExcel }: CustomTool
 
     return (
         <Toolbar>
-            <ColumnsPanelTrigger render={<ToolbarButton><ViewColumnIcon fontSize="small" /></ToolbarButton>} />
-            <FilterPanelTrigger render={<ToolbarButton><FilterListIcon fontSize="small" /></ToolbarButton>} />
+            <Tooltip title="Colunas">
+                <ColumnsPanelTrigger render={<ToolbarButton><ViewColumnIcon fontSize="small" /></ToolbarButton>} />
+            </Tooltip>
+            <Tooltip title="Filtros">
+                <FilterPanelTrigger render={<ToolbarButton><FilterListIcon fontSize="small" /></ToolbarButton>} />
+            </Tooltip>
             <Tooltip title="Exportar">
                 <ToolbarButton onClick={handleClick}>
                     <FileDownloadIcon fontSize="small" />
