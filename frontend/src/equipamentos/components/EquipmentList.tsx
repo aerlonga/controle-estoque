@@ -8,14 +8,12 @@ import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import {
     DataGrid,
-    GridActionsCellItem,
     GridColDef,
     GridFilterModel,
     GridPaginationModel,
     GridSortModel,
     GridEventListener,
     gridClasses,
-    GridRowModel,
 } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -341,7 +339,7 @@ export default function EquipmentList() {
             },
             {
                 field: 'created_at',
-                headerName: 'Cadastrado em',
+                headerName: 'Cadastro',
                 width: 120,
                 disableColumnMenu: true,
                 sortable: false,
@@ -356,55 +354,80 @@ export default function EquipmentList() {
             },
             {
                 field: 'actions',
-                type: 'actions',
                 headerName: 'Ações',
                 width: 160,
-                getActions: ({ row }) => {
-                    const actions = [
-                        <GridActionsCellItem
-                            key="edit-item"
-                            icon={<EditIcon />}
-                            label="Editar"
-                            onClick={handleRowEdit(row)}
-                            showInMenu={false}
-                        />,
-                    ];
+                sortable: false,
+                filterable: false,
+                disableColumnMenu: true,
+                renderCell: (params) => {
+                    const isNoDeposito = params.row.status === 'NO_DEPOSITO';
+                    const isForaDeposito = params.row.status === 'FORA_DEPOSITO';
 
-                    if (row.status === 'NO_DEPOSITO') {
-                        actions.push(
-                            <GridActionsCellItem
-                                key="saida-item"
-                                icon={<ArrowDownwardIcon />}
-                                label="Registrar Saída"
-                                onClick={handleMovement(row, 'SAIDA')}
-                                showInMenu={false}
-                            />
-                        );
-                    }
+                    return (
+                        <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 0.5,
+                            height: '100%'
+                        }}>
+                            <Tooltip title="Editar">
+                                <IconButton
+                                    size="small"
+                                    color="primary"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRowEdit(params.row)();
+                                    }}
+                                >
+                                    <EditIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
 
-                    if (row.status === 'FORA_DEPOSITO') {
-                        actions.push(
-                            <GridActionsCellItem
-                                key="entrada-item"
-                                icon={<ArrowUpwardIcon />}
-                                label="Registrar Entrada"
-                                onClick={handleMovement(row, 'ENTRADA')}
-                                showInMenu={false}
-                            />
-                        );
-                    }
+                            {isNoDeposito && (
+                                <Tooltip title="Registrar Saída">
+                                    <IconButton
+                                        size="small"
+                                        color="warning"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleMovement(params.row, 'SAIDA')();
+                                        }}
+                                    >
+                                        <ArrowDownwardIcon fontSize="small" />
+                                    </IconButton>
+                                </Tooltip>
+                            )}
 
-                    actions.push(
-                        <GridActionsCellItem
-                            key="delete-item"
-                            icon={<DeleteIcon />}
-                            label="Excluir"
-                            onClick={handleRowDelete(row)}
-                            showInMenu={false}
-                        />
+                            {isForaDeposito && (
+                                <Tooltip title="Registrar Entrada">
+                                    <IconButton
+                                        size="small"
+                                        color="success"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleMovement(params.row, 'ENTRADA')();
+                                        }}
+                                    >
+                                        <ArrowUpwardIcon fontSize="small" />
+                                    </IconButton>
+                                </Tooltip>
+                            )}
+
+                            <Tooltip title="Excluir">
+                                <IconButton
+                                    size="small"
+                                    color="error"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRowDelete(params.row)();
+                                    }}
+                                >
+                                    <DeleteIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                        </Box>
                     );
-
-                    return actions;
                 },
             },
         ],
@@ -415,12 +438,12 @@ export default function EquipmentList() {
 
     return (
         <PageContainer
-            title={pageTitle}
+            // title={pageTitle}
             // breadcrumbs={[{ title: pageTitle }]}
             fullWidth
             actions={
                 <Stack direction="row" alignItems="center" spacing={1}>
-                    <Tooltip title="Atualizar dados" placement="right" enterDelay={1000}>
+                    <Tooltip title="Atualizar dados" placement="bottom" enterDelay={1000}>
                         <div>
                             <IconButton size="small" aria-label="refresh" onClick={handleRefresh}>
                                 <RefreshIcon />
