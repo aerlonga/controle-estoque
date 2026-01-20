@@ -21,6 +21,14 @@ const equipamentoService = {
             throw new Error('ID do usuário é obrigatório');
         }
 
+        const usuarioExiste = await prisma.usuario.findUnique({
+            where: { id: parseInt(usuario_id) }
+        });
+
+        if (!usuarioExiste) {
+            throw new Error('Usuário não encontrado. Por favor, faça login novamente.');
+        }
+
         const existente = await prisma.equipamento.findUnique({
             where: { numero_serie: numero_serie }
         })
@@ -58,24 +66,183 @@ const equipamentoService = {
     },
 
     async listarAtivos(filtros = {}, page = 1, limit = 10) {
-        const { status, usuario_id } = filtros;
+        try {
+            const { status, usuario_id, search, nome, modelo, numero_serie, patrimonio, local, created_at } = filtros;
 
-        const where = {
-            status: {
-                not: 'DESCARTADO'
+            const where = {
+                status: {
+                    not: 'DESCARTADO'
+                }
+            };
+
+            if (status && ['NO_DEPOSITO', 'FORA_DEPOSITO'].includes(status)) {
+                where.status = status;
             }
-        };
 
-        if (status && ['NO_DEPOSITO', 'FORA_DEPOSITO'].includes(status)) {
-            where.status = status;
+            if (usuario_id) {
+                where.usuario_id = parseInt(usuario_id);
+            }
+
+            // Filtros individuais por campo
+            if (nome && nome.trim()) {
+                where.nome = { contains: nome.trim(), mode: 'insensitive' };
+            }
+
+            if (modelo && modelo.trim()) {
+                where.modelo = { contains: modelo.trim(), mode: 'insensitive' };
+            }
+
+            if (numero_serie && numero_serie.trim()) {
+                where.numero_serie = { contains: numero_serie.trim(), mode: 'insensitive' };
+            }
+
+            if (patrimonio && patrimonio.trim()) {
+                where.patrimonio = { contains: patrimonio.trim(), mode: 'insensitive' };
+            }
+
+            if (local && local.trim()) {
+                where.local = { contains: local.trim(), mode: 'insensitive' };
+            }
+
+            // Filtro por data de cadastro
+            if (created_at) {
+                const date = new Date(created_at);
+                const nextDay = new Date(date);
+                nextDay.setDate(nextDay.getDate() + 1);
+                where.created_at = {
+                    gte: date,
+                    lt: nextDay
+                };
+            }
+
+            // Busca genérica por texto em múltiplos campos (mantida para compatibilidade)
+            if (search && search.trim()) {
+                where.OR = [
+                    { nome: { contains: search.trim(), mode: 'insensitive' } },
+                    { modelo: { contains: search.trim(), mode: 'insensitive' } },
+                    { numero_serie: { contains: search.trim(), mode: 'insensitive' } },
+                    { patrimonio: { contains: search.trim(), mode: 'insensitive' } },
+                    { local: { contains: search.trim(), mode: 'insensitive' } }
+                ];
+            }
+
+            // Calcular total de registros correspondentes para preencher corretamente meta.total
+            const totalCount = await prisma.equipamento.count({ where });
+
+            const [data, meta] = await prisma.equipamento
+                .paginate({
+                    where,
+                    include: {
+                        usuario: {
+                            select: {
+                                id: true,
+                                nome: true,
+                                usuario_rede: true
+                            }
+                        },
+                        movimentacoes: {
+                            take: 1,
+                            orderBy: {
+                                data_movimentacao: 'desc'
+                            },
+                            select: {
+                                observacao: true
+                            }
+                        }
+                    },
+                    orderBy: {
+                        created_at: 'desc'
+                    }
+                })
+                .withPages({
+                    limit: parseInt(limit),
+                    page: parseInt(page),
+                    includePageCount: true
+                });
+
+            // Normalizar e garantir formato consistente com total e totalPages corretos
+            const normalizedMeta = meta || {};
+            normalizedMeta.total = Number.isInteger(normalizedMeta.total) && normalizedMeta.total > 0
+                ? normalizedMeta.total
+                : totalCount;
+            normalizedMeta.page = parseInt(page);
+            normalizedMeta.limit = parseInt(limit);
+            normalizedMeta.totalPages = normalizedMeta.totalPages || Math.max(1, Math.ceil(totalCount / parseInt(limit)));
+            normalizedMeta.isFirstPage = normalizedMeta.page <= 1;
+            normalizedMeta.isLastPage = normalizedMeta.page >= normalizedMeta.totalPages;
+
+            return {
+                data: Array.isArray(data) ? data : [],
+                meta: normalizedMeta,
+            };
+        } catch (error) {
+            console.error('Erro no equipamentoService.listarAtivos:', error);
+            throw error;
         }
+    },
 
-        if (usuario_id) {
-            where.usuario_id = parseInt(usuario_id);
-        }
+    async listarTodos(filtros = {}) {
+        try {
+            const { status, usuario_id, search, nome, modelo, numero_serie, patrimonio, local, created_at } = filtros;
 
-        const [data, meta] = await prisma.equipamento
-            .paginate({
+            const where = {
+                status: {
+                    not: 'DESCARTADO'
+                }
+            };
+
+            if (status && ['NO_DEPOSITO', 'FORA_DEPOSITO'].includes(status)) {
+                where.status = status;
+            }
+
+            if (usuario_id) {
+                where.usuario_id = parseInt(usuario_id);
+            }
+
+            // Filtros individuais por campo
+            if (nome && nome.trim()) {
+                where.nome = { contains: nome.trim(), mode: 'insensitive' };
+            }
+
+            if (modelo && modelo.trim()) {
+                where.modelo = { contains: modelo.trim(), mode: 'insensitive' };
+            }
+
+            if (numero_serie && numero_serie.trim()) {
+                where.numero_serie = { contains: numero_serie.trim(), mode: 'insensitive' };
+            }
+
+            if (patrimonio && patrimonio.trim()) {
+                where.patrimonio = { contains: patrimonio.trim(), mode: 'insensitive' };
+            }
+
+            if (local && local.trim()) {
+                where.local = { contains: local.trim(), mode: 'insensitive' };
+            }
+
+            // Filtro por data de cadastro
+            if (created_at) {
+                const date = new Date(created_at);
+                const nextDay = new Date(date);
+                nextDay.setDate(nextDay.getDate() + 1);
+                where.created_at = {
+                    gte: date,
+                    lt: nextDay
+                };
+            }
+
+            // Busca genérica por texto em múltiplos campos (mantida para compatibilidade)
+            if (search && search.trim()) {
+                where.OR = [
+                    { nome: { contains: search.trim(), mode: 'insensitive' } },
+                    { modelo: { contains: search.trim(), mode: 'insensitive' } },
+                    { numero_serie: { contains: search.trim(), mode: 'insensitive' } },
+                    { patrimonio: { contains: search.trim(), mode: 'insensitive' } },
+                    { local: { contains: search.trim(), mode: 'insensitive' } }
+                ];
+            }
+
+            const data = await prisma.equipamento.findMany({
                 where,
                 include: {
                     usuario: {
@@ -84,19 +251,30 @@ const equipamentoService = {
                             nome: true,
                             usuario_rede: true
                         }
+                    },
+                    movimentacoes: {
+                        take: 1,
+                        orderBy: {
+                            data_movimentacao: 'desc'
+                        },
+                        select: {
+                            observacao: true
+                        }
                     }
                 },
                 orderBy: {
                     created_at: 'desc'
                 }
-            })
-            .withPages({
-                limit,
-                page,
-                includePageCount: true
             });
 
-        return { data, meta };
+            return {
+                data: Array.isArray(data) ? data : [],
+                total: data.length
+            };
+        } catch (error) {
+            console.error('Erro no equipamentoService.listarTodos:', error);
+            throw error;
+        }
     },
 
     async buscarPorId(id) {

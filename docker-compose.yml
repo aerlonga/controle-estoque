@@ -15,7 +15,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -36,7 +36,7 @@ services:
     volumes:
       - postgres_test_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d estoque_test" ]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d estoque_test"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -45,7 +45,6 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
     container_name: estoque-backend
     restart: unless-stopped
     depends_on:
@@ -59,15 +58,13 @@ services:
     ports:
       - "${PORT}:${PORT}"
     volumes:
-      - ./backend:/app
-      - /app/node_modules
-    command: sh -c "npm install && npx prisma generate && npx prisma migrate deploy && npm run dev"
+      - ./backend:/app:z
+    command: sh -c "npx prisma migrate deploy && npm run dev"
 
   # Frontend React + Vite
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
     container_name: estoque-frontend
     restart: unless-stopped
     depends_on:
@@ -77,12 +74,8 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    command: sh -c "npm install && npm run dev -- --host"
+      - ./frontend:/app:z
 
 volumes:
   postgres_data:
   postgres_test_data:
-
-

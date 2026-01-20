@@ -26,14 +26,17 @@ export interface Equipamento {
     id: number
     nome: string
     descricao?: string | null
-    tipo: string
+    tipo?: string
+    modelo?: string | null
     numero_serie?: string | null
     patrimonio?: string | null
+    local?: string | null
     status: StatusEquipamento
     usuario_id?: number | null
     created_at?: string
     updated_at?: string
     usuario?: Usuario
+    movimentacoes?: Partial<Movimentacao>[]
 }
 
 export interface Movimentacao {
@@ -55,10 +58,12 @@ export interface Movimentacao {
 export interface EquipamentoFormData {
     nome: string
     descricao?: string
-    tipo: string
+    tipo?: string
+    modelo?: string
     numero_serie?: string
     patrimonio?: string
-    status: StatusEquipamento
+    local?: string
+    status?: StatusEquipamento
     usuario_id?: number
 }
 

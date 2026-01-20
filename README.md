@@ -109,3 +109,9 @@ docker exec -it estoque-postgres psql -U <seu_usuario_postgres> -d estoque
 ```bash
 docker-compose down
 ```
+
+### Rodar Build de Produção (Frontend)
+Caso precise gerar os arquivos estáticos de produção manuamente:
+```bash
+docker exec estoque-frontend npm run build
+```
