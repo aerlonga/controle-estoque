@@ -11,7 +11,6 @@ import {
     GridColDef,
     GridPaginationModel,
     GridSortModel,
-    GridEventListener,
     gridClasses,
 } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
@@ -129,12 +128,7 @@ export default function EquipmentList() {
         }
     }, [isLoading, loadData]);
 
-    const handleRowClick = React.useCallback<GridEventListener<'rowClick'>>(
-        ({ row }) => {
-            navigate({ to: `/equipments/${row.id}` });
-        },
-        [navigate],
-    );
+
 
     const handleCreateClick = React.useCallback(() => {
         navigate({ to: '/equipments/new' });
@@ -480,7 +474,6 @@ export default function EquipmentList() {
                         sortModel={sortModel}
                         onSortModelChange={handleSortModelChange}
                         disableRowSelectionOnClick
-                        onRowClick={handleRowClick}
                         loading={isLoading}
                         initialState={initialState}
                         showToolbar
@@ -505,10 +498,7 @@ export default function EquipmentList() {
                             {
                                 outline: 'none',
                             },
-                            // Cursor pointer ao passar o mouse
-                            [`& .${gridClasses.row}:hover`]: {
-                                cursor: 'pointer',
-                            },
+
                             // Borda horizontal entre linhas
                             [`& .${gridClasses.row}`]: {
                                 borderBottom: '1px solid',

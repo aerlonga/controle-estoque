@@ -9,13 +9,12 @@ import DialogsProvider from '../equipamentos/hooks/useDialogs/DialogsProvider'
 
 const Dashboard = lazy(() => import('../pages/Dashboard'))
 const Users = lazy(() => import('../pages/Users'))
-const dashboardTeste = lazy(() => import('../pages/dashboard-teste'))
+
 
 // Equipment components from MUI template
 const EquipmentList = lazy(() => import('../equipamentos/components/EquipmentList'))
 const EquipmentCreate = lazy(() => import('../equipamentos/components/EquipmentCreate'))
 const EquipmentEdit = lazy(() => import('../equipamentos/components/EquipmentEdit'))
-const EquipmentShow = lazy(() => import('../equipamentos/components/EquipmentShow'))
 
 const LoadingFallback = () => (
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
@@ -51,11 +50,7 @@ const dashboardRoute = createRoute({
     component: Dashboard,
 })
 
-const dashboardTesteRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: '/dashboard-teste',
-    component: dashboardTeste,
-})
+
 
 const usersRoute = createRoute({
     getParentRoute: () => rootRoute,
@@ -94,17 +89,7 @@ const equipmentNewRoute = createRoute({
     component: EquipmentCreate,
 })
 
-const equipmentShowRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: '/equipments/$id',
-    beforeLoad: () => {
-        const { isAuthenticated } = useAuthStore.getState()
-        if (!isAuthenticated) {
-            throw redirect({ to: '/' })
-        }
-    },
-    component: EquipmentShow,
-})
+
 
 const equipmentEditRoute = createRoute({
     getParentRoute: () => rootRoute,
@@ -123,9 +108,8 @@ const routeTree = rootRoute.addChildren([
     usersRoute,
     equipmentsRoute,
     equipmentNewRoute,
-    equipmentShowRoute,
     equipmentEditRoute,
-    dashboardTesteRoute,
+
 ])
 
 export const router = createRouter({

@@ -117,7 +117,7 @@ function EquipmentEditForm({
             onSubmit={handleFormSubmit}
             onReset={handleFormReset}
             submitButtonLabel="Salvar"
-            backButtonPath={`/equipments/${equipmentId}`}
+            backButtonPath="/equipments"
         />
     );
 }
