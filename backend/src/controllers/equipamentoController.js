@@ -17,7 +17,13 @@ const equipamentoController = {
             const filtros = {
                 status: req.query.status,
                 usuario_id: req.query.usuario_id,
-                search: req.query.search
+                search: req.query.search,
+                nome: req.query.nome,
+                modelo: req.query.modelo,
+                numero_serie: req.query.numero_serie,
+                patrimonio: req.query.patrimonio,
+                local: req.query.local,
+                created_at: req.query.created_at,
             };
 
             const result = await equipamentoService.listarAtivos(filtros, page, limit);
@@ -46,7 +52,13 @@ const equipamentoController = {
             const filtros = {
                 status: req.query.status,
                 usuario_id: req.query.usuario_id,
-                search: req.query.search
+                search: req.query.search,
+                nome: req.query.nome,
+                modelo: req.query.modelo,
+                numero_serie: req.query.numero_serie,
+                patrimonio: req.query.patrimonio,
+                local: req.query.local,
+                created_at: req.query.created_at,
             };
 
             const result = await equipamentoService.listarTodos(filtros);

@@ -4,16 +4,16 @@
  * Todo processamento de dados é feito no backend
  */
 
-import type { GridFilterModel } from '@mui/x-data-grid';
 import { equipamentoService } from '../../services/api';
 import type { Equipamento, EquipamentoFormData } from '../../types/api';
+import type { FilterState } from '../components/EquipmentFilter';
 
 export type Equipment = Equipamento;
 
 export interface GetManyParams {
     paginationModel?: { page: number; pageSize: number };
     sortModel?: { field: string; sort: 'asc' | 'desc' }[];
-    filterModel?: GridFilterModel;
+    filters?: FilterState;
 }
 
 export interface GetManyResult {
@@ -21,32 +21,37 @@ export interface GetManyResult {
     itemCount: number;
 }
 
+function buildQueryParams(filters?: FilterState): Record<string, any> {
+    const queryParams: Record<string, any> = {};
+
+    if (!filters) return queryParams;
+
+    if (filters.nome?.trim()) queryParams.nome = filters.nome.trim();
+    if (filters.modelo?.trim()) queryParams.modelo = filters.modelo.trim();
+    if (filters.numero_serie?.trim()) queryParams.numero_serie = filters.numero_serie.trim();
+    if (filters.patrimonio?.trim()) queryParams.patrimonio = filters.patrimonio.trim();
+    if (filters.local?.trim()) queryParams.local = filters.local.trim();
+    if (filters.status) queryParams.status = filters.status;
+    if (filters.usuario_id) queryParams.usuario_id = filters.usuario_id;
+    if (filters.created_at) queryParams.created_at = filters.created_at.format('YYYY-MM-DD');
+
+    return queryParams;
+}
+
 export async function getMany(params: GetManyParams = {}): Promise<GetManyResult> {
     try {
-        const { paginationModel = { page: 0, pageSize: 10 }, filterModel } = params;
+        const { paginationModel = { page: 0, pageSize: 10 }, filters } = params;
 
         const queryParams: Record<string, any> = {
             page: paginationModel.page + 1,
             limit: paginationModel.pageSize,
+            ...buildQueryParams(filters),
         };
-
-        // Processar filtros do DataGrid
-        if (filterModel?.items && filterModel.items.length > 0) {
-            const searchFilters = filterModel.items
-                .filter(item => item.value && item.value.trim())
-                .map(item => item.value.trim());
-
-            if (searchFilters.length > 0) {
-                // Combinar todos os filtros em uma única busca
-                queryParams.search = searchFilters.join(' ');
-            }
-        }
 
         const response = await equipamentoService.listar(queryParams);
 
         const items = Array.isArray(response.data) ? response.data : [];
         const itemCount = response.meta?.total ?? 0;
-
 
         return {
             items,
@@ -63,21 +68,9 @@ export async function getMany(params: GetManyParams = {}): Promise<GetManyResult
 
 export async function getAll(params: GetManyParams = {}): Promise<Equipment[]> {
     try {
-        const { filterModel } = params;
+        const { filters } = params;
 
-        const queryParams: Record<string, any> = {};
-
-        // Processar filtros do DataGrid
-        if (filterModel?.items && filterModel.items.length > 0) {
-            const searchFilters = filterModel.items
-                .filter(item => item.value && item.value.trim())
-                .map(item => item.value.trim());
-
-            if (searchFilters.length > 0) {
-                // Combinar todos os filtros em uma única busca
-                queryParams.search = searchFilters.join(' ');
-            }
-        }
+        const queryParams = buildQueryParams(filters);
 
         const response = await equipamentoService.listarTodos(queryParams);
 

@@ -59,7 +59,7 @@ const equipamentoService = {
 
     async listarAtivos(filtros = {}, page = 1, limit = 10) {
         try {
-            const { status, usuario_id, search } = filtros;
+            const { status, usuario_id, search, nome, modelo, numero_serie, patrimonio, local, created_at } = filtros;
 
             const where = {
                 status: {
@@ -75,7 +75,39 @@ const equipamentoService = {
                 where.usuario_id = parseInt(usuario_id);
             }
 
-            // Adicionar busca por texto em múltiplos campos
+            // Filtros individuais por campo
+            if (nome && nome.trim()) {
+                where.nome = { contains: nome.trim(), mode: 'insensitive' };
+            }
+
+            if (modelo && modelo.trim()) {
+                where.modelo = { contains: modelo.trim(), mode: 'insensitive' };
+            }
+
+            if (numero_serie && numero_serie.trim()) {
+                where.numero_serie = { contains: numero_serie.trim(), mode: 'insensitive' };
+            }
+
+            if (patrimonio && patrimonio.trim()) {
+                where.patrimonio = { contains: patrimonio.trim(), mode: 'insensitive' };
+            }
+
+            if (local && local.trim()) {
+                where.local = { contains: local.trim(), mode: 'insensitive' };
+            }
+
+            // Filtro por data de cadastro
+            if (created_at) {
+                const date = new Date(created_at);
+                const nextDay = new Date(date);
+                nextDay.setDate(nextDay.getDate() + 1);
+                where.created_at = {
+                    gte: date,
+                    lt: nextDay
+                };
+            }
+
+            // Busca genérica por texto em múltiplos campos (mantida para compatibilidade)
             if (search && search.trim()) {
                 where.OR = [
                     { nome: { contains: search.trim(), mode: 'insensitive' } },
@@ -134,7 +166,7 @@ const equipamentoService = {
 
     async listarTodos(filtros = {}) {
         try {
-            const { status, usuario_id, search } = filtros;
+            const { status, usuario_id, search, nome, modelo, numero_serie, patrimonio, local, created_at } = filtros;
 
             const where = {
                 status: {
@@ -150,7 +182,39 @@ const equipamentoService = {
                 where.usuario_id = parseInt(usuario_id);
             }
 
-            // Adicionar busca por texto em múltiplos campos
+            // Filtros individuais por campo
+            if (nome && nome.trim()) {
+                where.nome = { contains: nome.trim(), mode: 'insensitive' };
+            }
+
+            if (modelo && modelo.trim()) {
+                where.modelo = { contains: modelo.trim(), mode: 'insensitive' };
+            }
+
+            if (numero_serie && numero_serie.trim()) {
+                where.numero_serie = { contains: numero_serie.trim(), mode: 'insensitive' };
+            }
+
+            if (patrimonio && patrimonio.trim()) {
+                where.patrimonio = { contains: patrimonio.trim(), mode: 'insensitive' };
+            }
+
+            if (local && local.trim()) {
+                where.local = { contains: local.trim(), mode: 'insensitive' };
+            }
+
+            // Filtro por data de cadastro
+            if (created_at) {
+                const date = new Date(created_at);
+                const nextDay = new Date(date);
+                nextDay.setDate(nextDay.getDate() + 1);
+                where.created_at = {
+                    gte: date,
+                    lt: nextDay
+                };
+            }
+
+            // Busca genérica por texto em múltiplos campos (mantida para compatibilidade)
             if (search && search.trim()) {
                 where.OR = [
                     { nome: { contains: search.trim(), mode: 'insensitive' } },

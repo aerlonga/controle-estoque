@@ -3,8 +3,6 @@ import {
     Toolbar,
     ToolbarButton,
     ColumnsPanelTrigger,
-    FilterPanelTrigger,
-    ExportPrint,
 } from '@mui/x-data-grid';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -14,7 +12,6 @@ import Tooltip from '@mui/material/Tooltip';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import TableViewIcon from '@mui/icons-material/TableView';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 
 declare module '@mui/x-data-grid' {
@@ -55,9 +52,6 @@ export default function CustomToolbar({ onExportPDF, onExportExcel }: CustomTool
         <Toolbar>
             <Tooltip title="Colunas">
                 <ColumnsPanelTrigger render={<ToolbarButton><ViewColumnIcon fontSize="small" /></ToolbarButton>} />
-            </Tooltip>
-            <Tooltip title="Filtros">
-                <FilterPanelTrigger render={<ToolbarButton><FilterListIcon fontSize="small" /></ToolbarButton>} />
             </Tooltip>
             <Tooltip title="Exportar">
                 <ToolbarButton onClick={handleClick}>

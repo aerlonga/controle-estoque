@@ -9,7 +9,6 @@ import Tooltip from '@mui/material/Tooltip';
 import {
     DataGrid,
     GridColDef,
-    GridFilterModel,
     GridPaginationModel,
     GridSortModel,
     GridEventListener,
@@ -35,6 +34,7 @@ import MovementDialog from './MovementDialog';
 import { usePageTitle } from '../../contexts/PageTitleContext';
 import { exportToExcel, exportToPDF } from '../utils/exportHelpers';
 import CustomToolbar from './CustomToolbar';
+import EquipmentFilter, { FilterState, initialFilterState } from './EquipmentFilter';
 
 const INITIAL_PAGE_SIZE = 10;
 
@@ -55,7 +55,7 @@ export default function EquipmentList() {
         page: 0,
         pageSize: INITIAL_PAGE_SIZE,
     });
-    const [filterModel, setFilterModel] = React.useState<GridFilterModel>({ items: [] });
+    const [filters, setFilters] = React.useState<FilterState>(initialFilterState);
     const [sortModel, setSortModel] = React.useState<GridSortModel>([]);
 
     const [rowsState, setRowsState] = React.useState<{
@@ -84,9 +84,9 @@ export default function EquipmentList() {
         [],
     );
 
-    const handleFilterModelChange = React.useCallback(
-        (model: GridFilterModel) => {
-            setFilterModel(model);
+    const handleFilterChange = React.useCallback(
+        (newFilters: FilterState) => {
+            setFilters(newFilters);
         },
         [],
     );
@@ -106,13 +106,7 @@ export default function EquipmentList() {
             const listData = await getEquipments({
                 paginationModel,
                 sortModel: sortModel.map((s) => ({ field: s.field, sort: s.sort || 'asc' })),
-                filterModel: {
-                    items: filterModel.items.map((item) => ({
-                        field: item.field,
-                        operator: item.operator,
-                        value: String(item.value || ''),
-                    })),
-                },
+                filters,
             });
 
             setRowsState({
@@ -124,7 +118,7 @@ export default function EquipmentList() {
         }
 
         setIsLoading(false);
-    }, [paginationModel, sortModel, filterModel]);
+    }, [paginationModel, sortModel, filters]);
 
     React.useEffect(() => {
         loadData();
@@ -213,7 +207,7 @@ export default function EquipmentList() {
     const handleExportExcel = React.useCallback(async () => {
         try {
             setIsLoading(true);
-            const allData = await getAllEquipments({ filterModel });
+            const allData = await getAllEquipments({ filters });
 
             exportToExcel(allData, 'equipamentos');
             notifications.show(`Exportado ${allData.length} equipamento(s) para Excel com sucesso!`, {
@@ -229,14 +223,14 @@ export default function EquipmentList() {
         } finally {
             setIsLoading(false);
         }
-    }, [filterModel, rowsState.rowCount, notifications]);
+    }, [filters, notifications]);
 
     const handleExportPDF = React.useCallback(async () => {
 
         try {
             setIsLoading(true);
 
-            const allData = await getAllEquipments({ filterModel });
+            const allData = await getAllEquipments({ filters });
 
             exportToPDF(allData, 'equipamentos');
             notifications.show(`Exportado ${allData.length} equipamento(s) para PDF com sucesso!`, {
@@ -252,7 +246,7 @@ export default function EquipmentList() {
         } finally {
             setIsLoading(false);
         }
-    }, [filterModel, rowsState.rowCount, notifications]);
+    }, [filters, notifications]);
 
 
 
@@ -461,6 +455,15 @@ export default function EquipmentList() {
             }
         >
             <Box sx={{ flex: 1, width: '100%' }}>
+                <EquipmentFilter
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                    onSearch={loadData}
+                    onClear={() => {
+                        setFilters(initialFilterState);
+                        setPaginationModel({ page: 0, pageSize: INITIAL_PAGE_SIZE });
+                    }}
+                />
                 {error ? (
                     <Box sx={{ flexGrow: 1 }}>
                         <Alert severity="error">{error.message}</Alert>
@@ -472,14 +475,11 @@ export default function EquipmentList() {
                         columns={columns}
                         pagination
                         sortingMode="server"
-                        filterMode="server"
                         paginationMode="server"
                         paginationModel={paginationModel}
                         onPaginationModelChange={handlePaginationModelChange}
                         sortModel={sortModel}
                         onSortModelChange={handleSortModelChange}
-                        filterModel={filterModel}
-                        onFilterModelChange={handleFilterModelChange}
                         disableRowSelectionOnClick
                         onRowClick={handleRowClick}
                         loading={isLoading}
