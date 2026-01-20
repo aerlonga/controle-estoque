@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 import Box from '@mui/material/Box'
 import { LineChart } from '@mui/x-charts/LineChart'
+import { formatNumber } from '../../utils/formatters'
 
 interface MovimentacoesChartProps {
     data: {
@@ -32,10 +33,6 @@ function AreaGradient({ color, id }: { color: string; id: string }) {
 
 export default function MovimentacoesChart({ data, period }: MovimentacoesChartProps) {
     const theme = useTheme()
-
-    const total = data.series.reduce((sum, serie) => {
-        return sum + serie.data.reduce((s, v) => s + v, 0)
-    }, 0)
 
     return (
         <Card variant="outlined" sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -69,6 +66,7 @@ export default function MovimentacoesChart({ data, period }: MovimentacoesChartP
                         stackOrder: 'ascending',
                         data: serie.data,
                         color: serie.color,
+                        valueFormatter: (value) => formatNumber(value ?? 0),
                     }))}
                     height={250}
                     margin={{ left: 0, right: 20, top: 20, bottom: 0 }}

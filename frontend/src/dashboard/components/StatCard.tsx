@@ -6,6 +6,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { SparkLineChart } from '@mui/x-charts/SparkLineChart';
 import { areaElementClasses } from '@mui/x-charts/LineChart';
+import { formatNumber } from '../../utils/formatters';
 
 export type StatCardProps = {
   title: string;
@@ -86,7 +87,7 @@ export default function StatCard({
               sx={{ justifyContent: 'space-between', alignItems: 'center' }}
             >
               <Typography variant="h4" component="p">
-                {value}
+                {formatNumber(value)}
               </Typography>
             </Stack>
             <Typography variant="caption" sx={{ color: 'text.secondary' }}>
@@ -100,6 +101,7 @@ export default function StatCard({
               area
               showHighlight
               showTooltip
+              valueFormatter={(value) => formatNumber(value)}
               xAxis={{
                 scaleType: 'band',
                 data: daysInWeek, // Use the correct property 'data' for xAxis

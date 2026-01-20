@@ -34,6 +34,7 @@ import { usePageTitle } from '../../contexts/PageTitleContext';
 import { exportToExcel, exportToPDF } from '../utils/exportHelpers';
 import CustomToolbar from './CustomToolbar';
 import EquipmentFilter, { FilterState, initialFilterState } from './EquipmentFilter';
+import { formatNumber } from '../../utils/formatters';
 
 const INITIAL_PAGE_SIZE = 10;
 
@@ -204,7 +205,7 @@ export default function EquipmentList() {
             const allData = await getAllEquipments({ filters });
 
             exportToExcel(allData, 'equipamentos');
-            notifications.show(`Exportado ${allData.length} equipamento(s) para Excel com sucesso!`, {
+            notifications.show(`Exportado ${formatNumber(allData.length)} equipamento(s) para Excel com sucesso!`, {
                 severity: 'success',
                 autoHideDuration: 3000,
             });
@@ -227,7 +228,7 @@ export default function EquipmentList() {
             const allData = await getAllEquipments({ filters });
 
             exportToPDF(allData, 'equipamentos');
-            notifications.show(`Exportado ${allData.length} equipamento(s) para PDF com sucesso!`, {
+            notifications.show(`Exportado ${formatNumber(allData.length)} equipamento(s) para PDF com sucesso!`, {
                 severity: 'success',
                 autoHideDuration: 3000,
             });

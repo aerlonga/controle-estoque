@@ -8,6 +8,7 @@ import CardContent from '@mui/material/CardContent';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
+import { formatNumber } from '../../utils/formatters';
 
 interface EquipamentoTipoData {
     label: string;
@@ -130,7 +131,7 @@ export default function EquipamentosPorTipoChart({ data }: EquipamentosPorTipoCh
                             width={260}
                             hideLegend
                         >
-                            <PieCenterLabel primaryText={total.toString()} secondaryText="Total" />
+                            <PieCenterLabel primaryText={formatNumber(total)} secondaryText="Total" />
                         </PieChart>
                     </Box>
 
@@ -153,7 +154,7 @@ export default function EquipamentosPorTipoChart({ data }: EquipamentosPorTipoCh
                                             {item.label}
                                         </Typography>
                                         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                            {item.value}
+                                            {formatNumber(item.value)}
                                         </Typography>
                                     </Stack>
                                     <LinearProgress
