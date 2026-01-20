@@ -8,6 +8,7 @@ import { tabsClasses } from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
+import { useLocation } from '@tanstack/react-router';
 import SideMenuMobile from '../components/SideMenuMobile';
 import MenuButton from '../components/MenuButton';
 import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
@@ -32,10 +33,37 @@ const Toolbar = styled(MuiToolbar)({
 export default function AppNavbar() {
   const [open, setOpen] = React.useState(false);
   const { menuTitle } = usePageTitle();
+  const location = useLocation();
 
   const toggleDrawer = (newOpen: boolean) => () => {
     setOpen(newOpen);
   };
+
+  const getPageTitle = () => {
+    const path = location.pathname;
+    const pathSegments = path.split('/').filter(x => x);
+
+    if (pathSegments.length === 0) {
+      return 'Dashboard';
+    }
+    if (pathSegments[0] === 'equipments') {
+      if (pathSegments.length === 1) {
+        return 'Equipamentos';
+      } else if (pathSegments[1] === 'new') {
+        return 'Cadastrar equipamento';
+      } else if (pathSegments.length === 3 && pathSegments[2] === 'edit') {
+        return 'Editar equipamento';
+      }
+    }
+
+    if (pathSegments[0] === 'users') {
+      return 'Usuários';
+    }
+
+    return menuTitle || 'Dashboard';
+  };
+
+  const displayTitle = getPageTitle();
 
   return (
     <AppBar
@@ -69,7 +97,7 @@ export default function AppNavbar() {
             sx={{ justifyContent: 'center', mr: 'auto' }}
           >
             <Typography variant="h4" component="h1" sx={{ color: 'text.primary' }}>
-              {menuTitle}
+              {displayTitle}
             </Typography>
           </Stack>
           <ColorModeIconDropdown />

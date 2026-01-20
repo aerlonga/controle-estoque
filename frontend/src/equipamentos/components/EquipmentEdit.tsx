@@ -21,12 +21,9 @@ import { usePageTitle } from '../../contexts/PageTitleContext';
 function EquipmentEditForm({
     initialValues,
     onSubmit,
-    equipmentId,
 }: {
-    // Aceitar tanto o tipo de formulário quanto o tipo retornado pela API
     initialValues: Partial<EquipmentFormState['values']> | Partial<EquipamentoFormData>;
     onSubmit: (formValues: Partial<EquipmentFormState['values']>) => Promise<void>;
-    equipmentId: string;
 }) {
     const navigate = useNavigate();
     const notifications = useNotifications();
@@ -131,17 +128,15 @@ export default function EquipmentEdit() {
     const [isLoading, setIsLoading] = React.useState(true);
     const [error, setError] = React.useState<Error | null>(null);
 
-    const equipmentName = equipment?.nome ?? '';
+
 
     React.useEffect(() => {
         setMenuTitle('Equipamentos');
     }, [setMenuTitle]);
 
     React.useEffect(() => {
-        if (equipmentName) {
-            setDetailTitle(equipmentName);
-        }
-    }, [equipmentName, setDetailTitle]);
+        setDetailTitle('Editar');
+    }, [setDetailTitle]);
 
     const loadData = React.useCallback(async () => {
         setError(null);
@@ -208,14 +203,13 @@ export default function EquipmentEdit() {
             <EquipmentEditForm
                 initialValues={sanitizeEquipmentForForm(equipment)}
                 onSubmit={handleSubmit}
-                equipmentId={equipmentId}
             />
         ) : null;
-    }, [isLoading, error, equipment, handleSubmit, equipmentId]);
+    }, [isLoading, error, equipment, handleSubmit]);
 
     return (
         <PageContainer
-            title={`Editar ${equipmentName || `Equipamento ${equipmentId}`}`}
+            title="Editar equipamento"
         >
             <Box sx={{ display: 'flex', flex: 1 }}>{renderEdit}</Box>
         </PageContainer>

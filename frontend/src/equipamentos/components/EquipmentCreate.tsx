@@ -119,7 +119,7 @@ export default function EquipmentCreate() {
 
     return (
         <PageContainer
-            title="Novo Equipamento"
+            title="Cadastrar Equipamento"
         >
             <EquipmentForm
                 formState={formState}

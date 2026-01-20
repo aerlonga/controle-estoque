@@ -2,9 +2,11 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import FormGroup from '@mui/material/FormGroup';
-import Grid from '@mui/material/Grid'; 
+import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
+import FormControl from '@mui/material/FormControl';
+import Input from '@mui/material/Input';
+import FormHelperText from '@mui/material/FormHelperText';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from '@tanstack/react-router';
 import type { EquipamentoFormData } from '../../types/api';
@@ -28,42 +30,51 @@ export interface EquipmentFormProps {
     backButtonPath?: string;
 }
 
-const textFieldStyle = {
-    '& .MuiInputLabel-root': {
-        fontSize: '1.1rem',
-        color: '#94a3b8', // Cor suave para o estado parado
-        transform: 'translate(14px, 16px) scale(1)',
-        transition: 'all 0.2s ease-out',
-    },
-    '& .MuiInputLabel-shrink': {
-        // EFEITO DE CÁPSULA:
-        fontSize: '1rem',
-        transform: 'translate(14px, -10px) scale(0.85)', // Sobe exatamente em cima da borda
-        backgroundColor: '#020617', // DEVE SER A MESMA COR DO FUNDO DO SEU FORM
-        padding: '0 8px',            // Espaço nas laterais para "quebrar" a borda
-        borderRadius: '10px',        // Arredonda o fundo do label
-        zIndex: 1,                   // Garante que fique acima da linha da borda
-        color: '#3b82f6',            // Cor de destaque ao subir (azul)
-    },
-    '& .MuiOutlinedInput-root': {
-        height: '56px',
-        fontSize: '1.1rem',
-        backgroundColor: 'transparent',
-        '& fieldset': {
-            borderColor: 'rgba(255, 255, 255, 0.2)', // Borda discreta
-        },
-        '&:hover fieldset': {
-            borderColor: 'rgba(255, 255, 255, 0.4)',
-        },
-        '&.Mui-focused fieldset': {
-            borderWidth: '2px',
-        },
-        '& input': {
-            padding: '12px 14px', 
-            color: '#f8fafc',
-        },
-    },
-};
+interface StandardInputProps {
+    label: string;
+    value: string | number | undefined | null;
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    name: string;
+    error?: boolean;
+    helperText?: string;
+    required?: boolean;
+    fullWidth?: boolean;
+}
+
+function StandardInput({
+    label,
+    value,
+    onChange,
+    name,
+    error,
+    helperText,
+    required,
+    fullWidth,
+}: StandardInputProps) {
+    return (
+        <FormControl variant="standard" fullWidth={fullWidth} error={error} required={required}>
+            <Input
+                id={`input-${name}`}
+                name={name}
+                value={value ?? ''}
+                onChange={onChange}
+                placeholder="-"
+                inputProps={{
+                    'aria-label': label,
+                }}
+            />
+            {/* O helperText do erro, se houver, ou o Label abaixo da linha */}
+            {error ? (
+                <Stack>
+                    <FormHelperText>{label}</FormHelperText>
+                    <FormHelperText error>{helperText}</FormHelperText>
+                </Stack>
+            ) : (
+                <FormHelperText>{label}</FormHelperText>
+            )}
+        </FormControl>
+    );
+}
 
 export default function EquipmentForm(props: EquipmentFormProps) {
     const {
@@ -124,66 +135,61 @@ export default function EquipmentForm(props: EquipmentFormProps) {
             <FormGroup>
                 <Grid container spacing={3} sx={{ mb: 4, width: '100%' }}>
                     <Grid component="div" size={{ xs: 12, sm: 6 }}>
-                        <TextField
-                            value={formValues.nome ?? ''}
+                        <StandardInput
+                            value={formValues.nome}
                             onChange={handleTextFieldChange}
                             name="nome"
                             label="Nome"
                             error={!!formErrors.nome}
-                            helperText={formErrors.nome ?? ' '}
-                            fullWidth
+                            helperText={formErrors.nome}
                             required
-                            sx={textFieldStyle}
+                            fullWidth
                         />
                     </Grid>
                     <Grid component="div" size={{ xs: 12, sm: 6 }}>
-                        <TextField
-                            value={formValues.modelo ?? ''}
+                        <StandardInput
+                            value={formValues.modelo}
                             onChange={handleTextFieldChange}
                             name="modelo"
                             label="Modelo"
                             error={!!formErrors.modelo}
-                            helperText={formErrors.modelo ?? ' '}
-                            fullWidth
+                            helperText={formErrors.modelo}
                             required
-                            sx={textFieldStyle}
+                            fullWidth
                         />
                     </Grid>
                     <Grid component="div" size={{ xs: 12, sm: 6 }}>
-                        <TextField
-                            value={formValues.numero_serie ?? ''}
+                        <StandardInput
+                            value={formValues.numero_serie}
                             onChange={handleTextFieldChange}
                             name="numero_serie"
                             label="Número de Série"
                             error={!!formErrors.numero_serie}
-                            helperText={formErrors.numero_serie ?? ' '}
-                            fullWidth
+                            helperText={formErrors.numero_serie}
                             required
-                            sx={textFieldStyle}
+                            fullWidth
                         />
                     </Grid>
                     <Grid component="div" size={{ xs: 12, sm: 6 }}>
-                        <TextField
-                            value={formValues.patrimonio ?? ''}
+                        <StandardInput
+                            value={formValues.patrimonio}
                             onChange={handleTextFieldChange}
                             name="patrimonio"
                             label="Patrimônio"
                             error={!!formErrors.patrimonio}
-                            helperText={formErrors.patrimonio ?? ' '}
+                            helperText={formErrors.patrimonio}
                             fullWidth
-                            sx={textFieldStyle}
                         />
                     </Grid>
                     <Grid component="div" size={{ xs: 12, sm: 12 }}>
-                        <TextField
-                            value={formValues.local ?? ''}
+                        <StandardInput
+                            value={formValues.local}
                             onChange={handleTextFieldChange}
                             name="local"
                             label="Local"
                             error={!!formErrors.local}
-                            helperText={formErrors.local ?? ' '}
+                            helperText={formErrors.local}
                             fullWidth
-                            sx={textFieldStyle}
                         />
                     </Grid>
                 </Grid>
@@ -194,8 +200,8 @@ export default function EquipmentForm(props: EquipmentFormProps) {
                     variant="contained"
                     startIcon={<ArrowBackIcon />}
                     onClick={handleBack}
-                    sx={{ 
-                        bgcolor: '#1e293b', 
+                    sx={{
+                        bgcolor: '#1e293b',
                         '&:hover': { bgcolor: '#334155' },
                         textTransform: 'none',
                         px: 4,
@@ -209,8 +215,8 @@ export default function EquipmentForm(props: EquipmentFormProps) {
                     type="submit"
                     variant="contained"
                     disabled={isSubmitting}
-                    sx={{ 
-                        textTransform: 'none', 
+                    sx={{
+                        textTransform: 'none',
                         px: 6,
                         py: 1.5,
                         borderRadius: '8px',

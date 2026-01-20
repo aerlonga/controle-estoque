@@ -34,7 +34,6 @@ export default function NavbarBreadcrumbs() {
     navigate({ to: path });
   };
 
-  // Se estamos na home (sem pathnames)
   if (pathnames.length === 0) {
     return (
       <StyledBreadcrumbs
@@ -53,10 +52,8 @@ export default function NavbarBreadcrumbs() {
     );
   }
 
-  // Construir breadcrumbs de forma inteligente
   const breadcrumbItems = [];
 
-  // Sempre começa com Home (clicável)
   breadcrumbItems.push(
     <Typography
       key="home"
@@ -71,12 +68,9 @@ export default function NavbarBreadcrumbs() {
     </Typography>
   );
 
-  // Pega o primeiro segmento (geralmente o menu principal)
   const firstSegment = pathnames[0];
   const firstPath = `/${firstSegment}`;
   const menuName = routeNameMap[firstPath] || firstSegment;
-
-  // Se temos apenas 1 segmento, é a página de lista/menu
   if (pathnames.length === 1) {
     breadcrumbItems.push(
       <Typography
@@ -88,8 +82,6 @@ export default function NavbarBreadcrumbs() {
       </Typography>
     );
   } else {
-    // Temos mais de 1 segmento (ex: /equipments/348 ou /equipments/348/edit)
-    // Menu principal é clicável
     breadcrumbItems.push(
       <Typography
         key={firstPath}
@@ -105,9 +97,30 @@ export default function NavbarBreadcrumbs() {
       </Typography>
     );
 
-    // Se há um detailTitle definido, usar ele como último item
-    // Isso substitui TODOS os segmentos intermediários (IDs, etc)
-    if (detailTitle) {
+    const isEquipmentEdit = firstSegment === 'equipments' && pathnames.length === 3 && pathnames[2] === 'edit';
+    const isEquipmentNew = firstSegment === 'equipments' && pathnames.length === 2 && pathnames[1] === 'new';
+
+    if (isEquipmentEdit) {
+      breadcrumbItems.push(
+        <Typography
+          key="edit"
+          variant="body1"
+          sx={{ color: 'text.primary', fontWeight: 600 }}
+        >
+          Editar equipamento
+        </Typography>
+      );
+    } else if (isEquipmentNew) {
+      breadcrumbItems.push(
+        <Typography
+          key="new"
+          variant="body1"
+          sx={{ color: 'text.primary', fontWeight: 600 }}
+        >
+          Cadastrar equipamento
+        </Typography>
+      );
+    } else if (detailTitle) {
       breadcrumbItems.push(
         <Typography
           key="detail"
@@ -118,8 +131,6 @@ export default function NavbarBreadcrumbs() {
         </Typography>
       );
     } else {
-      // Se não há detailTitle, mostrar os segmentos restantes
-      // (isso pode acontecer durante o carregamento)
       for (let i = 1; i < pathnames.length; i++) {
         const value = pathnames[i];
         const to = `/${pathnames.slice(0, i + 1).join('/')}`;

@@ -253,7 +253,7 @@ export default function EquipmentList() {
 
     const columns = React.useMemo<GridColDef[]>(
         () => [
-            { field: 'id', headerName: 'ID', width: 80, disableColumnMenu: true, sortable: false },
+
             {
                 field: 'nome',
                 headerName: 'Nome',
@@ -327,8 +327,8 @@ export default function EquipmentList() {
             },
             {
                 field: 'created_at',
-                headerName: 'Cadastro',
-                width: 120,
+                headerName: 'Data de Cadastro',
+                width: 160,
                 disableColumnMenu: true,
                 sortable: false,
                 valueGetter: (value: string) => {
@@ -482,7 +482,6 @@ export default function EquipmentList() {
                         }}
                         pageSizeOptions={[5, INITIAL_PAGE_SIZE, 25]}
                         sx={{
-                            // Bordas nas células e headers
                             [`& .${gridClasses.columnHeader}`]: {
                                 outline: 'transparent',
                                 borderRight: '1px solid',
@@ -493,18 +492,14 @@ export default function EquipmentList() {
                                 borderRight: '1px solid',
                                 borderColor: 'divider',
                             },
-                            // Remover outline ao focar
                             [`& .${gridClasses.columnHeader}:focus-within, & .${gridClasses.cell}:focus-within`]:
                             {
                                 outline: 'none',
                             },
-
-                            // Borda horizontal entre linhas
                             [`& .${gridClasses.row}`]: {
                                 borderBottom: '1px solid',
                                 borderColor: 'divider',
                             },
-                            // Borda ao redor da tabela
                             border: '1px solid',
                             borderColor: 'divider',
                         }}
@@ -523,7 +518,6 @@ export default function EquipmentList() {
                         }}
                         localeText={{
                             noRowsLabel: 'Nenhum equipamento cadastrado',
-                            // Toolbar
                             toolbarColumns: 'Colunas',
                             toolbarColumnsLabel: 'Selecionar colunas',
                             toolbarFilters: 'Filtros',

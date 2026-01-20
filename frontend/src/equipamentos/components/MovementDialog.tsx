@@ -4,10 +4,13 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    TextField,
     Button,
     Alert,
     Typography,
+    FormControl,
+    Input,
+    FormHelperText,
+    Stack,
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
@@ -104,16 +107,25 @@ export default function MovementDialog({
                         name="observacao"
                         control={control}
                         render={({ field }) => (
-                            <TextField
-                                {...field}
-                                label="Observação (opcional)"
-                                fullWidth
-                                multiline
-                                rows={3}
-                                placeholder="Ex: Entregue ao setor financeiro"
-                                error={!!errors.observacao}
-                                helperText={errors.observacao?.message}
-                            />
+                            <FormControl variant="standard" fullWidth error={!!errors.observacao}>
+                                <Input
+                                    {...field}
+                                    id="observacao"
+                                    multiline
+                                    placeholder="Ex: Entregue ao setor financeiro"
+                                    inputProps={{
+                                        'aria-label': 'Observação (opcional)',
+                                    }}
+                                />
+                                {errors.observacao ? (
+                                    <Stack>
+                                        <FormHelperText>Observação (opcional)</FormHelperText>
+                                        <FormHelperText error>{errors.observacao.message}</FormHelperText>
+                                    </Stack>
+                                ) : (
+                                    <FormHelperText>Observação (opcional)</FormHelperText>
+                                )}
+                            </FormControl>
                         )}
                     />
 

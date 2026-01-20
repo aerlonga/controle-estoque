@@ -64,7 +64,6 @@ const usersRoute = createRoute({
     component: Users,
 })
 
-// Equipment routes
 const equipmentsRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/equipments',

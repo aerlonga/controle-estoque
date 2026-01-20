@@ -21,6 +21,14 @@ const equipamentoService = {
             throw new Error('ID do usuário é obrigatório');
         }
 
+        const usuarioExiste = await prisma.usuario.findUnique({
+            where: { id: parseInt(usuario_id) }
+        });
+
+        if (!usuarioExiste) {
+            throw new Error('Usuário não encontrado. Por favor, faça login novamente.');
+        }
+
         const existente = await prisma.equipamento.findUnique({
             where: { numero_serie: numero_serie }
         })
@@ -131,6 +139,15 @@ const equipamentoService = {
                                 nome: true,
                                 usuario_rede: true
                             }
+                        },
+                        movimentacoes: {
+                            take: 1,
+                            orderBy: {
+                                data_movimentacao: 'desc'
+                            },
+                            select: {
+                                observacao: true
+                            }
                         }
                     },
                     orderBy: {
@@ -233,6 +250,15 @@ const equipamentoService = {
                             id: true,
                             nome: true,
                             usuario_rede: true
+                        }
+                    },
+                    movimentacoes: {
+                        take: 1,
+                        orderBy: {
+                            data_movimentacao: 'desc'
+                        },
+                        select: {
+                            observacao: true
                         }
                     }
                 },

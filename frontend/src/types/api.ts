@@ -36,6 +36,7 @@ export interface Equipamento {
     created_at?: string
     updated_at?: string
     usuario?: Usuario
+    movimentacoes?: Partial<Movimentacao>[]
 }
 
 export interface Movimentacao {

@@ -11,7 +11,6 @@ const statusLabels: Record<string, string> = {
 
 export const exportToExcel = (data: Equipment[], filename: string = 'equipamentos') => {
   const exportData = data.map(item => ({
-    'ID': item.id,
     'Nome': item.nome,
     'Modelo': item.modelo,
     'Nº Série': item.numero_serie || '-',
@@ -19,7 +18,8 @@ export const exportToExcel = (data: Equipment[], filename: string = 'equipamento
     'Local': item.local || '-',
     'Status': statusLabels[item.status] || item.status,
     'Responsável': item.usuario?.nome || 'N/A',
-    'Cadastrado em': item.created_at ? new Date(item.created_at).toLocaleDateString('pt-BR') : '-',
+    'Data de Cadastro': item.created_at ? new Date(item.created_at).toLocaleDateString('pt-BR') : '-',
+    'Observação movimentação': item.movimentacoes?.[0]?.observacao || '-'
   }));
 
   const wb = XLSX.utils.book_new();
@@ -36,7 +36,6 @@ export const exportToExcel = (data: Equipment[], filename: string = 'equipamento
   ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 8 } });
 
   ws['!cols'] = [
-    { wch: 8 },
     { wch: 25 },
     { wch: 20 },
     { wch: 18 },
@@ -45,6 +44,7 @@ export const exportToExcel = (data: Equipment[], filename: string = 'equipamento
     { wch: 18 },
     { wch: 25 },
     { wch: 15 },
+    { wch: 40 },
   ];
 
   XLSX.utils.book_append_sheet(wb, ws, 'Equipamentos');
@@ -61,7 +61,8 @@ export const exportToPDF = (data: Equipment[], filename: string = 'equipamentos'
   });
 
   // Calcular largura total da tabela e margem para centralização
-  const tableWidth = 12 + 38 + 32 + 28 + 24 + 30 + 30 + 35 + 22; // 251mm
+  // 38 + 32 + 28 + 24 + 30 + 30 + 35 + 22 + 30 (obs) = 269
+  const tableWidth = 269;
   const pageWidth = doc.internal.pageSize.getWidth(); // 297mm (A4 landscape)
   const horizontalMargin = (pageWidth - tableWidth) / 2; // Margem para centralizar
 
@@ -83,7 +84,6 @@ export const exportToPDF = (data: Equipment[], filename: string = 'equipamentos'
   doc.text(`Exportado em: ${dataExportacao}`, horizontalMargin, 24);
 
   const tableData = data.map(item => [
-    String(item.id),
     item.nome,
     item.modelo ?? '-',
     item.numero_serie ?? '-',
@@ -92,11 +92,11 @@ export const exportToPDF = (data: Equipment[], filename: string = 'equipamentos'
     statusLabels[item.status] || item.status,
     item.usuario?.nome ?? 'N/A',
     item.created_at ? new Date(item.created_at).toLocaleDateString('pt-BR') : '-',
+    item.movimentacoes?.[0]?.observacao || '-'
   ]);
 
   autoTable(doc, {
     head: [[
-      'ID',
       'Nome',
       'Modelo',
       'Nº Série',
@@ -104,7 +104,8 @@ export const exportToPDF = (data: Equipment[], filename: string = 'equipamentos'
       'Local',
       'Status',
       'Responsável',
-      'Cadastrado'
+      'Data de Cadastro',
+      'Observação'
     ]],
     body: tableData,
     startY: 28,
@@ -124,15 +125,15 @@ export const exportToPDF = (data: Equipment[], filename: string = 'equipamentos'
       fillColor: [248, 249, 250],
     },
     columnStyles: {
-      0: { cellWidth: 12, halign: 'center' },
-      1: { cellWidth: 38 },
-      2: { cellWidth: 32 },
-      3: { cellWidth: 28 },
-      4: { cellWidth: 24 },
+      0: { cellWidth: 38 },
+      1: { cellWidth: 32 },
+      2: { cellWidth: 28 },
+      3: { cellWidth: 24 },
+      4: { cellWidth: 30 },
       5: { cellWidth: 30 },
-      6: { cellWidth: 30 },
-      7: { cellWidth: 35 },
-      8: { cellWidth: 22, halign: 'center' },
+      6: { cellWidth: 35 },
+      7: { cellWidth: 22, halign: 'center' },
+      8: { cellWidth: 30 },
     },
     margin: { left: horizontalMargin, right: horizontalMargin },
     theme: 'grid',
