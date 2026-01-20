@@ -3,21 +3,20 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
+import Input from '@mui/material/Input';
+import FormHelperText from '@mui/material/FormHelperText';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Dayjs } from 'dayjs';
 import 'dayjs/locale/pt-br';
 import { usuarioService } from '../../services/api';
 import type { Usuario } from '../../types/api';
+import DatePickerField from './DatePickerField';
 
 export interface FilterState {
     nome: string;
@@ -53,61 +52,6 @@ const statusOptions = [
     { value: 'NO_DEPOSITO', label: 'No Depósito' },
     { value: 'FORA_DEPOSITO', label: 'Fora do Depósito' },
 ];
-
-const textFieldStyle = {
-    '& .MuiInputLabel-root': {
-        fontSize: '0.95rem',
-        color: '#94a3b8',
-        transform: 'translate(14px, 12px) scale(1)',
-        transition: 'all 0.2s ease-out',
-    },
-    '& .MuiInputLabel-shrink': {
-        fontSize: '0.85rem',
-        transform: 'translate(14px, -9px) scale(0.85)',
-        backgroundColor: '#020617',
-        padding: '0 8px',
-        borderRadius: '10px',
-        zIndex: 1,
-        color: '#3b82f6',
-    },
-    '& .MuiOutlinedInput-root': {
-        height: '48px',
-        fontSize: '0.95rem',
-        backgroundColor: 'transparent',
-        '& fieldset': {
-            borderColor: 'rgba(255, 255, 255, 0.2)',
-        },
-        '&:hover fieldset': {
-            borderColor: 'rgba(255, 255, 255, 0.4)',
-        },
-        '&.Mui-focused fieldset': {
-            borderWidth: '2px',
-        },
-        '& input': {
-            padding: '10px 14px',
-            color: '#f8fafc',
-        },
-    },
-};
-
-const selectStyle = {
-    height: '48px',
-    fontSize: '0.95rem',
-    backgroundColor: 'transparent',
-    '& fieldset': {
-        borderColor: 'rgba(255, 255, 255, 0.2)',
-    },
-    '&:hover fieldset': {
-        borderColor: 'rgba(255, 255, 255, 0.4)',
-    },
-    '&.Mui-focused fieldset': {
-        borderWidth: '2px',
-    },
-    '& .MuiSelect-select': {
-        padding: '10px 14px',
-        color: '#f8fafc',
-    },
-};
 
 
 
@@ -163,125 +107,105 @@ export default function EquipmentFilter({
                     borderRadius: 1,
                 }}
             >
-                <Grid container spacing={2} alignItems="center">
+                <Grid container spacing={3} alignItems="flex-end">
                     <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                        <TextField
-                            fullWidth
-                            size="small"
-                            label="Nome"
-                            value={filters.nome}
-                            onChange={handleInputChange('nome')}
-                            onKeyPress={handleKeyPress}
-                            sx={textFieldStyle}
-                        />
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                        <TextField
-                            fullWidth
-                            size="small"
-                            label="Modelo"
-                            value={filters.modelo}
-                            onChange={handleInputChange('modelo')}
-                            onKeyPress={handleKeyPress}
-                            sx={textFieldStyle}
-                        />
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                        <TextField
-                            fullWidth
-                            size="small"
-                            label="Nº Série"
-                            value={filters.numero_serie}
-                            onChange={handleInputChange('numero_serie')}
-                            onKeyPress={handleKeyPress}
-                            sx={textFieldStyle}
-                        />
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                        <TextField
-                            fullWidth
-                            size="small"
-                            label="Patrimônio"
-                            value={filters.patrimonio}
-                            onChange={handleInputChange('patrimonio')}
-                            onKeyPress={handleKeyPress}
-                            sx={textFieldStyle}
-                        />
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                        <TextField
-                            fullWidth
-                            size="small"
-                            label="Local"
-                            value={filters.local}
-                            onChange={handleInputChange('local')}
-                            onKeyPress={handleKeyPress}
-                            sx={textFieldStyle}
-                        />
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                        <FormControl fullWidth size="small">
-                            <InputLabel
-                                sx={{
-                                    fontSize: '0.95rem',
-                                    color: '#94a3b8',
-                                    transform: 'translate(14px, 12px) scale(1)',
-                                    transition: 'all 0.2s ease-out',
-                                    '&.Mui-focused': {
-                                        color: '#3b82f6',
-                                    },
-                                    '&.MuiInputLabel-shrink': {
-                                        fontSize: '0.85rem',
-                                        transform: 'translate(14px, -9px) scale(0.85)',
-                                        backgroundColor: '#020617',
-                                        padding: '0 8px',
-                                        borderRadius: '10px',
-                                    },
+                        <FormControl variant="standard" fullWidth>
+                            <Input
+                                id="filter-nome"
+                                value={filters.nome}
+                                onChange={handleInputChange('nome')}
+                                onKeyPress={handleKeyPress}
+                                inputProps={{
+                                    'aria-label': 'Nome',
                                 }}
-                            >
-                                Status
-                            </InputLabel>
-                            <Select
+                            />
+                            <FormHelperText>Nome</FormHelperText>
+                        </FormControl>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                        <FormControl variant="standard" fullWidth>
+                            <Input
+                                id="filter-modelo"
+                                value={filters.modelo}
+                                onChange={handleInputChange('modelo')}
+                                onKeyPress={handleKeyPress}
+                                inputProps={{
+                                    'aria-label': 'Modelo',
+                                }}
+                            />
+                            <FormHelperText>Modelo</FormHelperText>
+                        </FormControl>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                        <FormControl variant="standard" fullWidth>
+                            <Input
+                                id="filter-numero-serie"
+                                value={filters.numero_serie}
+                                onChange={handleInputChange('numero_serie')}
+                                onKeyPress={handleKeyPress}
+                                inputProps={{
+                                    'aria-label': 'Nº Série',
+                                }}
+                            />
+                            <FormHelperText>Nº Série</FormHelperText>
+                        </FormControl>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                        <FormControl variant="standard" fullWidth>
+                            <Input
+                                id="filter-patrimonio"
+                                value={filters.patrimonio}
+                                onChange={handleInputChange('patrimonio')}
+                                onKeyPress={handleKeyPress}
+                                inputProps={{
+                                    'aria-label': 'Patrimônio',
+                                }}
+                            />
+                            <FormHelperText>Patrimônio</FormHelperText>
+                        </FormControl>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                        <FormControl variant="standard" fullWidth>
+                            <Input
+                                id="filter-local"
+                                value={filters.local}
+                                onChange={handleInputChange('local')}
+                                onKeyPress={handleKeyPress}
+                                inputProps={{
+                                    'aria-label': 'Local',
+                                }}
+                            />
+                            <FormHelperText>Local</FormHelperText>
+                        </FormControl>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                        <FormControl variant="standard" fullWidth>
+                            <TextField
+                                id="filter-status"
+                                select
                                 value={filters.status}
-                                label="Status"
                                 onChange={handleStatusChange}
-                                sx={selectStyle}
+                                variant="standard"
+                                fullWidth
                             >
                                 {statusOptions.map((option) => (
                                     <MenuItem key={option.value} value={option.value}>
                                         {option.label}
                                     </MenuItem>
                                 ))}
-                            </Select>
+                            </TextField>
+                            <FormHelperText>Status</FormHelperText>
                         </FormControl>
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                        <FormControl fullWidth size="small">
-                            <InputLabel
-                                sx={{
-                                    fontSize: '0.95rem',
-                                    color: '#94a3b8',
-                                    transform: 'translate(14px, 12px) scale(1)',
-                                    transition: 'all 0.2s ease-out',
-                                    '&.Mui-focused': {
-                                        color: '#3b82f6',
-                                    },
-                                    '&.MuiInputLabel-shrink': {
-                                        fontSize: '0.85rem',
-                                        transform: 'translate(14px, -9px) scale(0.85)',
-                                        backgroundColor: '#020617',
-                                        padding: '0 8px',
-                                        borderRadius: '10px',
-                                    },
-                                }}
-                            >
-                                Responsável
-                            </InputLabel>
-                            <Select
+                        <FormControl variant="standard" fullWidth>
+                            <TextField
+                                id="filter-responsavel"
+                                select
                                 value={filters.usuario_id}
-                                label="Responsável"
                                 onChange={(event) => onFilterChange({ ...filters, usuario_id: event.target.value as string })}
-                                sx={selectStyle}
+                                variant="standard"
+                                fullWidth
                             >
                                 <MenuItem value="">Todos</MenuItem>
                                 {usuarios.map((usuario) => (
@@ -289,83 +213,17 @@ export default function EquipmentFilter({
                                         {usuario.nome}
                                     </MenuItem>
                                 ))}
-                            </Select>
+                            </TextField>
+                            <FormHelperText>Responsável</FormHelperText>
                         </FormControl>
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                        <FormControl fullWidth size="small">
-                            <InputLabel
-                                shrink={filters.created_at !== null}
-                                sx={{
-                                    fontSize: '0.95rem',
-                                    color: '#94a3b8',
-                                    transform: 'translate(14px, 12px) scale(1)',
-                                    transition: 'all 0.2s ease-out',
-                                    '&.Mui-focused': {
-                                        color: '#3b82f6',
-                                    },
-                                    '&.MuiInputLabel-shrink': {
-                                        fontSize: '0.85rem',
-                                        transform: 'translate(14px, -9px) scale(0.85)',
-                                        backgroundColor: '#020617',
-                                        padding: '0 8px',
-                                        borderRadius: '10px',
-                                        zIndex: 1,
-                                    },
-                                }}
-                            >
-                                Cadastro
-                            </InputLabel>
-                            <DatePicker
-                                value={filters.created_at}
-                                onChange={handleDateChange}
-                                format="DD/MM/YYYY"
-                                slots={{
-                                    openPickerIcon: CalendarTodayIcon,
-                                }}
-                                slotProps={{
-                                    field: {
-                                        clearable: true,
-                                        onClear: () => handleDateChange(null)
-                                    },
-                                    textField: {
-                                        fullWidth: true,
-                                        variant: 'outlined',
-                                        sx: {
-                                            '& .MuiInputBase-root': {
-                                                height: '48px',
-                                                color: '#f8fafc',
-                                                backgroundColor: 'transparent',
-                                                '& fieldset': {
-                                                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                                                },
-                                                '&:hover fieldset': {
-                                                    borderColor: 'rgba(255, 255, 255, 0.4)',
-                                                },
-                                                '&.Mui-focused fieldset': {
-                                                    borderWidth: '2px',
-                                                    borderColor: '#1976d2',
-                                                },
-                                            },
-                                            '& .MuiInputBase-input': {
-                                                padding: '10px 14px',
-                                                height: 'auto',
-                                            },
-                                        }
-                                    },
-                                    openPickerButton: {
-                                        disableRipple: true,
-                                        sx: {
-                                            color: '#94a3b8',
-                                            marginRight: '4px',
-                                            '&:hover': {
-                                                backgroundColor: 'transparent',
-                                            },
-                                        },
-                                    },
-                                }}
-                            />
-                        </FormControl>
+                        <DatePickerField
+                            label="Cadastro"
+                            value={filters.created_at}
+                            onChange={handleDateChange}
+                            fullWidth
+                        />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 12, md: 2 }}>
                         <Box sx={{ display: 'flex', gap: 1 }}>

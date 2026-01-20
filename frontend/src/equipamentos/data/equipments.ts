@@ -1,6 +1,4 @@
 /**
- * Data layer para Equipamentos
- * Wrapper simples que usa o equipamentoService existente
  * Todo processamento de dados é feito no backend
  */
 
