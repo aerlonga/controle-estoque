@@ -43,7 +43,6 @@ export const initialFilterState: FilterState = {
 interface EquipmentFilterProps {
     filters: FilterState;
     onFilterChange: (filters: FilterState) => void;
-    onSearch: () => void;
     onClear: () => void;
 }
 
@@ -58,10 +57,14 @@ const statusOptions = [
 export default function EquipmentFilter({
     filters,
     onFilterChange,
-    onSearch,
     onClear,
 }: EquipmentFilterProps) {
     const [usuarios, setUsuarios] = React.useState<Usuario[]>([]);
+    const [localFilters, setLocalFilters] = React.useState<FilterState>(filters);
+
+    React.useEffect(() => {
+        setLocalFilters(filters);
+    }, [filters]);
 
     React.useEffect(() => {
         const fetchUsuarios = async () => {
@@ -78,20 +81,28 @@ export default function EquipmentFilter({
     const handleInputChange = (field: keyof FilterState) => (
         event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) => {
-        onFilterChange({ ...filters, [field]: event.target.value });
+        setLocalFilters({ ...localFilters, [field]: event.target.value });
     };
 
     const handleStatusChange = (event: any) => {
-        onFilterChange({ ...filters, status: event.target.value });
+        setLocalFilters({ ...localFilters, status: event.target.value });
     };
 
     const handleDateChange = (newValue: unknown) => {
-        onFilterChange({ ...filters, created_at: newValue as Dayjs | null });
+        setLocalFilters({ ...localFilters, created_at: newValue as Dayjs | null });
+    };
+
+    const handleSearch = () => {
+        onFilterChange(localFilters);
+    };
+
+    const handleClear = () => {
+        onClear();
     };
 
     const handleKeyPress = (event: React.KeyboardEvent) => {
         if (event.key === 'Enter') {
-            onSearch();
+            handleSearch();
         }
     };
 
@@ -112,7 +123,7 @@ export default function EquipmentFilter({
                         <FormControl variant="standard" fullWidth>
                             <Input
                                 id="filter-nome"
-                                value={filters.nome}
+                                value={localFilters.nome}
                                 onChange={handleInputChange('nome')}
                                 onKeyPress={handleKeyPress}
                                 inputProps={{
@@ -126,7 +137,7 @@ export default function EquipmentFilter({
                         <FormControl variant="standard" fullWidth>
                             <Input
                                 id="filter-modelo"
-                                value={filters.modelo}
+                                value={localFilters.modelo}
                                 onChange={handleInputChange('modelo')}
                                 onKeyPress={handleKeyPress}
                                 inputProps={{
@@ -140,7 +151,7 @@ export default function EquipmentFilter({
                         <FormControl variant="standard" fullWidth>
                             <Input
                                 id="filter-numero-serie"
-                                value={filters.numero_serie}
+                                value={localFilters.numero_serie}
                                 onChange={handleInputChange('numero_serie')}
                                 onKeyPress={handleKeyPress}
                                 inputProps={{
@@ -154,7 +165,7 @@ export default function EquipmentFilter({
                         <FormControl variant="standard" fullWidth>
                             <Input
                                 id="filter-patrimonio"
-                                value={filters.patrimonio}
+                                value={localFilters.patrimonio}
                                 onChange={handleInputChange('patrimonio')}
                                 onKeyPress={handleKeyPress}
                                 inputProps={{
@@ -168,7 +179,7 @@ export default function EquipmentFilter({
                         <FormControl variant="standard" fullWidth>
                             <Input
                                 id="filter-local"
-                                value={filters.local}
+                                value={localFilters.local}
                                 onChange={handleInputChange('local')}
                                 onKeyPress={handleKeyPress}
                                 inputProps={{
@@ -183,7 +194,7 @@ export default function EquipmentFilter({
                             <TextField
                                 id="filter-status"
                                 select
-                                value={filters.status}
+                                value={localFilters.status}
                                 onChange={handleStatusChange}
                                 variant="standard"
                                 fullWidth
@@ -202,8 +213,8 @@ export default function EquipmentFilter({
                             <TextField
                                 id="filter-responsavel"
                                 select
-                                value={filters.usuario_id}
-                                onChange={(event) => onFilterChange({ ...filters, usuario_id: event.target.value as string })}
+                                value={localFilters.usuario_id}
+                                onChange={(event) => setLocalFilters({ ...localFilters, usuario_id: event.target.value as string })}
                                 variant="standard"
                                 fullWidth
                             >
@@ -220,20 +231,20 @@ export default function EquipmentFilter({
                     <Grid size={{ xs: 12, sm: 6, md: 2 }}>
                         <DatePickerField
                             label="Cadastro"
-                            value={filters.created_at}
+                            value={localFilters.created_at}
                             onChange={handleDateChange}
                             fullWidth
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 12, md: 2 }}>
-                        <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Grid size={{ xs: 12, sm: 12, md: 8 }}>
+                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
                             <Button
                                 variant="contained"
                                 size="small"
                                 startIcon={<SearchIcon />}
-                                onClick={onSearch}
+                                onClick={handleSearch}
                                 sx={{
-                                    flex: 1,
+                                    minWidth: '120px',
                                     textTransform: 'none',
                                     borderRadius: '8px',
                                     height: '40px',
@@ -245,9 +256,9 @@ export default function EquipmentFilter({
                                 variant="outlined"
                                 size="small"
                                 startIcon={<ClearIcon />}
-                                onClick={onClear}
+                                onClick={handleClear}
                                 sx={{
-                                    flex: 1,
+                                    minWidth: '120px',
                                     textTransform: 'none',
                                     borderRadius: '8px',
                                     height: '40px',

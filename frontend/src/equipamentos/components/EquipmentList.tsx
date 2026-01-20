@@ -428,7 +428,7 @@ export default function EquipmentList() {
         [handleRowEdit, handleRowDelete, handleMovement],
     );
 
-    const pageTitle = 'Equipamentos';
+    // const pageTitle = 'Equipamentos';
 
     return (
         <PageContainer
@@ -458,7 +458,6 @@ export default function EquipmentList() {
                 <EquipmentFilter
                     filters={filters}
                     onFilterChange={handleFilterChange}
-                    onSearch={loadData}
                     onClear={() => {
                         setFilters(initialFilterState);
                         setPaginationModel({ page: 0, pageSize: INITIAL_PAGE_SIZE });
