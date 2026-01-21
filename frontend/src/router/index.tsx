@@ -9,6 +9,7 @@ import DialogsProvider from '../equipamentos/hooks/useDialogs/DialogsProvider'
 
 const Dashboard = lazy(() => import('../pages/Dashboard'))
 const Users = lazy(() => import('../pages/Users'))
+const UserForm = lazy(() => import('../usuarios/components/UserForm'))
 
 
 // Equipment components from MUI template
@@ -64,6 +65,31 @@ const usersRoute = createRoute({
     component: Users,
 })
 
+const userNewRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/users/new',
+    beforeLoad: () => {
+        const { isAuthenticated } = useAuthStore.getState()
+        if (!isAuthenticated) {
+            throw redirect({ to: '/' })
+        }
+    },
+    component: UserForm,
+})
+
+const userEditRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/users/$id/edit',
+    beforeLoad: () => {
+        const { isAuthenticated } = useAuthStore.getState()
+        if (!isAuthenticated) {
+            throw redirect({ to: '/' })
+        }
+    },
+    component: UserForm,
+})
+
+
 const equipmentsRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/equipments',
@@ -105,10 +131,11 @@ const equipmentEditRoute = createRoute({
 const routeTree = rootRoute.addChildren([
     dashboardRoute,
     usersRoute,
+    userNewRoute,
+    userEditRoute,
     equipmentsRoute,
     equipmentNewRoute,
     equipmentEditRoute,
-
 ])
 
 export const router = createRouter({

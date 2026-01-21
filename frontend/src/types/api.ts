@@ -14,10 +14,10 @@ export type Role = 'ADMIN' | 'USUARIO'
 export interface Usuario {
     id: number
     nome: string
-    email: string
+    usuario_rede: string
     senha?: string
-    role: Role
-    status_usuario: StatusUsuario
+    perfil: Role
+    status_usuario?: StatusUsuario
     created_at?: string
     updated_at?: string
 }
@@ -69,9 +69,9 @@ export interface EquipamentoFormData {
 
 export interface UsuarioFormData {
     nome: string
-    email: string
+    usuario_rede: string
     senha?: string
-    role: Role
+    perfil: Role
     status_usuario?: StatusUsuario
 }
 
