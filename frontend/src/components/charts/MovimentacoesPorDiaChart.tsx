@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 import { BarChart } from '@mui/x-charts/BarChart'
 import { useTheme } from '@mui/material/styles'
+import { formatNumber } from '../../utils/formatters'
 
 interface MovimentacoesPorDiaChartProps {
     data: {
@@ -15,8 +16,6 @@ interface MovimentacoesPorDiaChartProps {
 
 export default function MovimentacoesPorDiaChart({ data }: MovimentacoesPorDiaChartProps) {
     const theme = useTheme()
-
-    const total = data.series[0]?.data.reduce((sum, v) => sum + v, 0) || 0
 
     return (
         <Card variant="outlined" sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -46,7 +45,10 @@ export default function MovimentacoesPorDiaChart({ data }: MovimentacoesPorDiaCh
                     colors={[data.series[0]?.color || theme.palette.primary.main]}
                     xAxis={data.xAxis}
                     yAxis={[{ width: 50 }]}
-                    series={data.series}
+                    series={data.series.map(serie => ({
+                        ...serie,
+                        valueFormatter: (value) => formatNumber(value ?? 0),
+                    }))}
                     height={250}
                     margin={{ left: 0, right: 0, top: 20, bottom: 0 }}
                     grid={{ horizontal: true }}

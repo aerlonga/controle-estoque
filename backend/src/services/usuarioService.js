@@ -2,9 +2,6 @@ const prisma = require('../models/prisma');
 const bcrypt = require('bcrypt');
 
 class UsuarioService {
-    /**
-     * Criar novo usuário
-     */
     async criar(dados) {
         if (!dados.nome || !dados.usuario_rede || !dados.senha) {
             throw new Error('Nome, usuário de rede e senha são obrigatórios');
@@ -24,7 +21,7 @@ class UsuarioService {
                 nome: dados.nome,
                 usuario_rede: dados.usuario_rede,
                 senha_hash: senhaHash,
-                perfil: dados.perfil // Aceita perfil, default será USUARIO
+                perfil: dados.perfil
             }
         });
 
@@ -32,13 +29,22 @@ class UsuarioService {
         return usuario;
     }
 
-    /**
-     * Listar todos os usuários (com paginação)
-     */
-    async listar(page = 1, limit = 10) {
+    async listar(page = 1, limit = 10, filtros = {}) {
+        const where = { status_usuario: 1 };
+
+        if (filtros.nome) {
+            where.nome = { contains: filtros.nome, mode: 'insensitive' };
+        }
+        if (filtros.usuario_rede) {
+            where.usuario_rede = { contains: filtros.usuario_rede, mode: 'insensitive' };
+        }
+        if (filtros.perfil) {
+            where.perfil = filtros.perfil;
+        }
+
         const [data, meta] = await prisma.usuario
             .paginate({
-                where: { status_usuario: 1 },
+                where,
                 select: {
                     id: true,
                     nome: true,
@@ -57,9 +63,6 @@ class UsuarioService {
         return { data, meta };
     }
 
-    /**
-     * Buscar usuário por ID
-     */
     async buscarPorId(id) {
         const usuario = await prisma.usuario.findUnique({
             where: { id: parseInt(id) },
@@ -79,9 +82,6 @@ class UsuarioService {
         return usuario;
     }
 
-    /**
-     * Atualizar usuário
-     */
     async atualizar(id, dados) {
         await this.buscarPorId(id);
 
@@ -118,9 +118,6 @@ class UsuarioService {
         return usuario;
     }
 
-    /**
-     * Desativar usuário (soft delete)
-     */
     async desativar(id) {
         await this.buscarPorId(id);
 

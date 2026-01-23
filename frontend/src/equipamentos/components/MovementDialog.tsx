@@ -1,24 +1,56 @@
+// import * as React from 'react';
 import {
-    Dialog, DialogTitle, DialogContent, DialogActions,
-    TextField, Button, Alert, Box, Typography
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    Alert,
+    Typography,
+    FormControl,
+    Input,
+    FormHelperText,
+    Stack,
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
 import { equipamentoService } from '../../services/api';
+import type { Equipment } from '../data/equipments';
+import type { TipoMovimentacao } from '../../types/api';
 
-function MovementDialog({ open, onClose, onSuccess, equipment, tipoMovimentacao }) {
-    const { control, handleSubmit, formState: { errors }, reset } = useForm({
+interface MovementDialogProps {
+    open: boolean;
+    onClose: () => void;
+    onSuccess: () => void;
+    equipment: Equipment | null;
+    tipoMovimentacao: TipoMovimentacao | null;
+}
+
+interface FormData {
+    observacao: string;
+}
+
+export default function MovementDialog({
+    open,
+    onClose,
+    onSuccess,
+    equipment,
+    tipoMovimentacao,
+}: MovementDialogProps) {
+    const { control, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
         defaultValues: {
-            observacao: ''
-        }
+            observacao: '',
+        },
     });
 
     const movementMutation = useMutation({
-        mutationFn: (data) => {
-            // Aqui vamos chamar o endpoint de movimentação quando estiver implementado
+        mutationFn: (data: FormData) => {
+            if (!equipment || !tipoMovimentacao) {
+                throw new Error('Equipamento ou tipo de movimentação inválido');
+            }
             return equipamentoService.movimentar(equipment.id, {
                 tipo: tipoMovimentacao,
-                observacao: data.observacao
+                observacao: data.observacao,
             });
         },
         onSuccess: () => {
@@ -33,7 +65,7 @@ function MovementDialog({ open, onClose, onSuccess, equipment, tipoMovimentacao 
         onClose();
     };
 
-    const onSubmit = (data) => {
+    const onSubmit = (data: FormData) => {
         movementMutation.mutate(data);
     };
 
@@ -45,7 +77,7 @@ function MovementDialog({ open, onClose, onSuccess, equipment, tipoMovimentacao 
     return (
         <Dialog
             open={open}
-            onClose={(event, reason) => {
+            onClose={(_event, reason) => {
                 if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
                     return;
                 }
@@ -75,22 +107,31 @@ function MovementDialog({ open, onClose, onSuccess, equipment, tipoMovimentacao 
                         name="observacao"
                         control={control}
                         render={({ field }) => (
-                            <TextField
-                                {...field}
-                                label="Observação (opcional)"
-                                fullWidth
-                                multiline
-                                rows={3}
-                                placeholder="Ex: Entregue ao setor financeiro"
-                                error={!!errors.observacao}
-                                helperText={errors.observacao?.message}
-                            />
+                            <FormControl variant="standard" fullWidth error={!!errors.observacao}>
+                                <Input
+                                    {...field}
+                                    id="observacao"
+                                    multiline
+                                    placeholder="Ex: Entregue ao setor financeiro"
+                                    inputProps={{
+                                        'aria-label': 'Observação (opcional)',
+                                    }}
+                                />
+                                {errors.observacao ? (
+                                    <Stack>
+                                        <FormHelperText>Observação (opcional)</FormHelperText>
+                                        <FormHelperText error>{errors.observacao.message}</FormHelperText>
+                                    </Stack>
+                                ) : (
+                                    <FormHelperText>Observação (opcional)</FormHelperText>
+                                )}
+                            </FormControl>
                         )}
                     />
 
                     {movementMutation.isError && (
                         <Alert severity="error" sx={{ mt: 2 }}>
-                            {movementMutation.error.response?.data?.error || 'Erro ao registrar movimentação'}
+                            {(movementMutation.error as Error)?.message || 'Erro ao registrar movimentação'}
                         </Alert>
                     )}
                 </DialogContent>
@@ -109,5 +150,3 @@ function MovementDialog({ open, onClose, onSuccess, equipment, tipoMovimentacao 
         </Dialog>
     );
 }
-
-export default MovementDialog;

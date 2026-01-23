@@ -6,7 +6,6 @@ import type {
     UsuarioFormData,
     EquipamentoFormData,
     MovimentacaoFormData,
-    LoginFormData,
     AuthResponse,
     ApiResponse,
     MovimentacaoFiltros,
@@ -23,8 +22,16 @@ export const authService = {
 }
 
 export const usuarioService = {
-    async listar(): Promise<ApiResponse<Usuario[]>> {
-        const response = await api.get<ApiResponse<Usuario[]>>('/usuarios')
+    async listar(params: {
+        page?: number;
+        limit?: number;
+        nome?: string;
+        usuario_rede?: string;
+        perfil?: string;
+    } = {}): Promise<{ data: Usuario[]; meta: any }> {
+        const response = await api.get<{ data: Usuario[]; meta: any }>('/usuarios', {
+            params
+        })
         return response.data
     },
 
@@ -50,8 +57,21 @@ export const usuarioService = {
 }
 
 export const equipamentoService = {
-    async listar(): Promise<ApiResponse<Equipamento[]>> {
-        const response = await api.get<ApiResponse<Equipamento[]>>('/equipamentos')
+    async listar(
+        params: Record<string, any> = {}
+    ): Promise<{ data: Equipamento[]; meta: any }> {
+        const response = await api.get<{ data: Equipamento[]; meta: any }>('/equipamentos', {
+            params,
+        })
+        return response.data
+    },
+
+    async listarTodos(
+        params: Record<string, any> = {}
+    ): Promise<{ data: Equipamento[]; total: number }> {
+        const response = await api.get<{ data: Equipamento[]; total: number }>('/equipamentos/export/all', {
+            params,
+        })
         return response.data
     },
 

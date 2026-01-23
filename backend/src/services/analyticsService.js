@@ -2,24 +2,20 @@ const prisma = require('../models/prisma');
 
 const analyticsService = {
     /**
-     * Retorna dados agregados de movimentações por data e dia da semana
-     * @param {Object} filtros - { periodo: 7|15|30, data_inicio: 'YYYY-MM-DD', data_fim: 'YYYY-MM-DD' }
+     * @param {Object} filtros
      */
     async getMovimentacoesAnalytics(filtros = {}) {
         const { periodo, data_inicio, data_fim } = filtros;
 
-        // Determinar intervalo de datas
         let startDate, endDate, periodDays;
 
         if (data_inicio && data_fim) {
-            // Período personalizado
             startDate = new Date(data_inicio);
             startDate.setHours(0, 0, 0, 0);
             endDate = new Date(data_fim);
             endDate.setHours(23, 59, 59, 999);
             periodDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
         } else {
-            // Período predefinido (padrão: 30 dias)
             const days = parseInt(periodo) || 30;
             endDate = new Date();
             endDate.setHours(23, 59, 59, 999);
@@ -29,7 +25,6 @@ const analyticsService = {
             periodDays = days;
         }
 
-        // Buscar todas as movimentações no período
         const movimentacoes = await prisma.movimentacao.findMany({
             where: {
                 data_movimentacao: {
@@ -42,14 +37,12 @@ const analyticsService = {
             }
         });
 
-        // Buscar TODAS as movimentações para estatística semanal
         const todasMovimentacoes = await prisma.movimentacao.findMany({
             orderBy: {
                 data_movimentacao: 'desc'
             }
         });
 
-        // Processar dados por data
         const porDataMap = {};
 
         movimentacoes.forEach((mov) => {
@@ -62,7 +55,6 @@ const analyticsService = {
             porDataMap[dateKey][mov.tipo]++;
         });
 
-        // Gerar array completo de datas
         const allDates = [];
         for (let i = 0; i < periodDays; i++) {
             const date = new Date(startDate);
@@ -79,18 +71,16 @@ const analyticsService = {
             }
         }
 
-        // Processar dados por dia da semana (começando na segunda-feira)
         const weekdays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
         const weeklyTotal = Array(7).fill(0);
 
         todasMovimentacoes.forEach((mov) => {
             const date = new Date(mov.data_movimentacao);
-            const day = date.getDay(); // 0 = domingo, 1 = segunda
+            const day = date.getDay();
             const adjustedDay = day === 0 ? 6 : day - 1;
             weeklyTotal[adjustedDay]++;
         });
 
-        // Construir resposta formatada
         return {
             porData: {
                 xAxis: allDates.map(d => d.label),
@@ -119,11 +109,7 @@ const analyticsService = {
         };
     },
 
-    /**
-     * Retorna dados agregados de equipamentos por tipo e status
-     */
     async getEquipamentosAnalytics() {
-        // Buscar todos os equipamentos não descartados
         const equipamentos = await prisma.equipamento.findMany({
             where: {
                 status: {
@@ -132,29 +118,23 @@ const analyticsService = {
             }
         });
 
-        // Contar por tipo
         const porTipoMap = {};
         let noDeposito = 0;
         let foraDeposito = 0;
 
         equipamentos.forEach((eq) => {
-            // Contar por tipo
             porTipoMap[eq.nome] = (porTipoMap[eq.nome] || 0) + 1;
 
-            // Contar por status
             if (eq.status === 'NO_DEPOSITO') noDeposito++;
             if (eq.status === 'FORA_DEPOSITO') foraDeposito++;
         });
-
-        // Converter para array e ordenar por quantidade
         const porTipo = Object.entries(porTipoMap)
             .map(([label, value]) => ({ label, value }))
             .sort((a, b) => b.value - a.value);
 
-        // Gerar histórico simulado (últimos 30 dias)
         const generateHistory = (baseValue) => {
             return Array.from({ length: 30 }, () => {
-                const variation = Math.random() * 0.2 - 0.1; // ±10%
+                const variation = Math.random() * 0.2 - 0.1;
                 return Math.max(0, Math.floor(baseValue * (1 + variation)));
             });
         };

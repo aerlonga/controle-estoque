@@ -14,10 +14,10 @@ export type Role = 'ADMIN' | 'USUARIO'
 export interface Usuario {
     id: number
     nome: string
-    email: string
+    usuario_rede: string
     senha?: string
-    role: Role
-    status_usuario: StatusUsuario
+    perfil: Role
+    status_usuario?: StatusUsuario
     created_at?: string
     updated_at?: string
 }
@@ -26,14 +26,17 @@ export interface Equipamento {
     id: number
     nome: string
     descricao?: string | null
-    tipo: string
+    tipo?: string
+    modelo?: string | null
     numero_serie?: string | null
     patrimonio?: string | null
+    local?: string | null
     status: StatusEquipamento
     usuario_id?: number | null
     created_at?: string
     updated_at?: string
     usuario?: Usuario
+    movimentacoes?: Partial<Movimentacao>[]
 }
 
 export interface Movimentacao {
@@ -55,18 +58,20 @@ export interface Movimentacao {
 export interface EquipamentoFormData {
     nome: string
     descricao?: string
-    tipo: string
+    tipo?: string
+    modelo?: string
     numero_serie?: string
     patrimonio?: string
-    status: StatusEquipamento
+    local?: string
+    status?: StatusEquipamento
     usuario_id?: number
 }
 
 export interface UsuarioFormData {
     nome: string
-    email: string
+    usuario_rede: string
     senha?: string
-    role: Role
+    perfil: Role
     status_usuario?: StatusUsuario
 }
 

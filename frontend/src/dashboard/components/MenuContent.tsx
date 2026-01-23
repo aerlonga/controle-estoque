@@ -12,7 +12,7 @@ import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded'
 const mainListItems = [
   { text: 'Dashboard', icon: <DashboardRoundedIcon />, path: '/' },
   { text: 'Equipamentos', icon: <BuildRoundedIcon />, path: '/equipments' },
-  { text: 'Usuários', icon: <PeopleRoundedIcon />, path: '/users' },
+  { text: 'Usuários', icon: <PeopleRoundedIcon />, path: '/users', adminOnly: true },
 ]
 
 export default function MenuContent() {
@@ -20,10 +20,29 @@ export default function MenuContent() {
   const routerState = useRouterState()
   const currentPath = routerState.location.pathname
 
+  const isAdmin = (() => {
+    const usuario = localStorage.getItem('usuario')
+    if (!usuario) return false
+    try {
+      const parsed = JSON.parse(usuario)
+      return parsed.perfil === 'ADMIN'
+    } catch {
+      return false
+    }
+  })()
+
+  // Filter menu items based on user permissions
+  const filteredMenuItems = mainListItems.filter(item => {
+    if (item.adminOnly) {
+      return isAdmin
+    }
+    return true
+  })
+
   return (
     <Stack sx={{ flexGrow: 1, p: 1, justifyContent: 'space-between' }}>
       <List dense>
-        {mainListItems.map((item, index) => (
+        {filteredMenuItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: 'block' }}>
             <ListItemButton
               selected={currentPath === item.path}
