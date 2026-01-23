@@ -9,23 +9,13 @@ import Input from '@mui/material/Input';
 import FormHelperText from '@mui/material/FormHelperText';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from '@tanstack/react-router';
+import { useForm, Controller } from 'react-hook-form';
 import type { EquipamentoFormData } from '../../types/api';
-
-export interface EquipmentFormState {
-    values: Partial<EquipamentoFormData>;
-    errors: Partial<Record<keyof EquipamentoFormData, string>>;
-}
-
-export type FormFieldValue = string | number | null;
+import { validate as validateEquipment } from '../data/equipments';
 
 export interface EquipmentFormProps {
-    formState: EquipmentFormState;
-    onFieldChange: (
-        name: keyof EquipmentFormState['values'],
-        value: FormFieldValue,
-    ) => void;
-    onSubmit: (formValues: Partial<EquipmentFormState['values']>) => Promise<void>;
-    onReset?: (formValues: Partial<EquipmentFormState['values']>) => void;
+    defaultValues?: Partial<EquipamentoFormData>;
+    onSubmit: (data: EquipamentoFormData) => Promise<void>;
     submitButtonLabel: string;
     backButtonPath?: string;
 }
@@ -34,6 +24,7 @@ interface StandardInputProps {
     label: string;
     value: string | number | undefined | null;
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    onBlur: () => void;
     name: string;
     error?: boolean;
     helperText?: string;
@@ -45,6 +36,7 @@ function StandardInput({
     label,
     value,
     onChange,
+    onBlur,
     name,
     error,
     helperText,
@@ -58,12 +50,12 @@ function StandardInput({
                 name={name}
                 value={value ?? ''}
                 onChange={onChange}
+                onBlur={onBlur}
                 placeholder="-"
                 inputProps={{
                     'aria-label': label,
                 }}
             />
-            {/* O helperText do erro, se houver, ou o Label abaixo da linha */}
             {error ? (
                 <Stack>
                     <FormHelperText>{label}</FormHelperText>
@@ -78,46 +70,40 @@ function StandardInput({
 
 export default function EquipmentForm(props: EquipmentFormProps) {
     const {
-        formState,
-        onFieldChange,
+        defaultValues,
         onSubmit,
-        onReset,
         submitButtonLabel,
         backButtonPath,
     } = props;
 
-    const formValues = formState.values;
-    const formErrors = formState.errors;
-
     const navigate = useNavigate();
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-    const handleSubmit = React.useCallback(
-        async (event: React.FormEvent<HTMLFormElement>) => {
-            event.preventDefault();
-            setIsSubmitting(true);
-            try {
-                await onSubmit(formValues);
-            } finally {
-                setIsSubmitting(false);
+    const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<EquipamentoFormData>({
+        defaultValues: {
+            nome: '',
+            modelo: '',
+            numero_serie: '',
+            patrimonio: '',
+            local: '',
+            ...defaultValues,
+        },
+        resolver: async (values) => {
+            const { issues } = validateEquipment(values);
+            if (issues && issues.length > 0) {
+                return {
+                    values: {},
+                    errors: issues.reduce((acc, issue) => ({
+                        ...acc,
+                        [issue.path![0]]: {
+                            type: 'manual',
+                            message: issue.message,
+                        },
+                    }), {}),
+                };
             }
+            return { values, errors: {} };
         },
-        [formValues, onSubmit],
-    );
-
-    const handleTextFieldChange = React.useCallback(
-        (event: React.ChangeEvent<HTMLInputElement>) => {
-            onFieldChange(
-                event.target.name as keyof EquipmentFormState['values'],
-                event.target.value,
-            );
-        },
-        [onFieldChange],
-    );
-
-    const handleReset = React.useCallback(() => {
-        if (onReset) onReset(formValues);
-    }, [formValues, onReset]);
+    });
 
     const handleBack = React.useCallback(() => {
         navigate({ to: backButtonPath ?? '/equipments' });
@@ -126,70 +112,89 @@ export default function EquipmentForm(props: EquipmentFormProps) {
     return (
         <Box
             component="form"
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit(onSubmit)}
             noValidate
             autoComplete="off"
-            onReset={handleReset}
             sx={{ width: '100%' }}
         >
             <FormGroup>
                 <Grid container spacing={3} sx={{ mb: 4, width: '100%' }}>
                     <Grid component="div" size={{ xs: 12, sm: 6 }}>
-                        <StandardInput
-                            value={formValues.nome}
-                            onChange={handleTextFieldChange}
+                        <Controller
                             name="nome"
-                            label="Nome"
-                            error={!!formErrors.nome}
-                            helperText={formErrors.nome}
-                            required
-                            fullWidth
+                            control={control}
+                            render={({ field }) => (
+                                <StandardInput
+                                    {...field}
+                                    label="Nome"
+                                    error={!!errors.nome}
+                                    helperText={errors.nome?.message}
+                                    required
+                                    fullWidth
+                                />
+                            )}
                         />
                     </Grid>
                     <Grid component="div" size={{ xs: 12, sm: 6 }}>
-                        <StandardInput
-                            value={formValues.modelo}
-                            onChange={handleTextFieldChange}
+                        <Controller
                             name="modelo"
-                            label="Modelo"
-                            error={!!formErrors.modelo}
-                            helperText={formErrors.modelo}
-                            required
-                            fullWidth
+                            control={control}
+                            render={({ field }) => (
+                                <StandardInput
+                                    {...field}
+                                    label="Modelo"
+                                    error={!!errors.modelo}
+                                    helperText={errors.modelo?.message}
+                                    required
+                                    fullWidth
+                                />
+                            )}
                         />
                     </Grid>
                     <Grid component="div" size={{ xs: 12, sm: 6 }}>
-                        <StandardInput
-                            value={formValues.numero_serie}
-                            onChange={handleTextFieldChange}
+                        <Controller
                             name="numero_serie"
-                            label="Número de Série"
-                            error={!!formErrors.numero_serie}
-                            helperText={formErrors.numero_serie}
-                            required
-                            fullWidth
+                            control={control}
+                            render={({ field }) => (
+                                <StandardInput
+                                    {...field}
+                                    label="Número de Série"
+                                    error={!!errors.numero_serie}
+                                    helperText={errors.numero_serie?.message}
+                                    required
+                                    fullWidth
+                                />
+                            )}
                         />
                     </Grid>
                     <Grid component="div" size={{ xs: 12, sm: 6 }}>
-                        <StandardInput
-                            value={formValues.patrimonio}
-                            onChange={handleTextFieldChange}
+                        <Controller
                             name="patrimonio"
-                            label="Patrimônio"
-                            error={!!formErrors.patrimonio}
-                            helperText={formErrors.patrimonio}
-                            fullWidth
+                            control={control}
+                            render={({ field }) => (
+                                <StandardInput
+                                    {...field}
+                                    label="Patrimônio"
+                                    error={!!errors.patrimonio}
+                                    helperText={errors.patrimonio?.message}
+                                    fullWidth
+                                />
+                            )}
                         />
                     </Grid>
                     <Grid component="div" size={{ xs: 12, sm: 12 }}>
-                        <StandardInput
-                            value={formValues.local}
-                            onChange={handleTextFieldChange}
+                        <Controller
                             name="local"
-                            label="Local"
-                            error={!!formErrors.local}
-                            helperText={formErrors.local}
-                            fullWidth
+                            control={control}
+                            render={({ field }) => (
+                                <StandardInput
+                                    {...field}
+                                    label="Local"
+                                    error={!!errors.local}
+                                    helperText={errors.local?.message}
+                                    fullWidth
+                                />
+                            )}
                         />
                     </Grid>
                 </Grid>
@@ -224,7 +229,7 @@ export default function EquipmentForm(props: EquipmentFormProps) {
                         fontWeight: '600'
                     }}
                 >
-                    {isSubmitting ? 'Cadastrando...' : submitButtonLabel}
+                    {isSubmitting ? 'Salvando...' : submitButtonLabel}
                 </Button>
             </Stack>
         </Box>

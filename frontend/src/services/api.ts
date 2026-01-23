@@ -22,8 +22,16 @@ export const authService = {
 }
 
 export const usuarioService = {
-    async listar(): Promise<ApiResponse<Usuario[]>> {
-        const response = await api.get<ApiResponse<Usuario[]>>('/usuarios')
+    async listar(params: {
+        page?: number;
+        limit?: number;
+        nome?: string;
+        usuario_rede?: string;
+        perfil?: string;
+    } = {}): Promise<{ data: Usuario[]; meta: any }> {
+        const response = await api.get<{ data: Usuario[]; meta: any }>('/usuarios', {
+            params
+        })
         return response.data
     },
 

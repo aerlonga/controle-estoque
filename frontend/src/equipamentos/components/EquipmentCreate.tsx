@@ -4,23 +4,11 @@ import useNotifications from '../hooks/useNotifications/useNotifications';
 import { useAuthStore } from '../../store/authStore';
 import {
     createOne as createEquipment,
-    validate as validateEquipment,
 } from '../data/equipments';
-import EquipmentForm, {
-    type FormFieldValue,
-    type EquipmentFormState,
-} from './EquipmentForm';
+import EquipmentForm from './EquipmentForm';
 import PageContainer from './PageContainer';
 import type { EquipamentoFormData } from '../../types/api';
 import { usePageTitle } from '../../contexts/PageTitleContext';
-
-const INITIAL_FORM_VALUES: Partial<EquipamentoFormData> = {
-    nome: '',
-    modelo: '',
-    numero_serie: '',
-    patrimonio: '',
-    local: '',
-};
 
 export default function EquipmentCreate() {
     const navigate = useNavigate();
@@ -28,73 +16,14 @@ export default function EquipmentCreate() {
     const { user } = useAuthStore();
     const { setMenuTitle } = usePageTitle();
 
-    const [formState, setFormState] = React.useState<EquipmentFormState>(() => ({
-        values: INITIAL_FORM_VALUES,
-        errors: {},
-    }));
-    const formValues = formState.values;
-    const formErrors = formState.errors;
-
     React.useEffect(() => {
         setMenuTitle('Equipamentos');
     }, [setMenuTitle]);
 
-    const setFormValues = React.useCallback(
-        (newFormValues: Partial<EquipmentFormState['values']>) => {
-            setFormState((previousState) => ({
-                ...previousState,
-                values: newFormValues,
-            }));
-        },
-        [],
-    );
-
-    const setFormErrors = React.useCallback(
-        (newFormErrors: Partial<EquipmentFormState['errors']>) => {
-            setFormState((previousState) => ({
-                ...previousState,
-                errors: newFormErrors,
-            }));
-        },
-        [],
-    );
-
-    const handleFormFieldChange = React.useCallback(
-        (name: keyof EquipmentFormState['values'], value: FormFieldValue) => {
-            const validateField = async (values: Partial<EquipmentFormState['values']>) => {
-                const { issues } = validateEquipment(values as Partial<EquipamentoFormData>);
-                setFormErrors({
-                    ...formErrors,
-                    [name]: issues?.find((issue) => issue.path?.[0] === name)?.message,
-                });
-            };
-
-            const newFormValues = { ...formValues, [name]: value };
-
-            setFormValues(newFormValues);
-            validateField(newFormValues);
-        },
-        [formValues, formErrors, setFormErrors, setFormValues],
-    );
-
-    const handleFormReset = React.useCallback(() => {
-        setFormValues(INITIAL_FORM_VALUES);
-    }, [setFormValues]);
-
-    const handleFormSubmit = React.useCallback(async () => {
-        const { issues } = validateEquipment(formValues as Partial<EquipamentoFormData>);
-        if (issues && issues.length > 0) {
-            setFormErrors(
-                Object.fromEntries(issues.map((issue) => [issue.path?.[0], issue.message])),
-            );
-            return;
-        }
-        setFormErrors({});
-
+    const handleFormSubmit = React.useCallback(async (data: EquipamentoFormData) => {
         try {
-            // Add usuario_id from authenticated user
             const dataToSubmit = {
-                ...formValues,
+                ...data,
                 usuario_id: user?.id,
             } as EquipamentoFormData;
 
@@ -106,8 +35,13 @@ export default function EquipmentCreate() {
 
             navigate({ to: '/equipments' });
         } catch (createError) {
+            const error = createError as any;
+            const errorMessage = error.response?.data?.details?.[0]?.message
+                || error.response?.data?.error
+                || error.message;
+
             notifications.show(
-                `Falha ao cadastrar equipamento. Motivo: ${(createError as Error).message}`,
+                `Falha ao cadastrar equipamento. Motivo: ${errorMessage}`,
                 {
                     severity: 'error',
                     autoHideDuration: 3000,
@@ -115,17 +49,14 @@ export default function EquipmentCreate() {
             );
             throw createError;
         }
-    }, [formValues, navigate, notifications, setFormErrors, user]);
+    }, [navigate, notifications, user]);
 
     return (
         <PageContainer
             title="Cadastrar Equipamento"
         >
             <EquipmentForm
-                formState={formState}
-                onFieldChange={handleFormFieldChange}
                 onSubmit={handleFormSubmit}
-                onReset={handleFormReset}
                 submitButtonLabel="Cadastrar"
             />
         </PageContainer>

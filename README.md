@@ -40,7 +40,7 @@ PORT=3000
 DATABASE_URL=postgresql://seu_usuario:sua_senha_segura@postgres:5432/estoque?schema=public
 
 JWT_SECRET=seu_segredo_jwt_super_seguro
-JWT_EXPIRES_IN=7d
+JWT_EXPIRES_IN=8h
 ```
 
 ### 2. Suba os Containers
@@ -52,8 +52,12 @@ docker-compose up -d --build
 > **Nota:** Se você alterar as credenciais no `.env` após já ter rodado o projeto uma vez, será necessário limpar os volumes antigos para que o banco seja recriado com a nova senha:
 > `docker-compose down -v`
 
-### 3. Popule o Banco de Dados (Opcional)
-Se quiser criar usuários e dados iniciais para teste:
+### 3. Popule o Banco de Dados
+
+Após subir os containers, o banco estará vazio. Utilize os scripts abaixo para popular os dados:
+
+**Opção A: Dados Iniciais (`seed.js`)**
+Cria o usuário administrador e configurações essenciais. Recomendado para produção ou início limpo.
 
 ```bash
 docker exec -it estoque-backend npm run seed

@@ -7,122 +7,19 @@ import useNotifications from '../hooks/useNotifications/useNotifications';
 import {
     getOne as getEquipment,
     updateOne as updateEquipment,
-    validate as validateEquipment,
     type Equipment,
 } from '../data/equipments';
-import EquipmentForm, {
-    type FormFieldValue,
-    type EquipmentFormState,
-} from './EquipmentForm';
+import EquipmentForm from './EquipmentForm';
 import PageContainer from './PageContainer';
 import type { EquipamentoFormData } from '../../types/api';
 import { usePageTitle } from '../../contexts/PageTitleContext';
-
-function EquipmentEditForm({
-    initialValues,
-    onSubmit,
-}: {
-    initialValues: Partial<EquipmentFormState['values']> | Partial<EquipamentoFormData>;
-    onSubmit: (formValues: Partial<EquipmentFormState['values']>) => Promise<void>;
-}) {
-    const navigate = useNavigate();
-    const notifications = useNotifications();
-
-    const [formState, setFormState] = React.useState<EquipmentFormState>(() => ({
-        values: initialValues,
-        errors: {},
-    }));
-    const formValues = formState.values;
-    const formErrors = formState.errors;
-
-    const setFormValues = React.useCallback(
-        (newFormValues: Partial<EquipmentFormState['values']>) => {
-            setFormState((previousState) => ({
-                ...previousState,
-                values: newFormValues,
-            }));
-        },
-        [],
-    );
-
-    const setFormErrors = React.useCallback(
-        (newFormErrors: Partial<EquipmentFormState['errors']>) => {
-            setFormState((previousState) => ({
-                ...previousState,
-                errors: newFormErrors,
-            }));
-        },
-        [],
-    );
-
-    const handleFormFieldChange = React.useCallback(
-        (name: keyof EquipmentFormState['values'], value: FormFieldValue) => {
-            const validateField = async (values: Partial<EquipmentFormState['values']>) => {
-                const { issues } = validateEquipment(values as Partial<EquipamentoFormData>);
-                setFormErrors({
-                    ...formErrors,
-                    [name]: issues?.find((issue) => issue.path?.[0] === name)?.message,
-                });
-            };
-
-            const newFormValues = { ...formValues, [name]: value };
-
-            setFormValues(newFormValues);
-            validateField(newFormValues);
-        },
-        [formValues, formErrors, setFormErrors, setFormValues],
-    );
-
-    const handleFormReset = React.useCallback(() => {
-        setFormValues(initialValues);
-    }, [initialValues, setFormValues]);
-
-    const handleFormSubmit = React.useCallback(async () => {
-        const { issues } = validateEquipment(formValues as Partial<EquipamentoFormData>);
-        if (issues && issues.length > 0) {
-            setFormErrors(
-                Object.fromEntries(issues.map((issue) => [issue.path?.[0], issue.message])),
-            );
-            return;
-        }
-        setFormErrors({});
-
-        try {
-            await onSubmit(formValues);
-            notifications.show('Equipamento atualizado com sucesso.', {
-                severity: 'success',
-                autoHideDuration: 3000,
-            });
-
-            navigate({ to: '/equipments' });
-        } catch (editError) {
-            notifications.show(
-                `Falha ao atualizar equipamento. Motivo: ${(editError as Error).message}`,
-                {
-                    severity: 'error',
-                    autoHideDuration: 3000,
-                },
-            );
-            throw editError;
-        }
-    }, [formValues, navigate, notifications, onSubmit, setFormErrors]);
-
-    return (
-        <EquipmentForm
-            formState={formState}
-            onFieldChange={handleFormFieldChange}
-            onSubmit={handleFormSubmit}
-            onReset={handleFormReset}
-            submitButtonLabel="Salvar"
-            backButtonPath="/equipments"
-        />
-    );
-}
 
 export default function EquipmentEdit() {
     const params = useParams({ strict: false });
     const equipmentId = (params as { id?: string }).id || '';
     const { setMenuTitle, setDetailTitle } = usePageTitle();
+    const navigate = useNavigate();
+    const notifications = useNotifications();
 
     const [equipment, setEquipment] = React.useState<Equipment | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
@@ -156,11 +53,30 @@ export default function EquipmentEdit() {
     }, [loadData]);
 
     const handleSubmit = React.useCallback(
-        async (formValues: Partial<EquipmentFormState['values']>) => {
-            const updatedData = await updateEquipment(Number(equipmentId), formValues as Partial<EquipamentoFormData>);
-            setEquipment(updatedData);
+        async (formValues: EquipamentoFormData) => {
+            try {
+                await updateEquipment(Number(equipmentId), formValues);
+                notifications.show('Equipamento atualizado com sucesso.', {
+                    severity: 'success',
+                    autoHideDuration: 3000,
+                });
+                navigate({ to: '/equipments' });
+            } catch (editError) {
+                const error = editError as any;
+                const errorMessage = error.response?.data?.details?.[0]?.message
+                    || error.response?.data?.error
+                    || error.message;
+
+                notifications.show(
+                    `Falha ao atualizar equipamento. Motivo: ${errorMessage}`,
+                    {
+                        severity: 'error',
+                        autoHideDuration: 3000,
+                    },
+                );
+            }
         },
-        [equipmentId],
+        [equipmentId, navigate, notifications],
     );
 
     const sanitizeEquipmentForForm = React.useCallback(
@@ -200,9 +116,11 @@ export default function EquipmentEdit() {
         }
 
         return equipment ? (
-            <EquipmentEditForm
-                initialValues={sanitizeEquipmentForForm(equipment)}
+            <EquipmentForm
+                defaultValues={sanitizeEquipmentForForm(equipment)}
                 onSubmit={handleSubmit}
+                submitButtonLabel="Salvar"
+                backButtonPath="/equipments"
             />
         ) : null;
     }, [isLoading, error, equipment, handleSubmit]);
