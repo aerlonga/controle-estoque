@@ -40,7 +40,7 @@ PORT=3000
 DATABASE_URL=postgresql://seu_usuario:sua_senha_segura@postgres:5432/estoque?schema=public
 
 JWT_SECRET=seu_segredo_jwt_super_seguro
-JWT_EXPIRES_IN=7d
+JWT_EXPIRES_IN=8h
 ```
 
 ### 2. Suba os Containers

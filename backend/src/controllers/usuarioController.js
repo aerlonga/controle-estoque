@@ -4,7 +4,7 @@ class UsuarioController {
     async criar(req, res) {
         try {
             const usuario = await usuarioService.criar(req.body);
-            return res.status(201).json(usuario);
+            return res.status(201).json({ data: usuario });
         } catch (error) {
             return res.status(400).json({ error: error.message });
         }
@@ -30,7 +30,7 @@ class UsuarioController {
     async buscarPorId(req, res) {
         try {
             const usuario = await usuarioService.buscarPorId(req.params.id);
-            return res.status(200).json(usuario);
+            return res.status(200).json({ data: usuario });
         } catch (error) {
             return res.status(404).json({ error: error.message });
         }
@@ -39,7 +39,7 @@ class UsuarioController {
     async atualizar(req, res) {
         try {
             const usuario = await usuarioService.atualizar(req.params.id, req.body);
-            return res.status(200).json(usuario);
+            return res.status(200).json({ data: usuario });
         } catch (error) {
             return res.status(400).json({ error: error.message });
         }

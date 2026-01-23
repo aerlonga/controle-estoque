@@ -11,6 +11,13 @@ import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
+import FormControl from '@mui/material/FormControl';
+import Input from '@mui/material/Input';
+import FormHelperText from '@mui/material/FormHelperText';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { usuarioService } from '../../services/api';
 import type { UsuarioFormData } from '../../types/api';
 import PageContainer from '../../equipamentos/components/PageContainer';
@@ -36,6 +43,13 @@ export default function UserForm() {
     const [isLoading, setIsLoading] = React.useState(false);
     const [isFetching, setIsFetching] = React.useState(isEditMode);
     const [error, setError] = React.useState<string | null>(null);
+    const [showPassword, setShowPassword] = React.useState(false);
+
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+    const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+    };
 
     const {
         control,
@@ -143,14 +157,19 @@ export default function UserForm() {
                             name="nome"
                             control={control}
                             render={({ field }) => (
-                                <TextField
-                                    {...field}
-                                    label="Nome Completo"
-                                    fullWidth
-                                    error={!!errors.nome}
-                                    helperText={errors.nome?.message}
-                                    disabled={isLoading}
-                                />
+                                <FormControl variant="standard" fullWidth error={!!errors.nome}>
+                                    <Input
+                                        {...field}
+                                        id="user-nome"
+                                        disabled={isLoading}
+                                        inputProps={{
+                                            'aria-label': 'Nome Completo',
+                                        }}
+                                    />
+                                    <FormHelperText>
+                                        {errors.nome?.message || 'Nome Completo'}
+                                    </FormHelperText>
+                                </FormControl>
                             )}
                         />
 
@@ -158,14 +177,19 @@ export default function UserForm() {
                             name="usuario_rede"
                             control={control}
                             render={({ field }) => (
-                                <TextField
-                                    {...field}
-                                    label="Usuário de Rede"
-                                    fullWidth
-                                    error={!!errors.usuario_rede}
-                                    helperText={errors.usuario_rede?.message}
-                                    disabled={isLoading}
-                                />
+                                <FormControl variant="standard" fullWidth error={!!errors.usuario_rede}>
+                                    <Input
+                                        {...field}
+                                        id="user-usuario-rede"
+                                        disabled={isLoading}
+                                        inputProps={{
+                                            'aria-label': 'Usuário de Rede',
+                                        }}
+                                    />
+                                    <FormHelperText>
+                                        {errors.usuario_rede?.message || 'Usuário de Rede'}
+                                    </FormHelperText>
+                                </FormControl>
                             )}
                         />
 
@@ -173,20 +197,50 @@ export default function UserForm() {
                             name="senha"
                             control={control}
                             render={({ field }) => (
-                                <TextField
-                                    {...field}
-                                    label={isEditMode ? 'Nova Senha (opcional)' : 'Senha'}
-                                    type="password"
-                                    fullWidth
-                                    error={!!errors.senha}
-                                    helperText={
-                                        errors.senha?.message ||
-                                        (isEditMode
-                                            ? 'Deixe em branco para manter a senha atual'
-                                            : '')
-                                    }
-                                    disabled={isLoading}
-                                />
+                                <FormControl variant="standard" fullWidth error={!!errors.senha}>
+                                    <Input
+                                        {...field}
+                                        id="user-senha"
+                                        type={showPassword ? 'text' : 'password'}
+                                        disabled={isLoading}
+                                        inputProps={{
+                                            'aria-label': isEditMode ? 'Nova Senha (opcional)' : 'Senha',
+                                        }}
+                                        endAdornment={
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    aria-label="toggle password visibility"
+                                                    onClick={handleClickShowPassword}
+                                                    onMouseDown={handleMouseDownPassword}
+                                                    edge="end"
+                                                    size="small"
+                                                    disableRipple
+                                                    sx={{
+                                                        color: 'text.secondary',
+                                                        border: 'none',
+                                                        backgroundColor: 'transparent',
+                                                        width: 'auto',
+                                                        height: 'auto',
+                                                        padding: 0,
+                                                        minWidth: 0,
+                                                        '&:hover': {
+                                                            backgroundColor: 'transparent',
+                                                            border: 'none',
+                                                        },
+                                                    }}
+                                                >
+                                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        }
+                                    />
+                                    <FormHelperText>
+                                        {errors.senha?.message ||
+                                            (isEditMode
+                                                ? 'Nova Senha (opcional) - Deixe em branco para manter a senha atual'
+                                                : 'Senha')}
+                                    </FormHelperText>
+                                </FormControl>
                             )}
                         />
 
@@ -194,18 +248,22 @@ export default function UserForm() {
                             name="perfil"
                             control={control}
                             render={({ field }) => (
-                                <TextField
-                                    {...field}
-                                    select
-                                    label="Perfil"
-                                    fullWidth
-                                    error={!!errors.perfil}
-                                    helperText={errors.perfil?.message}
-                                    disabled={isLoading}
-                                >
-                                    <MenuItem value="USUARIO">Usuário</MenuItem>
-                                    <MenuItem value="ADMIN">Administrador</MenuItem>
-                                </TextField>
+                                <FormControl variant="standard" fullWidth error={!!errors.perfil}>
+                                    <TextField
+                                        {...field}
+                                        id="user-perfil"
+                                        select
+                                        variant="standard"
+                                        fullWidth
+                                        disabled={isLoading}
+                                    >
+                                        <MenuItem value="USUARIO">Usuário</MenuItem>
+                                        <MenuItem value="ADMIN">Administrador</MenuItem>
+                                    </TextField>
+                                    <FormHelperText>
+                                        {errors.perfil?.message || 'Perfil'}
+                                    </FormHelperText>
+                                </FormControl>
                             )}
                         />
 
