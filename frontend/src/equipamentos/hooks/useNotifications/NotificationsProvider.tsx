@@ -41,10 +41,10 @@ function Notification({
   }
   const { close } = notificationsContext;
 
-  const { severity, actionText, onAction, autoHideDuration } = options;
+  const { severity, actionText, onAction, autoHideDuration = 2000 } = options;
 
   const handleClose = React.useCallback(
-    (event: unknown, reason?: CloseReason | SnackbarCloseReason) => {
+    (_event: unknown, reason?: CloseReason | SnackbarCloseReason) => {
       if (reason === 'clickaway') {
         return;
       }
@@ -82,6 +82,7 @@ function Notification({
       autoHideDuration,
       onClose: handleClose,
       action,
+      anchorOrigin: { vertical: 'top', horizontal: 'center' } as const,
     },
   });
 
