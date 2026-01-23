@@ -26,7 +26,7 @@ const updateUsuarioSchema = z.object({
 const createEquipamentoSchema = z.object({
     nome: z.string().min(2, 'Nome do equipamento é obrigatório').trim(),
     modelo: z.string().min(2, 'Modelo é obrigatório').trim(),
-    patrimonio: z.string().optional().nullable(),
+    patrimonio: z.string().regex(/^\d+$/, 'Patrimônio deve conter apenas números').optional().or(z.literal('')).nullable(),
     numero_serie: z.string().min(1, 'Número de série é obrigatório').trim(),
     // Status opcional na criação, assume default do banco se omitido
     status: z.enum(['NO_DEPOSITO', 'FORA_DEPOSITO', 'DESCARTADO']).optional(),
@@ -37,7 +37,7 @@ const createEquipamentoSchema = z.object({
 const updateEquipamentoSchema = z.object({
     nome: z.string().min(2).optional(),
     modelo: z.string().min(2).optional(),
-    patrimonio: z.string().optional().nullable(),
+    patrimonio: z.string().regex(/^\d+$/, 'Patrimônio deve conter apenas números').optional().or(z.literal('')).nullable(),
     numero_serie: z.string().min(1).optional(),
     status: z.enum(['NO_DEPOSITO', 'FORA_DEPOSITO', 'DESCARTADO']).optional(),
     local: z.string().optional().nullable(),

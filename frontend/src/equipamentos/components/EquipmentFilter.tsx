@@ -230,7 +230,7 @@ export default function EquipmentFilter({
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6, md: 2 }}>
                         <DatePickerField
-                            label="Cadastro"
+                            label="Data de Cadastro"
                             value={localFilters.created_at}
                             onChange={handleDateChange}
                             fullWidth
